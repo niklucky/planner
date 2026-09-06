@@ -7,6 +7,7 @@ const codes: Record<IntegrationErrorCode, TRPCError['code']> = {
   NOT_FOUND: 'NOT_FOUND',
   VERIFICATION_FAILED: 'BAD_REQUEST',
   ALREADY_IMPORTED: 'CONFLICT',
+  NOT_LINKED: 'PRECONDITION_FAILED',
 }
 
 function rethrow(e: unknown): never {

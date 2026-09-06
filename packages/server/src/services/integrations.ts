@@ -1,12 +1,12 @@
 import { type Db, schema } from '@planner/db'
-import type { AppStoreCredentials, ImportAppInput, Integration, RemoteApp } from '@planner/shared'
-import { and, eq } from 'drizzle-orm'
+import type { AppStoreCredentials, ImportAppInput, Integration, RemoteApp, RemoteVersion } from '@planner/shared'
+import { and, desc, eq, sql } from 'drizzle-orm'
 import type { SecretBox } from '../crypto/secret-box'
 
 type IntegrationRow = typeof schema.integrations.$inferSelect
 import { AppStoreError, createAppStoreClient } from '../integrations/app-store/client'
 
-export type IntegrationErrorCode = 'NOT_FOUND' | 'VERIFICATION_FAILED' | 'ALREADY_IMPORTED'
+export type IntegrationErrorCode = 'NOT_FOUND' | 'VERIFICATION_FAILED' | 'ALREADY_IMPORTED' | 'NOT_LINKED'
 
 export class IntegrationError extends Error {
   constructor(
@@ -146,7 +146,63 @@ export function integrationsService(db: Db, deps: IntegrationDeps) {
         .onConflictDoNothing({ target: [schema.apps.integrationId, schema.apps.externalId] })
         .returning()
       if (!app) throw new IntegrationError('ALREADY_IMPORTED', 'This app is already in the project')
+      // Best effort: versions can always be synced again from the UI.
+      await this.syncVersions(projectId, app.id).catch((e: unknown) =>
+        console.warn(`version sync after import failed for app ${app.id}:`, (e as Error).message),
+      )
       return app
+    },
+
+    /** Pulls the app's store versions and upserts them locally. Returns the local rows. */
+    async syncVersions(projectId: string, appId: string) {
+      const app = await db.query.apps.findFirst({
+        where: and(eq(schema.apps.id, appId), eq(schema.apps.projectId, projectId)),
+      })
+      if (!app) throw new IntegrationError('NOT_FOUND', 'App not found')
+      if (!app.integrationId || !app.externalId) {
+        throw new IntegrationError('NOT_LINKED', 'This app is not linked to a store')
+      }
+      const integration = await requireRow(projectId, app.integrationId)
+      let remote: RemoteVersion[]
+      try {
+        remote = await appStoreClient(integration).listVersions(app.externalId)
+      } catch (e) {
+        throw new IntegrationError('VERIFICATION_FAILED', describe(e))
+      }
+      const now = new Date()
+      if (remote.length > 0) {
+        const rows = remote.map((v) => ({
+          appId: app.id,
+          externalId: v.id,
+          versionString: v.versionString,
+          platform: v.platform,
+          state: v.state,
+          releaseType: v.releaseType,
+          storeCreatedAt: v.createdAt,
+          syncedAt: now,
+          updatedAt: now,
+        }))
+        await db
+          .insert(schema.appVersions)
+          .values(rows)
+          .onConflictDoUpdate({
+            target: [schema.appVersions.appId, schema.appVersions.externalId],
+            set: {
+              versionString: sql`excluded.version_string`,
+              platform: sql`excluded.platform`,
+              state: sql`excluded.state`,
+              releaseType: sql`excluded.release_type`,
+              storeCreatedAt: sql`excluded.store_created_at`,
+              syncedAt: now,
+              updatedAt: now,
+            },
+          })
+      }
+      return db
+        .select()
+        .from(schema.appVersions)
+        .where(eq(schema.appVersions.appId, app.id))
+        .orderBy(desc(schema.appVersions.storeCreatedAt))
     },
 
     async remove(projectId: string, integrationId: string) {

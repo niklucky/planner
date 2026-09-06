@@ -11,8 +11,12 @@ export function Section({ title, children }: { title: ReactNode; children: React
   )
 }
 
-export function Stack({ children }: { children: ReactNode }) {
-  return <div className={styles.stack}>{children}</div>
+export function Stack({ inset, children }: { inset?: boolean; children: ReactNode }) {
+  return (
+    <div className={styles.stack} data-inset={inset || undefined}>
+      {children}
+    </div>
+  )
 }
 
 export function Inline({ children }: { children: ReactNode }) {

@@ -1,4 +1,4 @@
-import type { AppStoreCredentials, RemoteApp } from '@planner/shared'
+import type { AppStoreCredentials, RemoteApp, RemoteVersion } from '@planner/shared'
 import { TOKEN_TTL_SECONDS, createAppStoreToken } from './token'
 
 const BASE_URL = 'https://api.appstoreconnect.apple.com'
@@ -28,6 +28,32 @@ interface AppsResponse {
 }
 
 const APP_FIELDS = 'fields[apps]=name,bundleId,sku,primaryLocale'
+const VERSION_FIELDS = 'fields[appStoreVersions]=versionString,appVersionState,appStoreState,platform,releaseType,createdDate'
+
+interface VersionResource {
+  id: string
+  attributes: {
+    versionString: string
+    appVersionState?: string
+    /** Deprecated by Apple in favour of appVersionState; still returned. */
+    appStoreState?: string
+    platform: string
+    releaseType?: string
+    createdDate?: string
+  }
+}
+
+function toRemoteVersion(item: VersionResource): RemoteVersion {
+  const a = item.attributes
+  return {
+    id: item.id,
+    versionString: a.versionString,
+    platform: a.platform,
+    state: a.appVersionState ?? a.appStoreState ?? 'UNKNOWN',
+    releaseType: a.releaseType ?? null,
+    createdAt: a.createdDate ? new Date(a.createdDate) : null,
+  }
+}
 
 function toRemoteApp(item: AppResource): RemoteApp {
   return {
@@ -77,6 +103,18 @@ export function createAppStoreClient(creds: AppStoreCredentials, fetchImpl: type
         path = page.links?.next?.replace(BASE_URL, '')
       }
       return apps
+    },
+
+    /** All App Store versions of an app, newest first. */
+    async listVersions(appId: string): Promise<RemoteVersion[]> {
+      const versions: RemoteVersion[] = []
+      let path: string | undefined = `/v1/apps/${encodeURIComponent(appId)}/appStoreVersions?limit=50&${VERSION_FIELDS}`
+      while (path) {
+        const page: { data: VersionResource[]; links?: { next?: string } } = await request(path)
+        versions.push(...page.data.map(toRemoteVersion))
+        path = page.links?.next?.replace(BASE_URL, '')
+      }
+      return versions.sort((a, b) => (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0))
     },
 
     async getApp(appId: string): Promise<RemoteApp> {

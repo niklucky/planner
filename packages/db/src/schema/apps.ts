@@ -26,3 +26,27 @@ export const apps = pgTable(
 )
 
 export type App = typeof apps.$inferSelect
+
+/** Store versions of an app, synced from the store. */
+export const appVersions = pgTable(
+  'app_versions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    appId: uuid('app_id')
+      .notNull()
+      .references(() => apps.id, { onDelete: 'cascade' }),
+    /** The store's id for the version. */
+    externalId: text('external_id').notNull(),
+    versionString: text('version_string').notNull(),
+    platform: text('platform').notNull(),
+    state: text('state').notNull(),
+    releaseType: text('release_type'),
+    storeCreatedAt: timestamp('store_created_at', { withTimezone: true }),
+    syncedAt: timestamp('synced_at', { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [unique().on(t.appId, t.externalId)],
+)
+
+export type AppVersion = typeof appVersions.$inferSelect
