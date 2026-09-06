@@ -78,6 +78,14 @@ interface ScreenshotResource {
   }
 }
 
+export interface UploadOperation {
+  method: string
+  url: string
+  length: number
+  offset: number
+  requestHeaders?: Array<{ name: string; value: string }>
+}
+
 export interface RemoteLocalization {
   id: string
   locale: string
@@ -201,6 +209,70 @@ export function createAppStoreClient(creds: AppStoreCredentials, fetchImpl: type
           return [{ id, fileName: shot.attributes.fileName ?? id, width: asset?.width ?? null, height: asset?.height ?? null, url }]
         }),
       }))
+    },
+
+    async createScreenshotSet(localizationId: string, displayType: string): Promise<{ id: string }> {
+      const res = await request<{ data: { id: string } }>('/v1/appScreenshotSets', {
+        method: 'POST',
+        body: {
+          data: {
+            type: 'appScreenshotSets',
+            attributes: { screenshotDisplayType: displayType },
+            relationships: {
+              appStoreVersionLocalization: { data: { type: 'appStoreVersionLocalizations', id: localizationId } },
+            },
+          },
+        },
+      })
+      return { id: res.data.id }
+    },
+
+    /** Step 1 of an upload: reserve the screenshot and get upload instructions. */
+    async createScreenshot(setId: string, fileName: string, fileSize: number) {
+      const res = await request<{ data: { id: string; attributes: { uploadOperations?: UploadOperation[] } } }>(
+        '/v1/appScreenshots',
+        {
+          method: 'POST',
+          body: {
+            data: {
+              type: 'appScreenshots',
+              attributes: { fileName, fileSize },
+              relationships: { appScreenshotSet: { data: { type: 'appScreenshotSets', id: setId } } },
+            },
+          },
+        },
+      )
+      return { id: res.data.id, uploadOperations: res.data.attributes.uploadOperations ?? [] }
+    },
+
+    /** Step 2: send the bytes to Apple's upload endpoints, one chunk per operation. */
+    async performUploadOperations(operations: UploadOperation[], bytes: Uint8Array) {
+      for (const op of operations) {
+        const chunk = bytes.subarray(op.offset, op.offset + op.length)
+        const headers = Object.fromEntries((op.requestHeaders ?? []).map((h) => [h.name, h.value]))
+        const res = await fetchImpl(op.url, { method: op.method, headers, body: chunk as unknown as RequestInit['body'] })
+        if (!res.ok) throw new AppStoreError(`Upload chunk failed (${res.status})`, res.status)
+      }
+    },
+
+    /** Step 3: tell Apple the upload is complete. */
+    async commitScreenshot(screenshotId: string, md5Hex: string) {
+      await request(`/v1/appScreenshots/${encodeURIComponent(screenshotId)}`, {
+        method: 'PATCH',
+        body: { data: { type: 'appScreenshots', id: screenshotId, attributes: { uploaded: true, sourceFileChecksum: md5Hex } } },
+      })
+    },
+
+    async deleteScreenshot(screenshotId: string) {
+      await request(`/v1/appScreenshots/${encodeURIComponent(screenshotId)}`, { method: 'DELETE' })
+    },
+
+    /** Sets the display order of a set's screenshots. */
+    async reorderScreenshotSet(setId: string, screenshotIds: string[]) {
+      await request(`/v1/appScreenshotSets/${encodeURIComponent(setId)}/relationships/appScreenshots`, {
+        method: 'PATCH',
+        body: { data: screenshotIds.map((id) => ({ type: 'appScreenshots', id })) },
+      })
     },
 
     /** Updates metadata of one version localization (e.g. what's new). */

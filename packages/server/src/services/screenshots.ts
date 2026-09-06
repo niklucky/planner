@@ -1,8 +1,20 @@
 import { createHash } from 'node:crypto'
+import { basename } from 'node:path'
 import { type Db, schema } from '@planner/db'
-import { SCREENSHOT_CONTENT_TYPES, SCREENSHOT_MAX_BYTES, type Screenshot, type ScreenshotSlot } from '@planner/shared'
+import {
+  SCREENSHOTS_PER_SET_LIMIT,
+  SCREENSHOT_CONTENT_TYPES,
+  SCREENSHOT_MAX_BYTES,
+  type Screenshot,
+  type ScreenshotPushPlanVersion,
+  type ScreenshotPushResultVersion,
+  type ScreenshotSlot,
+  type ScreenshotSlotPlan,
+  isVersionEditable,
+} from '@planner/shared'
 import { and, asc, eq, inArray, max } from 'drizzle-orm'
 import { contentTypeFor, imageSize } from '../images/size'
+import type { AppStoreClient } from '../integrations/app-store/client'
 import type { Storage } from '../storage'
 import { IntegrationError } from './integrations'
 import type { integrationsService } from './integrations'
@@ -99,6 +111,94 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
     }
   }
 
+
+  /** Concrete operations for one (locale, deviceType) slot, from local rows and the remote set. */
+  type SlotWork = {
+    plan: ScreenshotSlotPlan
+    localizationId: string
+    setId: string | null
+    local: Array<typeof schema.screenshots.$inferSelect>
+    toDelete: string[]
+    toUpload: Array<typeof schema.screenshots.$inferSelect>
+    finalOrderKnown: boolean
+  }
+
+  async function slotWorkFor(
+    client: AppStoreClient,
+    releaseId: string,
+    locs: Array<{ externalId: string; locale: string }>,
+  ): Promise<SlotWork[]> {
+    const local = await db.query.screenshots.findMany({
+      where: and(eq(schema.screenshots.releaseId, releaseId), eq(schema.screenshots.platform, 'ios')),
+      orderBy: [asc(schema.screenshots.position)],
+    })
+    const localesWithShots = new Set(local.map((l) => l.locale))
+    const work: SlotWork[] = []
+    for (const loc of locs) {
+      if (!localesWithShots.has(loc.locale)) continue
+      const remoteSets = await client.listScreenshotSets(loc.externalId)
+      const deviceTypes = new Set([
+        ...local.filter((l) => l.locale === loc.locale).map((l) => l.deviceType),
+        ...remoteSets.map((s) => s.displayType),
+      ])
+      for (const deviceType of deviceTypes) {
+        const set = remoteSets.find((s) => s.displayType === deviceType) ?? null
+        const mine = local.filter((l) => l.locale === loc.locale && l.deviceType === deviceType)
+        const remote = set?.screenshots ?? []
+        const remoteIds = new Set(remote.map((r) => r.id))
+        const toUpload = mine.filter((l) => !l.storeExternalId || !remoteIds.has(l.storeExternalId))
+        const keptIds = new Set(mine.map((l) => l.storeExternalId).filter((id): id is string => !!id && remoteIds.has(id)))
+        const toDelete = remote.map((r) => r.id).filter((id) => !keptIds.has(id))
+        const sameOrder =
+          toUpload.length === 0 &&
+          toDelete.length === 0 &&
+          remote.map((r) => r.id).join() === mine.map((l) => l.storeExternalId).join()
+        const plan: ScreenshotSlotPlan = {
+          locale: loc.locale,
+          deviceType,
+          createSet: !set && mine.length > 0,
+          uploads: toUpload.length,
+          deletes: toDelete.length,
+          reorder: !sameOrder && mine.length > 0,
+          overLimit: mine.length > SCREENSHOTS_PER_SET_LIMIT,
+        }
+        if (plan.createSet || plan.uploads || plan.deletes || plan.reorder) {
+          work.push({ plan, localizationId: loc.externalId, setId: set?.id ?? null, local: mine, toDelete, toUpload, finalOrderKnown: true })
+        }
+      }
+    }
+    return work
+  }
+
+  /** iOS store versions of the release with their app and localizations (snapshotting if needed). */
+  async function iosVersions(projectId: string, releaseId: string) {
+    const rows = await db
+      .select({ v: schema.appVersions, app: schema.apps })
+      .from(schema.appVersions)
+      .innerJoin(schema.apps, eq(schema.appVersions.appId, schema.apps.id))
+      .where(and(eq(schema.appVersions.releaseId, releaseId), eq(schema.apps.platform, 'ios')))
+    const out: Array<{ v: (typeof rows)[number]['v']; app: (typeof rows)[number]['app']; client: AppStoreClient; locs: Array<{ externalId: string; locale: string }> }> = []
+    for (const { v, app } of rows) {
+      if (!app.integrationId) continue
+      const client = await deps.integrations.appStoreClientFor(projectId, app.integrationId)
+      let locs = await db.query.appVersionLocalizations.findMany({ where: eq(schema.appVersionLocalizations.appVersionId, v.id) })
+      if (locs.length === 0) {
+        const remote = await client.listVersionLocalizations(v.externalId).catch((e: Error) => {
+          throw new IntegrationError('VERIFICATION_FAILED', e.message)
+        })
+        if (remote.length > 0) {
+          await db
+            .insert(schema.appVersionLocalizations)
+            .values(remote.map((l) => ({ appVersionId: v.id, externalId: l.id, locale: l.locale, whatsNew: l.whatsNew })))
+            .onConflictDoNothing()
+        }
+        locs = await db.query.appVersionLocalizations.findMany({ where: eq(schema.appVersionLocalizations.appVersionId, v.id) })
+      }
+      out.push({ v, app, client, locs })
+    }
+    return out
+  }
+
   return {
     async listForRelease(projectId: string, releaseId: string): Promise<Screenshot[]> {
       await requireRelease(projectId, releaseId)
@@ -146,6 +246,100 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
       if (!file) return null
       const bytes = await deps.storage.get(file.storageKey)
       return bytes ? { file, bytes } : null
+    },
+
+    /** What a push would do, per editable iOS version. Read-only. */
+    async planAppStorePush(projectId: string, releaseId: string): Promise<ScreenshotPushPlanVersion[]> {
+      const release = await requireRelease(projectId, releaseId)
+      const plans: ScreenshotPushPlanVersion[] = []
+      for (const { v, app, client, locs } of await iosVersions(projectId, release.id)) {
+        const editable = isVersionEditable('ios', v.state)
+        const base = { appVersionId: v.id, appName: app.name, versionString: v.versionString, state: v.state, editable }
+        if (!editable) {
+          plans.push({ ...base, slots: [] })
+          continue
+        }
+        const work = await slotWorkFor(client, release.id, locs).catch((e: Error) => {
+          throw new IntegrationError('VERIFICATION_FAILED', e.message)
+        })
+        plans.push({ ...base, slots: work.map((w) => w.plan) })
+      }
+      return plans
+    },
+
+    /** Makes App Store Connect match our screenshots for every editable iOS version. */
+    async pushToAppStore(projectId: string, releaseId: string): Promise<ScreenshotPushResultVersion[]> {
+      const release = await requireRelease(projectId, releaseId)
+      const results: ScreenshotPushResultVersion[] = []
+      for (const { v, app, client, locs } of await iosVersions(projectId, release.id)) {
+        const editable = isVersionEditable('ios', v.state)
+        const result: ScreenshotPushResultVersion = {
+          appVersionId: v.id,
+          appName: app.name,
+          versionString: v.versionString,
+          state: v.state,
+          editable,
+          slots: [],
+          uploaded: 0,
+          deleted: 0,
+          error: null,
+        }
+        results.push(result)
+        if (!editable) continue
+        let work: SlotWork[]
+        try {
+          work = await slotWorkFor(client, release.id, locs)
+        } catch (e) {
+          result.error = (e as Error).message
+          continue
+        }
+        result.slots = work.map((w) => w.plan)
+        for (const slot of work) {
+          try {
+            if (slot.plan.overLimit) {
+              throw new Error(`${slot.plan.locale} ${slot.plan.deviceType}: more than ${SCREENSHOTS_PER_SET_LIMIT} screenshots`)
+            }
+            let setId = slot.setId
+            if (!setId) setId = (await client.createScreenshotSet(slot.localizationId, slot.plan.deviceType)).id
+
+            for (const id of slot.toDelete) {
+              await client.deleteScreenshot(id)
+              result.deleted++
+            }
+
+            for (const row of slot.toUpload) {
+              const file = await db.query.files.findFirst({ where: eq(schema.files.id, row.fileId) })
+              const bytes = file ? await deps.storage.get(file.storageKey) : null
+              if (!file || !bytes) throw new Error('Stored image is missing')
+              const fileName = `${basename(file.storageKey)}`
+              const reserved = await client.createScreenshot(setId, fileName, bytes.byteLength)
+              await client.performUploadOperations(reserved.uploadOperations, bytes)
+              await client.commitScreenshot(reserved.id, createHash('md5').update(bytes).digest('hex'))
+              await db
+                .update(schema.screenshots)
+                .set({ storeExternalId: reserved.id, storeSetId: setId, syncedAt: new Date(), updatedAt: new Date() })
+                .where(eq(schema.screenshots.id, row.id))
+              row.storeExternalId = reserved.id
+              result.uploaded++
+            }
+
+            if (slot.local.length > 0) {
+              await client.reorderScreenshotSet(
+                setId,
+                slot.local.map((l) => l.storeExternalId).filter((id): id is string => !!id),
+              )
+              await db
+                .update(schema.screenshots)
+                .set({ storeSetId: setId, syncedAt: new Date() })
+                .where(inArray(schema.screenshots.id, slot.local.map((l) => l.id)))
+            }
+          } catch (e) {
+            result.error = `${slot.plan.locale} ${slot.plan.deviceType}: ${(e as Error).message}`
+            break
+          }
+        }
+      }
+      return results
     },
 
     /**

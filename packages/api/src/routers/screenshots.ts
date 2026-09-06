@@ -24,6 +24,14 @@ export const screenshotsRouter = router({
     .input(screenshotIdInput)
     .mutation(({ ctx, input }) => ctx.services.screenshots.remove(ctx.project.id, input.screenshotId).catch(rethrow)),
 
+  planAppStorePush: projectProcedure
+    .input(releaseIdInput)
+    .query(({ ctx, input }) => ctx.services.screenshots.planAppStorePush(ctx.project.id, input.releaseId).catch(rethrow)),
+
+  pushToAppStore: projectProcedure
+    .input(releaseIdInput)
+    .mutation(({ ctx, input }) => ctx.services.screenshots.pushToAppStore(ctx.project.id, input.releaseId).catch(rethrow)),
+
   pullFromAppStore: projectProcedure
     .input(releaseIdInput)
     .mutation(({ ctx, input }) =>

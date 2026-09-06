@@ -59,3 +59,33 @@ export interface Screenshot {
   /** Set when the screenshot exists in the store (pulled or pushed). */
   storeExternalId: string | null
 }
+
+/** What pushing a release's screenshots would do for one slot. */
+export interface ScreenshotSlotPlan {
+  locale: string
+  deviceType: string
+  /** Store set to be created because none exists yet. */
+  createSet: boolean
+  uploads: number
+  deletes: number
+  reorder: boolean
+  /** Apple allows at most 10 per set. */
+  overLimit: boolean
+}
+
+export interface ScreenshotPushPlanVersion {
+  appVersionId: string
+  appName: string
+  versionString: string
+  state: string
+  editable: boolean
+  slots: ScreenshotSlotPlan[]
+}
+
+export interface ScreenshotPushResultVersion extends ScreenshotPushPlanVersion {
+  uploaded: number
+  deleted: number
+  error: string | null
+}
+
+export const SCREENSHOTS_PER_SET_LIMIT = 10

@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo, useRef, useState } from 'react'
 import { useTRPC } from '../lib/trpc'
 import { uploadScreenshots } from '../lib/upload'
+import { PushScreenshotsDialog } from './push-screenshots-dialog'
 
 interface Props {
   projectId: string
@@ -36,6 +37,7 @@ export function ReleaseScreenshots({ projectId, releaseId, platforms, locales }:
   const [locale, setLocale] = useState<string>('')
   const currentLocale = allLocales.includes(locale) ? locale : (allLocales[0] ?? '')
   const [newDevice, setNewDevice] = useState<Record<Platform, string>>({ ios: '', android: '' })
+  const [pushing, setPushing] = useState(false)
 
   const busy = pull.isPending || remove.isPending || upload.isPending
   const message = pull.error?.message ?? remove.error?.message ?? upload.error?.message ?? error?.message
@@ -52,11 +54,17 @@ export function ReleaseScreenshots({ projectId, releaseId, platforms, locales }:
           ))}
         </Select>
         {platforms.includes('ios') && (
-          <Button type="button" onClick={() => pull.mutate(input)} disabled={busy}>
-            {pull.isPending ? 'Pulling…' : 'Pull from App Store'}
-          </Button>
+          <>
+            <Button type="button" onClick={() => pull.mutate(input)} disabled={busy}>
+              {pull.isPending ? 'Pulling…' : 'Pull from App Store'}
+            </Button>
+            <Button type="button" onClick={() => setPushing(true)} disabled={busy}>
+              Push to App Store…
+            </Button>
+          </>
         )}
       </Inline>
+      {pushing && <PushScreenshotsDialog projectId={projectId} releaseId={releaseId} onClose={() => setPushing(false)} />}
       {pull.data && <Text>Imported {pull.data.imported} screenshots.</Text>}
       {message && <Text>{message}</Text>}
 
