@@ -9,6 +9,7 @@ import {
   type ScreenshotPushPlanVersion,
   type ScreenshotPushResultVersion,
   type ScreenshotSlot,
+  type ReorderScreenshotsInput,
   type ScreenshotSlotPlan,
   isVersionEditable,
   screenshotsPerSetLimit,
@@ -285,6 +286,30 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
         created.push(toPublic(row!, file))
       }
       return created
+    },
+
+    /** Sets the display order of one slot. `ids` must be exactly the slot's screenshots. */
+    async reorder(projectId: string, input: ReorderScreenshotsInput) {
+      await requireRelease(projectId, input.releaseId)
+      const rows = await db.query.screenshots.findMany({
+        where: and(
+          eq(schema.screenshots.releaseId, input.releaseId),
+          eq(schema.screenshots.platform, input.platform),
+          eq(schema.screenshots.locale, input.locale),
+          eq(schema.screenshots.deviceType, input.deviceType),
+        ),
+      })
+      const current = new Set(rows.map((r) => r.id))
+      const given = new Set(input.ids)
+      if (current.size !== given.size || [...current].some((id) => !given.has(id))) {
+        throw new IntegrationError('VERIFICATION_FAILED', 'Order does not match the current screenshots; reload and retry')
+      }
+      const now = new Date()
+      await db.transaction(async (tx) => {
+        for (const [position, id] of input.ids.entries()) {
+          await tx.update(schema.screenshots).set({ position, updatedAt: now }).where(eq(schema.screenshots.id, id))
+        }
+      })
     },
 
     async remove(projectId: string, screenshotId: string) {

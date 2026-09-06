@@ -92,3 +92,10 @@ export interface ScreenshotPushResultVersion extends ScreenshotPushPlanVersion {
 export function screenshotsPerSetLimit(platform: 'ios' | 'android') {
   return platform === 'ios' ? 10 : 8
 }
+
+/** New order of a slot's screenshots: every id of the slot, exactly once. */
+export const reorderScreenshotsInput = screenshotSlotInput.extend({
+  releaseId: z.uuid(),
+  ids: z.array(z.uuid()).min(1).max(50),
+})
+export type ReorderScreenshotsInput = z.infer<typeof reorderScreenshotsInput>

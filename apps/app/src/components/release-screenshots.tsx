@@ -1,4 +1,4 @@
-import { Button, Gallery, GalleryEmpty, Inline, Row, Select, Stack, Text, Thumbnail } from '@planner/frontend'
+import { Button, Gallery, GalleryEmpty, Inline, Row, Select, Stack, Text, Thumbnail, moveItem, useDragReorder } from '@planner/frontend'
 import { DEVICE_TYPES, type Platform, type Screenshot, formatDeviceType } from '@planner/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo, useRef, useState } from 'react'
@@ -25,6 +25,27 @@ export function ReleaseScreenshots({ projectId, releaseId, platforms, locales }:
   const pull = useMutation(trpc.screenshots.pullFromAppStore.mutationOptions({ onSuccess: invalidate }))
   const pullPlay = useMutation(trpc.screenshots.pullFromGooglePlay.mutationOptions({ onSuccess: invalidate }))
   const remove = useMutation(trpc.screenshots.remove.mutationOptions({ onSuccess: invalidate }))
+  const reorder = useMutation(
+    trpc.screenshots.reorder.mutationOptions({
+      // Optimistic: reflect the new order immediately, then reconcile with the server.
+      onMutate: async (vars) => {
+        const key = trpc.screenshots.list.queryKey(input)
+        await queryClient.cancelQueries({ queryKey: key })
+        const previous = queryClient.getQueryData(key)
+        queryClient.setQueryData(key, (old) =>
+          old?.map((s) => {
+            const i = vars.ids.indexOf(s.id)
+            return i === -1 ? s : { ...s, position: i }
+          }),
+        )
+        return { previous }
+      },
+      onError: (_e, _vars, ctx) => {
+        if (ctx?.previous) queryClient.setQueryData(trpc.screenshots.list.queryKey(input), ctx.previous)
+      },
+      onSettled: invalidate,
+    }),
+  )
   const upload = useMutation({
     mutationFn: (args: { slot: Parameters<typeof uploadScreenshots>[2]; files: FileList }) =>
       uploadScreenshots(projectId, releaseId, args.slot, args.files),
@@ -42,7 +63,12 @@ export function ReleaseScreenshots({ projectId, releaseId, platforms, locales }:
 
   const busy = pull.isPending || pullPlay.isPending || remove.isPending || upload.isPending
   const message =
-    pull.error?.message ?? pullPlay.error?.message ?? remove.error?.message ?? upload.error?.message ?? error?.message
+    pull.error?.message ??
+    pullPlay.error?.message ??
+    remove.error?.message ??
+    upload.error?.message ??
+    reorder.error?.message ??
+    error?.message
   const imported = pull.data?.imported ?? pullPlay.data?.imported
 
   return (
@@ -99,6 +125,7 @@ export function ReleaseScreenshots({ projectId, releaseId, platforms, locales }:
                 disabled={busy}
                 onUpload={(files) => upload.mutate({ slot: { platform, locale: currentLocale, deviceType }, files })}
                 onRemove={(id) => remove.mutate({ projectId, screenshotId: id })}
+                onReorder={(ids) => reorder.mutate({ ...input, platform, locale: currentLocale, deviceType, ids })}
               />
             ))}
             {currentLocale && unused.length > 0 && (
@@ -139,6 +166,7 @@ function DeviceSlot({
   disabled,
   onUpload,
   onRemove,
+  onReorder,
 }: {
   title: string
   shots: Screenshot[]
@@ -146,7 +174,13 @@ function DeviceSlot({
   disabled: boolean
   onUpload: (files: FileList) => void
   onRemove: (id: string) => void
+  onReorder: (ids: string[]) => void
 }) {
+  const drag = useDragReorder((from, to) =>
+    onReorder(
+      moveItem(shots, from, to).map((s) => s.id),
+    ),
+  )
   return (
     <Stack>
       <Row secondary={<UploadButton disabled={disabled} onFiles={onUpload} />}>
@@ -154,12 +188,13 @@ function DeviceSlot({
       </Row>
       <Gallery>
         {shots.length === 0 && <GalleryEmpty>Empty</GalleryEmpty>}
-        {shots.map((s) => (
+        {shots.map((s, index) => (
           <Thumbnail
             key={s.id}
             src={`${s.url}?project=${projectId}`}
-            alt={`${title} ${s.position + 1}`}
+            alt={`${title} ${index + 1}`}
             onRemove={() => onRemove(s.id)}
+            {...drag.itemProps(index)}
           />
         ))}
       </Gallery>

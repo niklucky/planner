@@ -1,5 +1,5 @@
 import { IntegrationError, type IntegrationErrorCode } from '@planner/server'
-import { releaseIdInput, screenshotIdInput } from '@planner/shared'
+import { releaseIdInput, reorderScreenshotsInput, screenshotIdInput } from '@planner/shared'
 import { TRPCError } from '@trpc/server'
 import { projectProcedure, router } from '../trpc'
 
@@ -19,6 +19,18 @@ export const screenshotsRouter = router({
   list: projectProcedure
     .input(releaseIdInput)
     .query(({ ctx, input }) => ctx.services.screenshots.listForRelease(ctx.project.id, input.releaseId).catch(rethrow)),
+
+  reorder: projectProcedure.input(reorderScreenshotsInput).mutation(({ ctx, input }) =>
+    ctx.services.screenshots
+      .reorder(ctx.project.id, {
+        releaseId: input.releaseId,
+        platform: input.platform,
+        locale: input.locale,
+        deviceType: input.deviceType,
+        ids: input.ids,
+      })
+      .catch(rethrow),
+  ),
 
   remove: projectProcedure
     .input(screenshotIdInput)

@@ -12,6 +12,23 @@
   background: var(--color-hover);
 }
 
+.thumb[draggable='true'] {
+  cursor: grab;
+}
+
+.thumb[data-dragging] {
+  opacity: 0.4;
+}
+
+.thumb[data-over] {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.thumb img {
+  pointer-events: none;
+}
+
 .thumb img {
   display: block;
   height: 100%;
