@@ -19,6 +19,7 @@
     "lucide-react": "^1.41.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "superjson": "^2.2.6",
     "zod": "^4.5.4"
   },
   "devDependencies": {

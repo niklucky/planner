@@ -1,13 +1,19 @@
 import { Main, Page } from '@planner/frontend'
 import { Outlet, createFileRoute, notFound } from '@tanstack/react-router'
+import { TRPCClientError } from '@trpc/client'
 import { ProjectNav } from '../../../components/project-nav'
-import { projects } from '../../../data/projects'
 
 export const Route = createFileRoute('/_app/projects/$projectId')({
-  loader: ({ params }) => {
-    const project = projects.find((p) => p.id === params.projectId)
-    if (!project) throw notFound()
-    return project
+  loader: async ({ context, params }) => {
+    try {
+      return await context.queryClient.ensureQueryData(
+        context.trpc.projects.get.queryOptions({ id: params.projectId }),
+      )
+    } catch (e) {
+      // NOT_FOUND: no such project or not a member. BAD_REQUEST: id isn't a uuid.
+      if (e instanceof TRPCClientError && ['NOT_FOUND', 'BAD_REQUEST'].includes(e.data?.code)) throw notFound()
+      throw e
+    }
   },
   component: ProjectLayout,
   notFoundComponent: () => (

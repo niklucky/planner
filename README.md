@@ -40,4 +40,4 @@ Without `RESEND_API_KEY` in `.env`, emails (password reset) are printed to the A
 docker compose up -d
 ```
 
-Serves the web app and API on port 3000 and runs migrations on start.
+Serves the web app and API on port 3000 and runs migrations on start. Requires `ENCRYPTION_KEY` in the environment (or a `.env` next to the compose file); it encrypts store credentials at rest.

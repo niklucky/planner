@@ -17,6 +17,8 @@ const schema = z.object({
   APP_URL: z.string().default('http://localhost:5173'),
   RESEND_API_KEY: optional(z.string()),
   EMAIL_FROM: z.string().default('Planner <noreply@example.com>'),
+  /** 32 bytes, base64. Encrypts stored integration credentials. */
+  ENCRYPTION_KEY: z.string().min(1, 'ENCRYPTION_KEY is required (openssl rand -base64 32)'),
 })
 
 export const env = schema.parse(process.env)

@@ -1,6 +1,26 @@
 import { Page } from '@planner/frontend'
-import { createFileRoute } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
+import { createFileRoute, getRouteApi } from '@tanstack/react-router'
+import { AppStoreIntegration } from '../../../../components/app-store-integration'
+import { useTRPC } from '../../../../lib/trpc'
+
+const projectRoute = getRouteApi('/_app/projects/$projectId')
 
 export const Route = createFileRoute('/_app/projects/$projectId/integrations')({
-  component: () => <Page title="Integrations" />,
+  loader: ({ context, params }) =>
+    context.queryClient.ensureQueryData(context.trpc.integrations.list.queryOptions({ projectId: params.projectId })),
+  component: IntegrationsPage,
 })
+
+function IntegrationsPage() {
+  const project = projectRoute.useLoaderData()
+  const trpc = useTRPC()
+  const { data: integrations = [] } = useQuery(trpc.integrations.list.queryOptions({ projectId: project.id }))
+  const appStore = integrations.find((i) => i.provider === 'app_store')
+
+  return (
+    <Page title="Integrations">
+      <AppStoreIntegration projectId={project.id} integration={appStore} />
+    </Page>
+  )
+}

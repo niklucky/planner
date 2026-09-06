@@ -1,14 +1,10 @@
 import { type Db, schema } from '@planner/db'
-import type { CreateAppInput } from '@planner/shared'
+import { eq } from 'drizzle-orm'
 
 export function appsService(db: Db) {
   return {
-    list() {
-      return db.select().from(schema.apps).orderBy(schema.apps.createdAt)
-    },
-    async create(input: CreateAppInput) {
-      const [row] = await db.insert(schema.apps).values(input).returning()
-      return row!
+    listForProject(projectId: string) {
+      return db.select().from(schema.apps).where(eq(schema.apps.projectId, projectId)).orderBy(schema.apps.createdAt)
     },
   }
 }

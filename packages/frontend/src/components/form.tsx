@@ -43,3 +43,9 @@ export function Form({ error, className, children, ...rest }: FormProps) {
     </form>
   )
 }
+
+export type TextareaProps = ComponentPropsWithRef<'textarea'>
+
+export function Textarea({ className, ...rest }: TextareaProps) {
+  return <textarea className={cx(styles.input, styles.textarea, className)} {...rest} />
+}

@@ -1,6 +1,6 @@
 import { SubNav } from '@planner/frontend'
+import type { Project } from '@planner/shared'
 import { ChartColumn, Home, Plug, Store, Users } from 'lucide-react'
-import type { Project } from '../data/projects'
 import { NavLink } from './nav-link'
 
 export function ProjectNav({ project }: { project: Project }) {

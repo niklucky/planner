@@ -10,3 +10,11 @@ export const createAppInput = z.object({
   bundleId: z.string().min(1).max(255),
 })
 export type CreateAppInput = z.infer<typeof createAppInput>
+
+/** Link a store app to the project (creates the app row from store data). */
+export const importAppInput = z.object({
+  integrationId: z.uuid(),
+  /** The store's id for the app (Apple app id). */
+  externalId: z.string().min(1),
+})
+export type ImportAppInput = z.infer<typeof importAppInput>

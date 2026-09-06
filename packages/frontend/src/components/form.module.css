@@ -48,3 +48,13 @@
   font-size: var(--text-sm);
   color: var(--color-danger);
 }
+
+.textarea {
+  height: auto;
+  min-height: 120px;
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  resize: vertical;
+}

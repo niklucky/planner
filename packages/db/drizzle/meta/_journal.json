@@ -15,6 +15,20 @@
       "when": 1788710865732,
       "tag": "0001_young_hammerhead",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788712465235,
+      "tag": "0002_third_whirlwind",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788713530821,
+      "tag": "0003_mean_nehzno",
+      "breakpoints": true
     }
   ]
 }

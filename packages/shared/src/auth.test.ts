@@ -12,3 +12,15 @@ describe('auth schemas', () => {
     expect(r.success).toBe(false)
   })
 })
+
+describe('appStoreCredentialsInput', () => {
+  it('accepts Apple-style issuer ids that are not RFC 4122 uuids', async () => {
+    const { appStoreCredentialsInput } = await import('./integrations')
+    const r = appStoreCredentialsInput.safeParse({
+      issuerId: '57246542-96fe-1a63-e053-0824d011072a',
+      keyId: 'ABC123DEFG',
+      privateKey: '-----BEGIN PRIVATE KEY-----\nabc\n-----END PRIVATE KEY-----',
+    })
+    expect(r.success).toBe(true)
+  })
+})

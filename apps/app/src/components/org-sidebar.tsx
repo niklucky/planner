@@ -1,11 +1,14 @@
 import { Avatar, Button, Logo, Sidebar, SidebarHeader, SidebarSection, useStoredState } from '@planner/frontend'
+import { useQuery } from '@tanstack/react-query'
 import { LayoutGrid, PanelLeftClose, PanelLeftOpen, Settings } from 'lucide-react'
-import { projects } from '../data/projects'
+import { useTRPC } from '../lib/trpc'
 import { NavLink } from './nav-link'
 import { UserMenu } from './user-menu'
 
 export function OrgSidebar() {
+  const trpc = useTRPC()
   const [collapsed, setCollapsed] = useStoredState('planner.sidebar.collapsed', false)
+  const { data: projects = [] } = useQuery(trpc.projects.list.queryOptions())
 
   return (
     <Sidebar collapsed={collapsed}>
