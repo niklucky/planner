@@ -28,6 +28,10 @@ export const releasesRouter = router({
       .catch(rethrow),
   ),
 
+  pushNotes: projectProcedure
+    .input(releaseIdInput)
+    .mutation(({ ctx, input }) => ctx.services.releases.pushNotes(ctx.project.id, input.releaseId).catch(rethrow)),
+
   pullNotes: projectProcedure
     .input(releaseIdInput)
     .mutation(({ ctx, input }) => ctx.services.releases.pullNotes(ctx.project.id, input.releaseId).catch(rethrow)),

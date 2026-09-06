@@ -5,10 +5,12 @@ import {
   RELEASE_NOTE_MAX_LENGTH,
   formatStorePlatform,
   formatStoreState,
+  planPush,
 } from '@planner/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
 import { useTRPC } from '../lib/trpc'
+import { PushNotesDialog } from './push-notes-dialog'
 
 type NotesByKey = Record<string, string>
 const keyOf = (scope: NoteScope, locale: string) => `${scope}:${locale}`
@@ -22,6 +24,7 @@ export function ReleaseNotesEditor({ projectId, releaseId }: { projectId: string
   const [notesMode, setNotesMode] = useState<NotesMode>('shared')
   const [notes, setNotes] = useState<NotesByKey>({})
   const [dirty, setDirty] = useState(false)
+  const [pushing, setPushing] = useState(false)
 
   // Reset local state whenever fresh data arrives and there are no unsaved edits.
   useEffect(() => {
@@ -63,6 +66,8 @@ export function ReleaseNotesEditor({ projectId, releaseId }: { projectId: string
   if (!release) return <Text>{query.error?.message ?? 'Loading…'}</Text>
 
   const scopes: NoteScope[] = notesMode === 'shared' ? ['shared'] : platforms
+  const plan = planPush(release)
+  const canPush = plan.some((p) => p.editable)
   const lastPull = release.storeLocalizations.reduce<Date | null>(
     (max, l) => (!max || l.syncedAt > max ? l.syncedAt : max),
     null,
@@ -111,7 +116,18 @@ export function ReleaseNotesEditor({ projectId, releaseId }: { projectId: string
           <Button type="submit" variant="primary" disabled={save.isPending || !dirty}>
             Save
           </Button>
+          <Button
+            type="button"
+            onClick={() => setPushing(true)}
+            disabled={!canPush || dirty}
+            title={dirty ? 'Save your changes first' : !canPush ? 'No version is editable in the store' : undefined}
+          >
+            Push to App Store…
+          </Button>
         </Inline>
+        {pushing && (
+          <PushNotesDialog projectId={projectId} releaseId={releaseId} plan={plan} onClose={() => setPushing(false)} />
+        )}
         {lastPull && <Text>Store text pulled {lastPull.toLocaleString()}</Text>}
 
         {locales.length === 0 && <Text>No locales yet. Pull from the store to start from what's live.</Text>}

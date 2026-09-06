@@ -1,5 +1,5 @@
 import { type Db, schema } from '@planner/db'
-import { type NoteScope, type SaveReleaseNotesInput, compareVersions } from '@planner/shared'
+import { type PushPlanVersion, type SaveReleaseNotesInput, compareVersions, planPush, resolveNoteScope } from '@planner/shared'
 import { and, eq, inArray } from 'drizzle-orm'
 import type { integrationsService } from './integrations'
 import { IntegrationError } from './integrations'
@@ -33,6 +33,13 @@ const versionColumns = {
   integrationId: schema.apps.integrationId,
 }
 
+export interface PushResult extends PushPlanVersion {
+  /** Locales written to the store in this run. */
+  pushed: string[]
+  /** First error encountered; remaining locales for that version were not sent. */
+  error: string | null
+}
+
 export function releasesService(db: Db, deps: ReleaseDeps) {
   async function requireRelease(projectId: string, releaseId: string) {
     const row = await db.query.releases.findFirst({
@@ -40,6 +47,28 @@ export function releasesService(db: Db, deps: ReleaseDeps) {
     })
     if (!row) throw new IntegrationError('NOT_FOUND', 'Release not found')
     return row
+  }
+
+  /** Pulls the store's localizations for a version into the local snapshot and returns them. */
+  async function snapshotLocalizations(projectId: string, v: { id: string; externalId: string; integrationId: string }) {
+    const client = await deps.integrations.appStoreClientFor(projectId, v.integrationId)
+    let remote: Awaited<ReturnType<typeof client.listVersionLocalizations>>
+    try {
+      remote = await client.listVersionLocalizations(v.externalId)
+    } catch (e) {
+      throw new IntegrationError('VERIFICATION_FAILED', (e as Error).message)
+    }
+    const now = new Date()
+    for (const l of remote) {
+      await db
+        .insert(schema.appVersionLocalizations)
+        .values({ appVersionId: v.id, externalId: l.id, locale: l.locale, whatsNew: l.whatsNew, syncedAt: now })
+        .onConflictDoUpdate({
+          target: [schema.appVersionLocalizations.appVersionId, schema.appVersionLocalizations.locale],
+          set: { externalId: l.id, whatsNew: l.whatsNew, syncedAt: now },
+        })
+    }
+    return db.query.appVersionLocalizations.findMany({ where: eq(schema.appVersionLocalizations.appVersionId, v.id) })
   }
 
   function versionsFor(releaseIds: string[]) {
@@ -123,36 +152,72 @@ export function releasesService(db: Db, deps: ReleaseDeps) {
       const now = new Date()
       for (const v of versions) {
         if (!v.integrationId || v.platform !== 'ios') continue
-        const client = await deps.integrations.appStoreClientFor(projectId, v.integrationId)
-        let remote: Awaited<ReturnType<typeof client.listVersionLocalizations>>
-        try {
-          remote = await client.listVersionLocalizations(v.externalId)
-        } catch (e) {
-          throw new IntegrationError('VERIFICATION_FAILED', (e as Error).message)
+        const locs = await snapshotLocalizations(projectId, { id: v.id, externalId: v.externalId, integrationId: v.integrationId })
+        const scope = resolveNoteScope(release.notesMode, v.platform)
+        for (const l of locs) {
+          if (!l.whatsNew) continue
+          await db
+            .insert(schema.releaseNotes)
+            .values({ releaseId: release.id, scope, locale: l.locale, text: l.whatsNew, updatedAt: now })
+            .onConflictDoUpdate({
+              target: [schema.releaseNotes.releaseId, schema.releaseNotes.scope, schema.releaseNotes.locale],
+              set: { text: l.whatsNew, updatedAt: now },
+            })
         }
-        const scope: NoteScope = release.notesMode === 'shared' ? 'shared' : v.platform
-        await db.transaction(async (tx) => {
-          for (const l of remote) {
-            await tx
-              .insert(schema.appVersionLocalizations)
-              .values({ appVersionId: v.id, externalId: l.id, locale: l.locale, whatsNew: l.whatsNew, syncedAt: now })
-              .onConflictDoUpdate({
-                target: [schema.appVersionLocalizations.appVersionId, schema.appVersionLocalizations.locale],
-                set: { externalId: l.id, whatsNew: l.whatsNew, syncedAt: now },
-              })
-            if (l.whatsNew) {
-              await tx
-                .insert(schema.releaseNotes)
-                .values({ releaseId: release.id, scope, locale: l.locale, text: l.whatsNew, updatedAt: now })
-                .onConflictDoUpdate({
-                  target: [schema.releaseNotes.releaseId, schema.releaseNotes.scope, schema.releaseNotes.locale],
-                  set: { text: l.whatsNew, updatedAt: now },
-                })
-            }
-          }
-        })
       }
       return this.get(projectId, release.id)
+    },
+
+    /**
+     * Writes our notes to every editable App Store version in the release.
+     * Only locales whose text differs from the store snapshot are sent.
+     */
+    async pushNotes(projectId: string, releaseId: string) {
+      const release = await requireRelease(projectId, releaseId)
+      const versions = await versionsFor([release.id])
+      const notes = await db.query.releaseNotes.findMany({ where: eq(schema.releaseNotes.releaseId, release.id) })
+
+      // Make sure every editable version has a snapshot (we need localization ids).
+      const store = new Map<string, Awaited<ReturnType<typeof snapshotLocalizations>>>()
+      for (const v of versions) {
+        if (!v.integrationId || v.platform !== 'ios') continue
+        let locs = await db.query.appVersionLocalizations.findMany({
+          where: eq(schema.appVersionLocalizations.appVersionId, v.id),
+        })
+        if (locs.length === 0) locs = await snapshotLocalizations(projectId, { id: v.id, externalId: v.externalId, integrationId: v.integrationId })
+        store.set(v.id, locs)
+      }
+
+      const plans = planPush({
+        notesMode: release.notesMode,
+        notes,
+        versions,
+        storeLocalizations: [...store.values()].flat(),
+      })
+
+      const results: PushResult[] = []
+      for (const plan of plans) {
+        const result: PushResult = { ...plan, pushed: [], error: null }
+        results.push(result)
+        if (!plan.editable || plan.changes.length === 0) continue
+        const v = versions.find((x) => x.id === plan.appVersionId)!
+        const client = await deps.integrations.appStoreClientFor(projectId, v.integrationId!)
+        for (const change of plan.changes) {
+          const loc = store.get(v.id)!.find((l) => l.locale === change.locale)!
+          try {
+            await client.updateVersionLocalization(loc.externalId, { whatsNew: change.to })
+          } catch (e) {
+            result.error = `${change.locale}: ${(e as Error).message}`
+            break
+          }
+          await db
+            .update(schema.appVersionLocalizations)
+            .set({ whatsNew: change.to, syncedAt: new Date() })
+            .where(eq(schema.appVersionLocalizations.id, loc.id))
+          result.pushed.push(change.locale)
+        }
+      }
+      return results
     },
   }
 }

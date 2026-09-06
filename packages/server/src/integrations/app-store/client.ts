@@ -91,8 +91,16 @@ export function createAppStoreClient(creds: AppStoreCredentials, fetchImpl: type
     return cached.token
   }
 
-  async function request<T>(path: string): Promise<T> {
-    const res = await fetchImpl(`${BASE_URL}${path}`, { headers: { authorization: `Bearer ${token()}` } })
+  async function request<T>(path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
+    const res = await fetchImpl(`${BASE_URL}${path}`, {
+      method: init.method ?? 'GET',
+      headers: {
+        authorization: `Bearer ${token()}`,
+        ...(init.body !== undefined ? { 'content-type': 'application/json' } : {}),
+      },
+      body: init.body !== undefined ? JSON.stringify(init.body) : undefined,
+    })
+    if (res.status === 204) return undefined as T
     if (res.ok) return res.json() as Promise<T>
     let detail = `App Store Connect responded ${res.status}`
     try {
@@ -139,6 +147,14 @@ export function createAppStoreClient(creds: AppStoreCredentials, fetchImpl: type
         path = page.links?.next?.replace(BASE_URL, '')
       }
       return out
+    },
+
+    /** Updates metadata of one version localization (e.g. what's new). */
+    async updateVersionLocalization(localizationId: string, attributes: { whatsNew: string }) {
+      await request(`/v1/appStoreVersionLocalizations/${encodeURIComponent(localizationId)}`, {
+        method: 'PATCH',
+        body: { data: { type: 'appStoreVersionLocalizations', id: localizationId, attributes } },
+      })
     },
 
     async getApp(appId: string): Promise<RemoteApp> {
