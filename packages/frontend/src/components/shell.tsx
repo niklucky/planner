@@ -34,9 +34,9 @@ export function Main({ children }: { children: ReactNode }) {
   return <main className={styles.main}>{children}</main>
 }
 
-export function Page({ title, children }: { title: ReactNode; children?: ReactNode }) {
+export function Page({ title, wide, children }: { title: ReactNode; wide?: boolean; children?: ReactNode }) {
   return (
-    <div className={styles.page}>
+    <div className={styles.page} data-wide={wide || undefined}>
       <h1 className={styles.pageTitle}>{title}</h1>
       {children}
     </div>

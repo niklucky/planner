@@ -5,6 +5,7 @@ import type { SecretBox } from '../crypto/secret-box'
 
 type IntegrationRow = typeof schema.integrations.$inferSelect
 import { AppStoreError, createAppStoreClient } from '../integrations/app-store/client'
+import { linkVersionsToReleases } from '../releases/link'
 
 export type IntegrationErrorCode = 'NOT_FOUND' | 'VERIFICATION_FAILED' | 'ALREADY_IMPORTED' | 'NOT_LINKED'
 
@@ -198,11 +199,17 @@ export function integrationsService(db: Db, deps: IntegrationDeps) {
             },
           })
       }
+      await linkVersionsToReleases(db, projectId, app.id)
       return db
         .select()
         .from(schema.appVersions)
         .where(eq(schema.appVersions.appId, app.id))
         .orderBy(desc(schema.appVersions.storeCreatedAt))
+    },
+
+    /** Store client for an integration of the project. */
+    async appStoreClientFor(projectId: string, integrationId: string) {
+      return appStoreClient(await requireRow(projectId, integrationId))
     },
 
     async remove(projectId: string, integrationId: string) {

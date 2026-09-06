@@ -49,3 +49,9 @@ export type TextareaProps = ComponentPropsWithRef<'textarea'>
 export function Textarea({ className, ...rest }: TextareaProps) {
   return <textarea className={cx(styles.input, styles.textarea, className)} {...rest} />
 }
+
+export type SelectProps = ComponentPropsWithRef<'select'>
+
+export function Select({ className, ...rest }: SelectProps) {
+  return <select className={cx(styles.input, styles.select, className)} {...rest} />
+}

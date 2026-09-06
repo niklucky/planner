@@ -2,6 +2,7 @@ import { PLATFORMS } from '@planner/shared'
 import { pgEnum, pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core'
 import { integrations } from './integrations'
 import { projects } from './projects'
+import { releases } from './releases'
 
 export const platformEnum = pgEnum('platform', PLATFORMS)
 
@@ -37,6 +38,8 @@ export const appVersions = pgTable(
       .references(() => apps.id, { onDelete: 'cascade' }),
     /** The store's id for the version. */
     externalId: text('external_id').notNull(),
+    /** Project release this version belongs to (matched by version string). */
+    releaseId: uuid('release_id').references(() => releases.id, { onDelete: 'set null' }),
     versionString: text('version_string').notNull(),
     platform: text('platform').notNull(),
     state: text('state').notNull(),
@@ -50,3 +53,22 @@ export const appVersions = pgTable(
 )
 
 export type AppVersion = typeof appVersions.$inferSelect
+
+/** Snapshot of a store version's per-locale metadata, as last pulled. */
+export const appVersionLocalizations = pgTable(
+  'app_version_localizations',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    appVersionId: uuid('app_version_id')
+      .notNull()
+      .references(() => appVersions.id, { onDelete: 'cascade' }),
+    /** The store's id for the localization (needed to push updates). */
+    externalId: text('external_id').notNull(),
+    locale: text('locale').notNull(),
+    whatsNew: text('whats_new'),
+    syncedAt: timestamp('synced_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [unique().on(t.appVersionId, t.locale)],
+)
+
+export type AppVersionLocalization = typeof appVersionLocalizations.$inferSelect

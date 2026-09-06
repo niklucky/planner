@@ -58,3 +58,9 @@
   line-height: 1.5;
   resize: vertical;
 }
+
+.select {
+  width: auto;
+  padding-right: var(--space-3);
+  appearance: auto;
+}

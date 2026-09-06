@@ -1,0 +1,21 @@
+.tabs {
+  display: flex;
+  gap: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+
+.tab {
+  padding: var(--space-2) 0;
+  color: var(--color-fg-muted);
+  border-bottom: 2px solid transparent;
+  user-select: none;
+}
+
+.tab:hover {
+  color: var(--color-fg);
+}
+
+.tab[data-status='active'] {
+  color: var(--color-fg);
+  border-bottom-color: var(--color-fg);
+}

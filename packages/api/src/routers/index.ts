@@ -3,6 +3,7 @@ import { appsRouter } from './apps'
 import { authRouter } from './auth'
 import { integrationsRouter } from './integrations'
 import { projectsRouter } from './projects'
+import { releasesRouter } from './releases'
 
 export const appRouter = router({
   health: publicProcedure.query(() => ({ status: 'ok' as const, time: new Date().toISOString() })),
@@ -10,6 +11,7 @@ export const appRouter = router({
   apps: appsRouter,
   projects: projectsRouter,
   integrations: integrationsRouter,
+  releases: releasesRouter,
 })
 
 export type AppRouter = typeof appRouter

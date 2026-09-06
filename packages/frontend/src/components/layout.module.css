@@ -43,3 +43,23 @@
   color: var(--color-fg-muted);
   font-size: var(--text-sm);
 }
+
+.columns {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-8);
+}
+
+.columnsAside {
+  flex: none;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.columnsMain {
+  flex: 1;
+  min-width: 0;
+  max-width: 640px;
+}

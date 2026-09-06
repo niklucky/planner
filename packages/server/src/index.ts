@@ -3,15 +3,18 @@ import { appsService } from './services/apps'
 import { type AuthDeps, authService } from './services/auth'
 import { type IntegrationDeps, integrationsService } from './services/integrations'
 import { projectsService } from './services/projects'
+import { releasesService } from './services/releases'
 
 export interface ServiceDeps extends AuthDeps, IntegrationDeps {}
 
 export function createServices(db: Db, deps: ServiceDeps) {
+  const integrations = integrationsService(db, deps)
   return {
     apps: appsService(db),
     auth: authService(db, deps),
-    integrations: integrationsService(db, deps),
+    integrations,
     projects: projectsService(db),
+    releases: releasesService(db, { integrations }),
   }
 }
 

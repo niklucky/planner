@@ -65,6 +65,10 @@
   max-width: 960px;
 }
 
+.page[data-wide] {
+  max-width: none;
+}
+
 .pageTitle {
   font-size: var(--text-xl);
   font-weight: 600;

@@ -43,6 +43,17 @@ interface VersionResource {
   }
 }
 
+interface LocalizationResource {
+  id: string
+  attributes: { locale: string; whatsNew?: string | null }
+}
+
+export interface RemoteLocalization {
+  id: string
+  locale: string
+  whatsNew: string | null
+}
+
 function toRemoteVersion(item: VersionResource): RemoteVersion {
   const a = item.attributes
   return {
@@ -115,6 +126,19 @@ export function createAppStoreClient(creds: AppStoreCredentials, fetchImpl: type
         path = page.links?.next?.replace(BASE_URL, '')
       }
       return versions.sort((a, b) => (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0))
+    },
+
+    /** Per-locale metadata of a version. */
+    async listVersionLocalizations(versionId: string): Promise<RemoteLocalization[]> {
+      const out: RemoteLocalization[] = []
+      let path: string | undefined =
+        `/v1/appStoreVersions/${encodeURIComponent(versionId)}/appStoreVersionLocalizations?limit=50&fields[appStoreVersionLocalizations]=locale,whatsNew`
+      while (path) {
+        const page: { data: LocalizationResource[]; links?: { next?: string } } = await request(path)
+        out.push(...page.data.map((l) => ({ id: l.id, locale: l.attributes.locale, whatsNew: l.attributes.whatsNew ?? null })))
+        path = page.links?.next?.replace(BASE_URL, '')
+      }
+      return out
     },
 
     async getApp(appId: string): Promise<RemoteApp> {

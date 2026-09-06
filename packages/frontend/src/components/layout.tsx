@@ -32,3 +32,13 @@ export function Row({ children, secondary }: { children: ReactNode; secondary?: 
     </div>
   )
 }
+
+/** Narrow list on the left, detail on the right. */
+export function Columns({ aside, children }: { aside: ReactNode; children: ReactNode }) {
+  return (
+    <div className={styles.columns}>
+      <aside className={styles.columnsAside}>{aside}</aside>
+      <div className={styles.columnsMain}>{children}</div>
+    </div>
+  )
+}

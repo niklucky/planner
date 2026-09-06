@@ -23,6 +23,8 @@ import { Route as AppProjectsProjectIdAnalyticsRouteImport } from './routes/_app
 import { Route as AppProjectsProjectIdIntegrationsRouteImport } from './routes/_app/projects/$projectId/integrations'
 import { Route as AppProjectsProjectIdMembersRouteImport } from './routes/_app/projects/$projectId/members'
 import { Route as AppProjectsProjectIdStoresRouteImport } from './routes/_app/projects/$projectId/stores'
+import { Route as AppProjectsProjectIdStoresIndexRouteImport } from './routes/_app/projects/$projectId/stores/index'
+import { Route as AppProjectsProjectIdStoresReleasesRouteImport } from './routes/_app/projects/$projectId/stores/releases'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -97,6 +99,18 @@ const AppProjectsProjectIdStoresRoute =
     path: '/stores',
     getParentRoute: () => AppProjectsProjectIdRoute,
   } as any)
+const AppProjectsProjectIdStoresIndexRoute =
+  AppProjectsProjectIdStoresIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AppProjectsProjectIdStoresRoute,
+  } as any)
+const AppProjectsProjectIdStoresReleasesRoute =
+  AppProjectsProjectIdStoresReleasesRouteImport.update({
+    id: '/releases',
+    path: '/releases',
+    getParentRoute: () => AppProjectsProjectIdStoresRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -109,8 +123,10 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId/analytics': typeof AppProjectsProjectIdAnalyticsRoute
   '/projects/$projectId/integrations': typeof AppProjectsProjectIdIntegrationsRoute
   '/projects/$projectId/members': typeof AppProjectsProjectIdMembersRoute
-  '/projects/$projectId/stores': typeof AppProjectsProjectIdStoresRoute
+  '/projects/$projectId/stores': typeof AppProjectsProjectIdStoresRouteWithChildren
   '/projects/$projectId/': typeof AppProjectsProjectIdIndexRoute
+  '/projects/$projectId/stores/releases': typeof AppProjectsProjectIdStoresReleasesRoute
+  '/projects/$projectId/stores/': typeof AppProjectsProjectIdStoresIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
@@ -122,8 +138,9 @@ export interface FileRoutesByTo {
   '/projects/$projectId/analytics': typeof AppProjectsProjectIdAnalyticsRoute
   '/projects/$projectId/integrations': typeof AppProjectsProjectIdIntegrationsRoute
   '/projects/$projectId/members': typeof AppProjectsProjectIdMembersRoute
-  '/projects/$projectId/stores': typeof AppProjectsProjectIdStoresRoute
   '/projects/$projectId': typeof AppProjectsProjectIdIndexRoute
+  '/projects/$projectId/stores/releases': typeof AppProjectsProjectIdStoresReleasesRoute
+  '/projects/$projectId/stores': typeof AppProjectsProjectIdStoresIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -139,8 +156,10 @@ export interface FileRoutesById {
   '/_app/projects/$projectId/analytics': typeof AppProjectsProjectIdAnalyticsRoute
   '/_app/projects/$projectId/integrations': typeof AppProjectsProjectIdIntegrationsRoute
   '/_app/projects/$projectId/members': typeof AppProjectsProjectIdMembersRoute
-  '/_app/projects/$projectId/stores': typeof AppProjectsProjectIdStoresRoute
+  '/_app/projects/$projectId/stores': typeof AppProjectsProjectIdStoresRouteWithChildren
   '/_app/projects/$projectId/': typeof AppProjectsProjectIdIndexRoute
+  '/_app/projects/$projectId/stores/releases': typeof AppProjectsProjectIdStoresReleasesRoute
+  '/_app/projects/$projectId/stores/': typeof AppProjectsProjectIdStoresIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -157,6 +176,8 @@ export interface FileRouteTypes {
     | '/projects/$projectId/members'
     | '/projects/$projectId/stores'
     | '/projects/$projectId/'
+    | '/projects/$projectId/stores/releases'
+    | '/projects/$projectId/stores/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -168,8 +189,9 @@ export interface FileRouteTypes {
     | '/projects/$projectId/analytics'
     | '/projects/$projectId/integrations'
     | '/projects/$projectId/members'
-    | '/projects/$projectId/stores'
     | '/projects/$projectId'
+    | '/projects/$projectId/stores/releases'
+    | '/projects/$projectId/stores'
   id:
     | '__root__'
     | '/_app'
@@ -186,6 +208,8 @@ export interface FileRouteTypes {
     | '/_app/projects/$projectId/members'
     | '/_app/projects/$projectId/stores'
     | '/_app/projects/$projectId/'
+    | '/_app/projects/$projectId/stores/releases'
+    | '/_app/projects/$projectId/stores/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -293,14 +317,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProjectsProjectIdStoresRouteImport
       parentRoute: typeof AppProjectsProjectIdRoute
     }
+    '/_app/projects/$projectId/stores/': {
+      id: '/_app/projects/$projectId/stores/'
+      path: '/'
+      fullPath: '/projects/$projectId/stores/'
+      preLoaderRoute: typeof AppProjectsProjectIdStoresIndexRouteImport
+      parentRoute: typeof AppProjectsProjectIdStoresRoute
+    }
+    '/_app/projects/$projectId/stores/releases': {
+      id: '/_app/projects/$projectId/stores/releases'
+      path: '/releases'
+      fullPath: '/projects/$projectId/stores/releases'
+      preLoaderRoute: typeof AppProjectsProjectIdStoresReleasesRouteImport
+      parentRoute: typeof AppProjectsProjectIdStoresRoute
+    }
   }
 }
+
+interface AppProjectsProjectIdStoresRouteChildren {
+  AppProjectsProjectIdStoresReleasesRoute: typeof AppProjectsProjectIdStoresReleasesRoute
+  AppProjectsProjectIdStoresIndexRoute: typeof AppProjectsProjectIdStoresIndexRoute
+}
+
+const AppProjectsProjectIdStoresRouteChildren: AppProjectsProjectIdStoresRouteChildren =
+  {
+    AppProjectsProjectIdStoresReleasesRoute:
+      AppProjectsProjectIdStoresReleasesRoute,
+    AppProjectsProjectIdStoresIndexRoute: AppProjectsProjectIdStoresIndexRoute,
+  }
+
+const AppProjectsProjectIdStoresRouteWithChildren =
+  AppProjectsProjectIdStoresRoute._addFileChildren(
+    AppProjectsProjectIdStoresRouteChildren,
+  )
 
 interface AppProjectsProjectIdRouteChildren {
   AppProjectsProjectIdAnalyticsRoute: typeof AppProjectsProjectIdAnalyticsRoute
   AppProjectsProjectIdIntegrationsRoute: typeof AppProjectsProjectIdIntegrationsRoute
   AppProjectsProjectIdMembersRoute: typeof AppProjectsProjectIdMembersRoute
-  AppProjectsProjectIdStoresRoute: typeof AppProjectsProjectIdStoresRoute
+  AppProjectsProjectIdStoresRoute: typeof AppProjectsProjectIdStoresRouteWithChildren
   AppProjectsProjectIdIndexRoute: typeof AppProjectsProjectIdIndexRoute
 }
 
@@ -308,7 +363,7 @@ const AppProjectsProjectIdRouteChildren: AppProjectsProjectIdRouteChildren = {
   AppProjectsProjectIdAnalyticsRoute: AppProjectsProjectIdAnalyticsRoute,
   AppProjectsProjectIdIntegrationsRoute: AppProjectsProjectIdIntegrationsRoute,
   AppProjectsProjectIdMembersRoute: AppProjectsProjectIdMembersRoute,
-  AppProjectsProjectIdStoresRoute: AppProjectsProjectIdStoresRoute,
+  AppProjectsProjectIdStoresRoute: AppProjectsProjectIdStoresRouteWithChildren,
   AppProjectsProjectIdIndexRoute: AppProjectsProjectIdIndexRoute,
 }
 
