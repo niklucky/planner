@@ -57,6 +57,13 @@
       "when": 1788725244375,
       "tag": "0007_living_silver_centurion",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788732439170,
+      "tag": "0008_small_scorpion",
+      "breakpoints": true
     }
   ]
 }

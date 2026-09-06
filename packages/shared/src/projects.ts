@@ -21,3 +21,39 @@ export interface Project {
 export interface ProjectMembership extends Project {
   role: MemberRole
 }
+
+export interface ProjectMember {
+  userId: string
+  name: string
+  email: string
+  role: MemberRole
+  joinedAt: Date
+}
+
+export interface ProjectInvitation {
+  id: string
+  email: string
+  role: MemberRole
+  createdAt: Date
+  expiresAt: Date
+}
+
+export const inviteMemberInput = z.object({
+  email: z.string().trim().toLowerCase().pipe(z.email('Enter a valid email').max(255)),
+  role: z.literal('member').default('member'),
+})
+export type InviteMemberInput = z.infer<typeof inviteMemberInput>
+
+export const removeMemberInput = z.object({ userId: z.uuid() })
+export const invitationIdInput = z.object({ invitationId: z.uuid() })
+export const acceptInviteInput = z.object({ token: z.string().min(1) })
+
+/** A pending invitation addressed to the signed-in user's email. */
+export interface MyInvitation {
+  id: string
+  projectId: string
+  projectName: string
+  inviterName: string | null
+  role: MemberRole
+  expiresAt: Date
+}

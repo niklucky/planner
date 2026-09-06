@@ -18,3 +18,7 @@
   font-weight: 600;
   margin-bottom: var(--space-4);
 }
+
+.dialog > * + * {
+  margin-top: var(--space-4);
+}

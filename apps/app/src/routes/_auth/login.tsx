@@ -4,7 +4,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { type FormEvent, useState } from 'react'
 import { z } from 'zod'
+import { InviteHint, useInvitePreview } from '../../components/invite-hint'
 import { AppLink } from '../../components/nav-link'
+import { inviteTokenFromRedirect } from '../../lib/invite'
 import { type FieldErrors, parseForm } from '../../lib/form'
 import { useTRPC } from '../../lib/trpc'
 
@@ -21,6 +23,7 @@ function LoginPage() {
   const queryClient = useQueryClient()
   const trpc = useTRPC()
   const [errors, setErrors] = useState<FieldErrors>({})
+  const invite = useInvitePreview(inviteTokenFromRedirect(redirect))
 
   const login = useMutation(
     trpc.auth.login.mutationOptions({
@@ -45,14 +48,24 @@ function LoginPage() {
       links={
         <>
           <AppLink to="/forgot-password">Forgot password?</AppLink>
-          <AppLink to="/register">Create account</AppLink>
+          <AppLink to="/register" search={{ redirect }}>
+            Create account
+          </AppLink>
         </>
       }
     >
       <Form onSubmit={onSubmit} error={login.error?.message} noValidate>
         <Field label="Email" error={errors.email}>
-          <Input name="email" type="email" autoComplete="email" autoFocus />
+          <Input
+            key={invite.data?.email ?? 'empty'}
+            name="email"
+            type="email"
+            autoComplete="email"
+            autoFocus
+            defaultValue={invite.data?.email ?? ''}
+          />
         </Field>
+        <InviteHint preview={invite.data} email={invite.data?.email ?? ''} />
         <Field label="Password" error={errors.password}>
           <Input name="password" type="password" autoComplete="current-password" />
         </Field>
