@@ -69,7 +69,7 @@ export interface ScreenshotSlotPlan {
   uploads: number
   deletes: number
   reorder: boolean
-  /** Apple allows at most 10 per set. */
+  /** More screenshots than the store allows in one set. */
   overLimit: boolean
 }
 
@@ -88,4 +88,7 @@ export interface ScreenshotPushResultVersion extends ScreenshotPushPlanVersion {
   error: string | null
 }
 
-export const SCREENSHOTS_PER_SET_LIMIT = 10
+/** Apple allows 10 screenshots per set, Google 8 per image type. */
+export function screenshotsPerSetLimit(platform: 'ios' | 'android') {
+  return platform === 'ios' ? 10 : 8
+}

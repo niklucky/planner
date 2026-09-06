@@ -2,6 +2,7 @@ import type { RemoteVersion } from '@planner/shared'
 import { type GoogleAccessToken, type GoogleServiceAccount, fetchGoogleAccessToken } from './auth'
 
 const BASE_URL = 'https://androidpublisher.googleapis.com/androidpublisher/v3/applications'
+const UPLOAD_URL = 'https://androidpublisher.googleapis.com/upload/androidpublisher/v3/applications'
 
 export class GooglePlayError extends Error {
   constructor(
@@ -28,6 +29,12 @@ export interface PlayRelease {
 export interface PlayTrack {
   track: string
   releases?: PlayRelease[]
+}
+
+export interface PlayImage {
+  id: string
+  url: string
+  sha256?: string
 }
 
 export interface PlayAppInfo {
@@ -67,14 +74,18 @@ export function createGooglePlayClient(sa: GoogleServiceAccount, fetchImpl: type
     return cached.accessToken
   }
 
-  async function request<T>(path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
-    const res = await fetchImpl(`${BASE_URL}${path}`, {
+  async function request<T>(
+    path: string,
+    init: { method?: string; body?: unknown; raw?: { bytes: Uint8Array; contentType: string }; absolute?: boolean } = {},
+  ): Promise<T> {
+    const url = init.absolute ? path : `${BASE_URL}${path}`
+    const res = await fetchImpl(url, {
       method: init.method ?? 'GET',
       headers: {
         authorization: `Bearer ${await token()}`,
-        ...(init.body !== undefined ? { 'content-type': 'application/json' } : {}),
+        ...(init.raw ? { 'content-type': init.raw.contentType } : init.body !== undefined ? { 'content-type': 'application/json' } : {}),
       },
-      body: init.body !== undefined ? JSON.stringify(init.body) : undefined,
+      body: init.raw ? (init.raw.bytes as unknown as RequestInit['body']) : init.body !== undefined ? JSON.stringify(init.body) : undefined,
     })
     if (res.status === 204) return undefined as T
     const text = await res.text()
@@ -147,6 +158,67 @@ export function createGooglePlayClient(sa: GoogleServiceAccount, fetchImpl: type
       const release = tracks.find((t) => t.track === track)?.releases?.find((r) => releaseName(r) === name)
       if (!release) throw new GooglePlayError(`Release ${name} not found on track ${track}`)
       return release.releaseNotes ?? []
+    },
+
+    /** Languages that have a store listing. */
+    async listListingLanguages(packageName: string): Promise<string[]> {
+      return withEdit(packageName, async (editId) => {
+        const res = await request<{ listings?: Array<{ language: string }> }>(
+          `/${encodeURIComponent(packageName)}/edits/${editId}/listings`,
+        )
+        return (res.listings ?? []).map((l) => l.language)
+      })
+    },
+
+    /** Listing images per language and image type, in display order. */
+    async listImages(packageName: string, languages: string[], imageTypes: string[]) {
+      return withEdit(packageName, async (editId) => {
+        const pkg = encodeURIComponent(packageName)
+        const out: Array<{ language: string; imageType: string; images: PlayImage[] }> = []
+        for (const language of languages) {
+          for (const imageType of imageTypes) {
+            const res = await request<{ images?: PlayImage[] }>(
+              `/${pkg}/edits/${editId}/listings/${encodeURIComponent(language)}/${imageType}`,
+            )
+            out.push({ language, imageType, images: res.images ?? [] })
+          }
+        }
+        return out
+      })
+    },
+
+    /**
+     * Replaces the images of the given slots (Google has no reorder, so each slot
+     * is cleared and re-uploaded in order) in one committed edit. Returns new ids.
+     */
+    async replaceImages(
+      packageName: string,
+      slots: Array<{ language: string; imageType: string; files: Array<{ bytes: Uint8Array; contentType: string }> }>,
+    ) {
+      const pkg = encodeURIComponent(packageName)
+      return withEdit(
+        packageName,
+        async (editId) => {
+          const results: Array<{ language: string; imageType: string; ids: string[] }> = []
+          for (const slot of slots) {
+            const base = `/${pkg}/edits/${editId}/listings/${encodeURIComponent(slot.language)}/${slot.imageType}`
+            await request(base, { method: 'DELETE' })
+            const ids: string[] = []
+            for (const file of slot.files) {
+              const res = await request<{ image?: PlayImage }>(`${UPLOAD_URL}${base}?uploadType=media`, {
+                method: 'POST',
+                raw: file,
+                absolute: true,
+              })
+              if (!res.image?.id) throw new GooglePlayError('Upload returned no image id')
+              ids.push(res.image.id)
+            }
+            results.push({ language: slot.language, imageType: slot.imageType, ids })
+          }
+          return results
+        },
+        true,
+      )
     },
 
     /** Replaces the given languages' notes on one release, keeping other languages, and commits. */

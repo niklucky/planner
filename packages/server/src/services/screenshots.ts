@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import { basename } from 'node:path'
 import { type Db, schema } from '@planner/db'
 import {
-  SCREENSHOTS_PER_SET_LIMIT,
+  DEVICE_TYPES,
   SCREENSHOT_CONTENT_TYPES,
   SCREENSHOT_MAX_BYTES,
   type Screenshot,
@@ -11,10 +11,12 @@ import {
   type ScreenshotSlot,
   type ScreenshotSlotPlan,
   isVersionEditable,
+  screenshotsPerSetLimit,
 } from '@planner/shared'
 import { and, asc, eq, inArray, max } from 'drizzle-orm'
 import { contentTypeFor, imageSize } from '../images/size'
 import type { AppStoreClient } from '../integrations/app-store/client'
+import type { GooglePlayClient } from '../integrations/google-play/client'
 import type { Storage } from '../storage'
 import { IntegrationError } from './integrations'
 import type { integrationsService } from './integrations'
@@ -160,7 +162,7 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
           uploads: toUpload.length,
           deletes: toDelete.length,
           reorder: !sameOrder && mine.length > 0,
-          overLimit: mine.length > SCREENSHOTS_PER_SET_LIMIT,
+          overLimit: mine.length > screenshotsPerSetLimit('ios'),
         }
         if (plan.createSet || plan.uploads || plan.deletes || plan.reorder) {
           work.push({ plan, localizationId: loc.externalId, setId: set?.id ?? null, local: mine, toDelete, toUpload, finalOrderKnown: true })
@@ -197,6 +199,64 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
       out.push({ v, app, client, locs })
     }
     return out
+  }
+
+
+  const ANDROID_IMAGE_TYPES = DEVICE_TYPES.android.map((d) => d.id)
+
+  /** Android apps in the release (one per app even if several tracks are linked). */
+  async function androidApps(projectId: string, releaseId: string) {
+    const rows = await db
+      .selectDistinct({ app: schema.apps })
+      .from(schema.appVersions)
+      .innerJoin(schema.apps, eq(schema.appVersions.appId, schema.apps.id))
+      .where(and(eq(schema.appVersions.releaseId, releaseId), eq(schema.apps.platform, 'android')))
+    const out: Array<{ app: (typeof rows)[number]['app']; client: GooglePlayClient }> = []
+    for (const { app } of rows) {
+      if (!app.integrationId || !app.externalId) continue
+      out.push({ app, client: await deps.integrations.googlePlayClientFor(projectId, app.integrationId) })
+    }
+    return out
+  }
+
+  /** Full-size URL for a Play listing image. */
+  function fullSize(url: string) {
+    return url.includes('=') ? url : `${url}=s0`
+  }
+
+  type PlaySlotWork = {
+    plan: ScreenshotSlotPlan
+    local: Array<typeof schema.screenshots.$inferSelect>
+  }
+
+  /** Slots whose local images differ from the listing (membership or order). */
+  async function playSlotWork(client: GooglePlayClient, packageName: string, releaseId: string): Promise<PlaySlotWork[]> {
+    const local = await db.query.screenshots.findMany({
+      where: and(eq(schema.screenshots.releaseId, releaseId), eq(schema.screenshots.platform, 'android')),
+      orderBy: [asc(schema.screenshots.position)],
+    })
+    const locales = Array.from(new Set(local.map((l) => l.locale)))
+    if (locales.length === 0) return []
+    const remote = await client.listImages(packageName, locales, ANDROID_IMAGE_TYPES)
+    const work: PlaySlotWork[] = []
+    for (const { language, imageType, images } of remote) {
+      const mine = local.filter((l) => l.locale === language && l.deviceType === imageType)
+      const same = images.map((i) => i.id).join() === mine.map((l) => l.storeExternalId ?? '?').join()
+      if (same) continue
+      work.push({
+        plan: {
+          locale: language,
+          deviceType: imageType,
+          createSet: false,
+          uploads: mine.length,
+          deletes: images.length,
+          reorder: false,
+          overLimit: mine.length > screenshotsPerSetLimit('android'),
+        },
+        local: mine,
+      })
+    }
+    return work
   }
 
   return {
@@ -297,7 +357,7 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
         for (const slot of work) {
           try {
             if (slot.plan.overLimit) {
-              throw new Error(`${slot.plan.locale} ${slot.plan.deviceType}: more than ${SCREENSHOTS_PER_SET_LIMIT} screenshots`)
+              throw new Error(`${slot.plan.locale} ${slot.plan.deviceType}: more than ${screenshotsPerSetLimit('ios')} screenshots`)
             }
             let setId = slot.setId
             if (!setId) setId = (await client.createScreenshotSet(slot.localizationId, slot.plan.deviceType)).id
@@ -337,6 +397,124 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
             result.error = `${slot.plan.locale} ${slot.plan.deviceType}: ${(e as Error).message}`
             break
           }
+        }
+      }
+      return results
+    },
+
+    /**
+     * Replaces the release's Android screenshots with the Play listing's images
+     * (Google keeps them per listing, not per release), downloading them into storage.
+     */
+    async pullFromGooglePlay(projectId: string, releaseId: string) {
+      const release = await requireRelease(projectId, releaseId)
+      let imported = 0
+      for (const { app, client } of await androidApps(projectId, release.id)) {
+        const packageName = app.externalId!
+        let listing: Awaited<ReturnType<GooglePlayClient['listImages']>>
+        try {
+          const languages = await client.listListingLanguages(packageName)
+          listing = await client.listImages(packageName, languages, ANDROID_IMAGE_TYPES)
+        } catch (e) {
+          throw new IntegrationError('VERIFICATION_FAILED', (e as Error).message)
+        }
+        for (const { language, imageType, images } of listing) {
+          if (images.length === 0) continue
+          const slot: ScreenshotSlot = { platform: 'android', locale: language, deviceType: imageType }
+          const old = await db
+            .delete(schema.screenshots)
+            .where(
+              and(
+                eq(schema.screenshots.releaseId, release.id),
+                eq(schema.screenshots.platform, 'android'),
+                eq(schema.screenshots.locale, language),
+                eq(schema.screenshots.deviceType, imageType),
+              ),
+            )
+            .returning({ fileId: schema.screenshots.fileId })
+          let position = 0
+          for (const image of images) {
+            const res = await fetch(fullSize(image.url))
+            if (!res.ok) throw new IntegrationError('VERIFICATION_FAILED', `Could not download listing image (${res.status})`)
+            const file = await storeFile(projectId, new Uint8Array(await res.arrayBuffer()))
+            await db.insert(schema.screenshots).values({
+              releaseId: release.id,
+              ...slot,
+              position: position++,
+              fileId: file.id,
+              storeExternalId: image.id,
+              storeSetId: `${language}/${imageType}`,
+              syncedAt: new Date(),
+            })
+            imported++
+          }
+          await pruneFiles(old.map((o) => o.fileId))
+        }
+      }
+      return { imported }
+    },
+
+    /** What a push to Google Play would replace. Read-only. */
+    async planGooglePlayPush(projectId: string, releaseId: string): Promise<ScreenshotPushPlanVersion[]> {
+      const release = await requireRelease(projectId, releaseId)
+      const plans: ScreenshotPushPlanVersion[] = []
+      for (const { app, client } of await androidApps(projectId, release.id)) {
+        const work = await playSlotWork(client, app.externalId!, release.id).catch((e: Error) => {
+          throw new IntegrationError('VERIFICATION_FAILED', e.message)
+        })
+        plans.push({ appVersionId: app.id, appName: app.name, versionString: 'listing', state: 'LISTING', editable: true, slots: work.map((w) => w.plan) })
+      }
+      return plans
+    },
+
+    /** Replaces differing listing slots on Google Play with our screenshots, in one edit per app. */
+    async pushToGooglePlay(projectId: string, releaseId: string): Promise<ScreenshotPushResultVersion[]> {
+      const release = await requireRelease(projectId, releaseId)
+      const results: ScreenshotPushResultVersion[] = []
+      for (const { app, client } of await androidApps(projectId, release.id)) {
+        const result: ScreenshotPushResultVersion = {
+          appVersionId: app.id,
+          appName: app.name,
+          versionString: 'listing',
+          state: 'LISTING',
+          editable: true,
+          slots: [],
+          uploaded: 0,
+          deleted: 0,
+          error: null,
+        }
+        results.push(result)
+        try {
+          const work = await playSlotWork(client, app.externalId!, release.id)
+          result.slots = work.map((w) => w.plan)
+          const over = work.find((w) => w.plan.overLimit)
+          if (over) throw new Error(`${over.plan.locale} ${over.plan.deviceType}: more than ${screenshotsPerSetLimit('android')} screenshots`)
+          if (work.length === 0) continue
+          const slots = []
+          for (const w of work) {
+            const files = []
+            for (const row of w.local) {
+              const file = await db.query.files.findFirst({ where: eq(schema.files.id, row.fileId) })
+              const bytes = file ? await deps.storage.get(file.storageKey) : null
+              if (!file || !bytes) throw new Error('Stored image is missing')
+              files.push({ bytes, contentType: file.contentType })
+            }
+            slots.push({ language: w.plan.locale, imageType: w.plan.deviceType, files })
+          }
+          const replaced = await client.replaceImages(app.externalId!, slots)
+          for (const w of work) {
+            const ids = replaced.find((r) => r.language === w.plan.locale && r.imageType === w.plan.deviceType)?.ids ?? []
+            for (const [i, row] of w.local.entries()) {
+              await db
+                .update(schema.screenshots)
+                .set({ storeExternalId: ids[i] ?? null, storeSetId: `${w.plan.locale}/${w.plan.deviceType}`, syncedAt: new Date() })
+                .where(eq(schema.screenshots.id, row.id))
+            }
+            result.uploaded += w.plan.uploads
+            result.deleted += w.plan.deletes
+          }
+        } catch (e) {
+          result.error = (e as Error).message
         }
       }
       return results

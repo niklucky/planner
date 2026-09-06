@@ -23,6 +23,7 @@ export function ReleaseScreenshots({ projectId, releaseId, platforms, locales }:
   const invalidate = () => queryClient.invalidateQueries(trpc.screenshots.list.queryFilter(input))
 
   const pull = useMutation(trpc.screenshots.pullFromAppStore.mutationOptions({ onSuccess: invalidate }))
+  const pullPlay = useMutation(trpc.screenshots.pullFromGooglePlay.mutationOptions({ onSuccess: invalidate }))
   const remove = useMutation(trpc.screenshots.remove.mutationOptions({ onSuccess: invalidate }))
   const upload = useMutation({
     mutationFn: (args: { slot: Parameters<typeof uploadScreenshots>[2]; files: FileList }) =>
@@ -37,10 +38,12 @@ export function ReleaseScreenshots({ projectId, releaseId, platforms, locales }:
   const [locale, setLocale] = useState<string>('')
   const currentLocale = allLocales.includes(locale) ? locale : (allLocales[0] ?? '')
   const [newDevice, setNewDevice] = useState<Record<Platform, string>>({ ios: '', android: '' })
-  const [pushing, setPushing] = useState(false)
+  const [pushing, setPushing] = useState<Platform | null>(null)
 
-  const busy = pull.isPending || remove.isPending || upload.isPending
-  const message = pull.error?.message ?? remove.error?.message ?? upload.error?.message ?? error?.message
+  const busy = pull.isPending || pullPlay.isPending || remove.isPending || upload.isPending
+  const message =
+    pull.error?.message ?? pullPlay.error?.message ?? remove.error?.message ?? upload.error?.message ?? error?.message
+  const imported = pull.data?.imported ?? pullPlay.data?.imported
 
   return (
     <Stack>
@@ -58,14 +61,26 @@ export function ReleaseScreenshots({ projectId, releaseId, platforms, locales }:
             <Button type="button" onClick={() => pull.mutate(input)} disabled={busy}>
               {pull.isPending ? 'Pulling…' : 'Pull from App Store'}
             </Button>
-            <Button type="button" onClick={() => setPushing(true)} disabled={busy}>
+            <Button type="button" onClick={() => setPushing('ios')} disabled={busy}>
               Push to App Store…
             </Button>
           </>
         )}
+        {platforms.includes('android') && (
+          <>
+            <Button type="button" onClick={() => pullPlay.mutate(input)} disabled={busy}>
+              {pullPlay.isPending ? 'Pulling…' : 'Pull from Google Play'}
+            </Button>
+            <Button type="button" onClick={() => setPushing('android')} disabled={busy}>
+              Push to Google Play…
+            </Button>
+          </>
+        )}
       </Inline>
-      {pushing && <PushScreenshotsDialog projectId={projectId} releaseId={releaseId} onClose={() => setPushing(false)} />}
-      {pull.data && <Text>Imported {pull.data.imported} screenshots.</Text>}
+      {pushing && (
+        <PushScreenshotsDialog projectId={projectId} releaseId={releaseId} platform={pushing} onClose={() => setPushing(null)} />
+      )}
+      {imported !== undefined && <Text>Imported {imported} screenshots.</Text>}
       {message && <Text>{message}</Text>}
 
       {platforms.map((platform) => {
