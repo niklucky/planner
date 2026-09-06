@@ -1,4 +1,4 @@
-import { type ComponentPropsWithRef, type ReactElement, type ReactNode, cloneElement } from 'react'
+import { type ComponentPropsWithRef, type ReactElement, type ReactNode, cloneElement, useId } from 'react'
 import { cx } from '../cx'
 import styles from './form.module.css'
 
@@ -11,18 +11,25 @@ export function Input({ className, ...rest }: InputProps) {
 export interface FieldProps {
   label: ReactNode
   error?: ReactNode
-  /** A single input element; receives aria-invalid when `error` is set. */
-  children: ReactElement<{ 'aria-invalid'?: boolean }>
+  /** Optional control shown at the right of the label (e.g. a small action). */
+  action?: ReactNode
+  /** A single input element; receives id and aria-invalid. */
+  children: ReactElement<{ id?: string; 'aria-invalid'?: boolean }>
 }
 
-/** Label wrapping the control, so no ids are needed. */
-export function Field({ label, error, children }: FieldProps) {
+export function Field({ label, error, action, children }: FieldProps) {
+  const id = useId()
   return (
-    <label className={styles.field}>
-      <span className={styles.label}>{label}</span>
-      {cloneElement(children, { 'aria-invalid': error ? true : undefined })}
+    <div className={styles.field}>
+      <div className={styles.fieldHeader}>
+        <label htmlFor={id} className={styles.label}>
+          {label}
+        </label>
+        {action}
+      </div>
+      {cloneElement(children, { id, 'aria-invalid': error ? true : undefined })}
       {error && <span className={styles.fieldError}>{error}</span>}
-    </label>
+    </div>
   )
 }
 

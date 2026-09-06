@@ -5,7 +5,7 @@ import styles from './button.module.css'
 export interface ButtonProps extends ComponentPropsWithRef<'button'> {
   variant?: 'ghost' | 'primary'
   /** `icon` renders a square button for a single icon; `lg` matches input height. */
-  size?: 'md' | 'lg' | 'icon'
+  size?: 'sm' | 'md' | 'lg' | 'icon'
   /** Full width. */
   block?: boolean
 }

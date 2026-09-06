@@ -2,9 +2,11 @@ import { Button, Field, Form, Inline, Row, Section, Select, Stack, Text, Textare
 import {
   type NoteScope,
   type NotesMode,
+  type Platform,
   RELEASE_NOTE_MAX_LENGTH,
   formatStorePlatform,
   formatStoreState,
+  matchLocale,
   planPush,
 } from '@planner/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -16,11 +18,58 @@ import { ReleaseScreenshots } from './release-screenshots'
 type NotesByKey = Record<string, string>
 const keyOf = (scope: NoteScope, locale: string) => `${scope}:${locale}`
 
+interface SourceOption {
+  key: string
+  releaseId: string
+  scope: NoteScope
+  label: string
+}
+
 export function ReleaseNotesEditor({ projectId, releaseId }: { projectId: string; releaseId: string }) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const query = useQuery(trpc.releases.get.queryOptions({ projectId, releaseId }))
   const release = query.data
+  const { data: allReleases = [] } = useQuery(trpc.releases.list.queryOptions({ projectId }))
+
+  // Other releases (and their note scopes) that notes can be copied from.
+  const sources = useMemo<SourceOption[]>(
+    () =>
+      allReleases
+        .filter((r) => r.id !== releaseId)
+        .flatMap((r): SourceOption[] => {
+          const platforms = Array.from(new Set(r.versions.map((v) => v.platform)))
+          const name = (p: Platform) => (p === 'ios' ? 'iOS' : 'Android')
+          const label = `${r.groupName} · ${r.version}`
+          if (r.notesMode === 'shared') {
+            const suffix = platforms.length > 0 ? ` · ${platforms.map(name).join(' + ')}` : ''
+            return [{ key: `${r.id}:shared`, releaseId: r.id, scope: 'shared' as const, label: `${label}${suffix}` }]
+          }
+          return platforms.map((p) => ({ key: `${r.id}:${p}`, releaseId: r.id, scope: p, label: `${label} · ${name(p)}` }))
+        }),
+    [allReleases, releaseId],
+  )
+  // Default to the same version in another group when there is exactly one.
+  const [sourceKey, setSourceKey] = useState<string | null>(null)
+  const defaultSource = useMemo(() => {
+    const sameVersion = sources.filter((s) => allReleases.find((r) => r.id === s.releaseId)?.version === release?.version)
+    return sameVersion.length === 1 ? sameVersion[0]!.key : ''
+  }, [sources, allReleases, release])
+  const activeSourceKey = sourceKey ?? defaultSource
+  const source = sources.find((s) => s.key === activeSourceKey)
+  const sourceQuery = useQuery(
+    trpc.releases.get.queryOptions({ projectId, releaseId: source?.releaseId ?? '' }, { enabled: !!source }),
+  )
+  const sourceNotes = useMemo(
+    () => (sourceQuery.data?.notes ?? []).filter((n) => n.scope === source?.scope && n.text.trim()),
+    [sourceQuery.data, source],
+  )
+  const sourceLocales = useMemo(() => sourceNotes.map((n) => n.locale), [sourceNotes])
+  /** Source text for a target locale, via store-locale matching. */
+  const sourceTextFor = (locale: string) => {
+    const match = matchLocale(locale, sourceLocales)
+    return match ? sourceNotes.find((n) => n.locale === match)?.text : undefined
+  }
 
   const [notesMode, setNotesMode] = useState<NotesMode>('shared')
   const [notes, setNotes] = useState<NotesByKey>({})
@@ -79,6 +128,31 @@ export function ReleaseNotesEditor({ projectId, releaseId }: { projectId: string
     setNotes((prev) => ({ ...prev, [keyOf(scope, locale)]: text }))
   }
 
+  /** Fills every empty textarea that has a source counterpart. */
+  const copyMissing = () => {
+    const next = { ...notes }
+    let changed = 0
+    for (const scope of scopes) {
+      for (const locale of locales) {
+        const key = keyOf(scope, locale)
+        if (next[key]?.trim()) continue
+        const text = sourceTextFor(locale)
+        if (text) {
+          next[key] = text
+          changed++
+        }
+      }
+    }
+    if (changed > 0) {
+      setDirty(true)
+      setNotes(next)
+    }
+  }
+  const missingCount = scopes.reduce(
+    (n, scope) => n + locales.filter((l) => !notes[keyOf(scope, l)]?.trim() && sourceTextFor(l)).length,
+    0,
+  )
+
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     save.mutate({
@@ -131,20 +205,52 @@ export function ReleaseNotesEditor({ projectId, releaseId }: { projectId: string
         )}
         {lastPull && <Text>Store text pulled {lastPull.toLocaleString()}</Text>}
 
+        {sources.length > 0 && (
+          <Inline>
+            <Select value={activeSourceKey} onChange={(e) => setSourceKey(e.target.value)}>
+              <option value="">Copy from…</option>
+              {sources.map((s) => (
+                <option key={s.key} value={s.key}>
+                  {s.label}
+                </option>
+              ))}
+            </Select>
+            {source && (
+              <Button type="button" onClick={copyMissing} disabled={missingCount === 0 || sourceQuery.isPending}>
+                {sourceQuery.isPending ? 'Loading…' : `Copy missing (${missingCount})`}
+              </Button>
+            )}
+          </Inline>
+        )}
+
         {locales.length === 0 && <Text>No locales yet. Pull from the store to start from what's live.</Text>}
 
         {scopes.map((scope) => (
           <Stack key={scope}>
             {scope !== 'shared' && <Text>{scope === 'ios' ? 'iOS' : 'Android'}</Text>}
-            {locales.map((locale) => (
-              <Field key={locale} label={locale}>
-                <Textarea
-                  value={notes[keyOf(scope, locale)] ?? ''}
-                  maxLength={RELEASE_NOTE_MAX_LENGTH}
-                  onChange={(e) => update(scope, locale, e.target.value)}
-                />
-              </Field>
-            ))}
+            {locales.map((locale) => {
+              const fromSource = source ? sourceTextFor(locale) : undefined
+              const current = notes[keyOf(scope, locale)] ?? ''
+              return (
+                <Field
+                  key={locale}
+                  label={locale}
+                  action={
+                    fromSource !== undefined && fromSource !== current ? (
+                      <Button type="button" size="sm" onClick={() => update(scope, locale, fromSource)}>
+                        Copy
+                      </Button>
+                    ) : undefined
+                  }
+                >
+                  <Textarea
+                    value={current}
+                    maxLength={RELEASE_NOTE_MAX_LENGTH}
+                    onChange={(e) => update(scope, locale, e.target.value)}
+                  />
+                </Field>
+              )
+            })}
           </Stack>
         ))}
       </Form>
