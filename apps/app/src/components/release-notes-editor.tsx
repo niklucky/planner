@@ -1,4 +1,4 @@
-import { Button, Field, Form, Inline, Row, Select, Stack, Text, Textarea } from '@planner/frontend'
+import { Button, Field, Form, Inline, Row, Section, Select, Stack, Text, Textarea } from '@planner/frontend'
 import {
   type NoteScope,
   type NotesMode,
@@ -11,6 +11,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
 import { useTRPC } from '../lib/trpc'
 import { PushNotesDialog } from './push-notes-dialog'
+import { ReleaseScreenshots } from './release-screenshots'
 
 type NotesByKey = Record<string, string>
 const keyOf = (scope: NoteScope, locale: string) => `${scope}:${locale}`
@@ -147,6 +148,10 @@ export function ReleaseNotesEditor({ projectId, releaseId }: { projectId: string
           </Stack>
         ))}
       </Form>
+
+      <Section title="Screenshots">
+        <ReleaseScreenshots projectId={projectId} releaseId={releaseId} platforms={platforms} locales={locales} />
+      </Section>
     </Stack>
   )
 }

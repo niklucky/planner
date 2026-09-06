@@ -50,6 +50,13 @@
       "when": 1788723235795,
       "tag": "0006_shocking_korg",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1788725244375,
+      "tag": "0007_living_silver_centurion",
+      "breakpoints": true
     }
   ]
 }

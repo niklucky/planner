@@ -19,6 +19,11 @@ const schema = z.object({
   EMAIL_FROM: z.string().default('Planner <noreply@example.com>'),
   /** 32 bytes, base64. Encrypts stored integration credentials. */
   ENCRYPTION_KEY: z.string().min(1, 'ENCRYPTION_KEY is required (openssl rand -base64 32)'),
+  /** Directory for uploaded files (screenshots). */
+  STORAGE_DIR: z.preprocess(
+    (v) => (v === '' ? undefined : v),
+    z.string().default(new URL('../../../data/storage', import.meta.url).pathname),
+  ),
 })
 
 export const env = schema.parse(process.env)

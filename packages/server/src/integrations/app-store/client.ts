@@ -48,6 +48,36 @@ interface LocalizationResource {
   attributes: { locale: string; whatsNew?: string | null }
 }
 
+export interface RemoteScreenshot {
+  id: string
+  fileName: string
+  width: number | null
+  height: number | null
+  /** Full-size download URL, or null while Apple is still processing the upload. */
+  url: string | null
+}
+
+export interface RemoteScreenshotSet {
+  id: string
+  displayType: string
+  screenshots: RemoteScreenshot[]
+}
+
+interface ScreenshotSetResource {
+  id: string
+  attributes: { screenshotDisplayType: string }
+  relationships?: { appScreenshots?: { data?: Array<{ id: string }> } }
+}
+
+interface ScreenshotResource {
+  type: string
+  id: string
+  attributes: {
+    fileName?: string
+    imageAsset?: { templateUrl?: string; width?: number; height?: number } | null
+  }
+}
+
 export interface RemoteLocalization {
   id: string
   locale: string
@@ -147,6 +177,30 @@ export function createAppStoreClient(creds: AppStoreCredentials, fetchImpl: type
         path = page.links?.next?.replace(BASE_URL, '')
       }
       return out
+    },
+
+    /** Screenshot sets of a version localization, one per device class, in display order. */
+    async listScreenshotSets(localizationId: string): Promise<RemoteScreenshotSet[]> {
+      const path =
+        `/v1/appStoreVersionLocalizations/${encodeURIComponent(localizationId)}/appScreenshotSets` +
+        '?include=appScreenshots&limit=50&limit[appScreenshots]=50' +
+        '&fields[appScreenshotSets]=screenshotDisplayType,appScreenshots&fields[appScreenshots]=fileName,imageAsset'
+      const res = await request<{ data: ScreenshotSetResource[]; included?: ScreenshotResource[] }>(path)
+      const byId = new Map((res.included ?? []).filter((i) => i.type === 'appScreenshots').map((i) => [i.id, i]))
+      return res.data.map((set) => ({
+        id: set.id,
+        displayType: set.attributes.screenshotDisplayType,
+        screenshots: (set.relationships?.appScreenshots?.data ?? []).flatMap(({ id }) => {
+          const shot = byId.get(id)
+          if (!shot) return []
+          const asset = shot.attributes.imageAsset
+          const url =
+            asset?.templateUrl && asset.width && asset.height
+              ? asset.templateUrl.replace('{w}', String(asset.width)).replace('{h}', String(asset.height)).replace('{f}', 'png')
+              : null
+          return [{ id, fileName: shot.attributes.fileName ?? id, width: asset?.width ?? null, height: asset?.height ?? null, url }]
+        }),
+      }))
     },
 
     /** Updates metadata of one version localization (e.g. what's new). */
