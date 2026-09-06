@@ -45,3 +45,32 @@ export interface RemoteApp {
   sku: string | null
   primaryLocale: string | null
 }
+
+/** Google Cloud service account key (JSON) with access to the Play Console. */
+export const googlePlayCredentialsInput = z.object({
+  serviceAccountJson: z
+    .string()
+    .trim()
+    .min(1, 'Paste the service account JSON')
+    .superRefine((raw, ctx) => {
+      try {
+        const o = JSON.parse(raw) as Record<string, unknown>
+        if (typeof o.client_email !== 'string' || typeof o.private_key !== 'string') {
+          ctx.addIssue({ code: 'custom', message: 'JSON must contain client_email and private_key' })
+        }
+      } catch {
+        ctx.addIssue({ code: 'custom', message: 'Not valid JSON' })
+      }
+    }),
+})
+export type GooglePlayCredentialsInput = z.infer<typeof googlePlayCredentialsInput>
+
+/** Google Play has no "list apps" API; apps are added by package name. */
+export const importGooglePlayAppInput = z.object({
+  integrationId: z.uuid(),
+  packageName: z
+    .string()
+    .trim()
+    .regex(/^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/, 'Package name looks like com.example.app'),
+})
+export type ImportGooglePlayAppInput = z.infer<typeof importGooglePlayAppInput>

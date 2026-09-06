@@ -1,5 +1,5 @@
 import { IntegrationError, type IntegrationErrorCode } from '@planner/server'
-import { appStoreCredentialsInput, integrationIdInput } from '@planner/shared'
+import { appStoreCredentialsInput, googlePlayCredentialsInput, integrationIdInput } from '@planner/shared'
 import { TRPCError } from '@trpc/server'
 import { projectProcedure, router } from '../trpc'
 
@@ -27,6 +27,14 @@ export const integrationsRouter = router({
           keyId: input.keyId,
           privateKey: input.privateKey,
         })
+        .catch(rethrow),
+    ),
+
+  connectGooglePlay: projectProcedure
+    .input(googlePlayCredentialsInput)
+    .mutation(({ ctx, input }) =>
+      ctx.services.integrations
+        .connectGooglePlay(ctx.project.id, { serviceAccountJson: input.serviceAccountJson })
         .catch(rethrow),
     ),
 

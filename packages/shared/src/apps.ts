@@ -39,7 +39,29 @@ export function formatStoreState(state: string) {
   return words.charAt(0).toUpperCase() + words.slice(1)
 }
 
-/** Store platform code → label. */
+/** Store platform / track code → label. Apple platforms and Google Play tracks. */
 export function formatStorePlatform(platform: string) {
-  return { IOS: 'iOS', MAC_OS: 'macOS', TV_OS: 'tvOS', VISION_OS: 'visionOS' }[platform] ?? platform
+  const known: Record<string, string> = {
+    IOS: 'iOS',
+    MAC_OS: 'macOS',
+    TV_OS: 'tvOS',
+    VISION_OS: 'visionOS',
+    production: 'Production',
+    beta: 'Beta',
+    alpha: 'Alpha',
+    internal: 'Internal',
+  }
+  return known[platform] ?? platform
 }
+
+export const appGroupIdInput = z.object({ groupId: z.uuid() })
+
+export const moveAppToGroupInput = z.object({
+  appId: z.uuid(),
+  /** Null moves the app into a new group of its own. */
+  groupId: z.uuid().nullable(),
+})
+export type MoveAppToGroupInput = z.infer<typeof moveAppToGroupInput>
+
+export const renameAppGroupInput = appGroupIdInput.extend({ name: z.string().trim().min(1, 'Enter a name').max(120) })
+export type RenameAppGroupInput = z.infer<typeof renameAppGroupInput>

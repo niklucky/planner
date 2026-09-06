@@ -43,6 +43,13 @@
       "when": 1788718244582,
       "tag": "0005_dear_omega_sentinel",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788723235795,
+      "tag": "0006_shocking_korg",
+      "breakpoints": true
     }
   ]
 }

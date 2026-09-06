@@ -38,6 +38,13 @@ export const EDITABLE_VERSION_STATES = [
   'INVALID_BINARY',
 ] as const
 
+/** Whether the store lets us edit release notes for a version in this state. */
+export function isVersionEditable(platform: 'ios' | 'android', state: string) {
+  if (platform === 'ios') return (EDITABLE_VERSION_STATES as readonly string[]).includes(state)
+  // Google Play lets release notes change on any release that hasn't been halted.
+  return state !== 'HALTED'
+}
+
 /** Natural version order: "3.0.1" > "3.0.0" > "2.10.0" > "2.9.9". */
 export function compareVersions(a: string, b: string) {
   const pa = a.split('.').map((n) => Number.parseInt(n, 10) || 0)
@@ -80,7 +87,6 @@ export function resolveNoteScope(notesMode: NotesMode, platform: 'ios' | 'androi
 /** What pushing the release's notes would change, per App Store version. */
 export function planPush(input: PushPlanInput): PushPlanVersion[] {
   return input.versions
-    .filter((v) => v.platform === 'ios')
     .map((v) => {
       const scope = resolveNoteScope(input.notesMode, v.platform)
       const notes = input.notes.filter((n) => n.scope === scope && n.text.trim().length > 0)
@@ -90,7 +96,7 @@ export function planPush(input: PushPlanInput): PushPlanVersion[] {
         appName: v.appName,
         versionString: v.versionString,
         state: v.state,
-        editable: (EDITABLE_VERSION_STATES as readonly string[]).includes(v.state),
+        editable: isVersionEditable(v.platform, v.state),
         changes: [],
         unchanged: [],
         missingInStore: [],

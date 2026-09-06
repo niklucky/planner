@@ -31,6 +31,30 @@ const versionColumns = {
   externalId: schema.appVersions.externalId,
   releaseId: schema.appVersions.releaseId,
   integrationId: schema.apps.integrationId,
+  appExternalId: schema.apps.externalId,
+}
+
+function toSnapshotVersion(v: {
+  id: string
+  externalId: string
+  integrationId: string | null
+  platform: 'ios' | 'android'
+  storePlatform: string
+  versionString: string
+  appExternalId: string | null
+}): SnapshotVersionInput | null {
+  if (!v.integrationId || !v.appExternalId) return null
+  return { ...v, integrationId: v.integrationId, appExternalId: v.appExternalId }
+}
+
+interface SnapshotVersionInput {
+  id: string
+  externalId: string
+  integrationId: string
+  platform: 'ios' | 'android'
+  storePlatform: string
+  versionString: string
+  appExternalId: string
 }
 
 export interface PushResult extends PushPlanVersion {
@@ -49,12 +73,28 @@ export function releasesService(db: Db, deps: ReleaseDeps) {
     return row
   }
 
-  /** Pulls the store's localizations for a version into the local snapshot and returns them. */
-  async function snapshotLocalizations(projectId: string, v: { id: string; externalId: string; integrationId: string }) {
-    const client = await deps.integrations.appStoreClientFor(projectId, v.integrationId)
-    let remote: Awaited<ReturnType<typeof client.listVersionLocalizations>>
+  type SnapshotVersion = {
+    id: string
+    externalId: string
+    integrationId: string
+    platform: 'ios' | 'android'
+    storePlatform: string
+    versionString: string
+    appExternalId: string
+  }
+
+  /** Pulls the store's per-locale notes for a version into the local snapshot and returns them. */
+  async function snapshotLocalizations(projectId: string, v: SnapshotVersion) {
+    let remote: Array<{ id: string; locale: string; whatsNew: string | null }>
     try {
-      remote = await client.listVersionLocalizations(v.externalId)
+      if (v.platform === 'ios') {
+        const client = await deps.integrations.appStoreClientFor(projectId, v.integrationId)
+        remote = await client.listVersionLocalizations(v.externalId)
+      } else {
+        const client = await deps.integrations.googlePlayClientFor(projectId, v.integrationId)
+        const notes = await client.getReleaseNotes(v.appExternalId, v.storePlatform, v.versionString)
+        remote = notes.map((n) => ({ id: n.language, locale: n.language, whatsNew: n.text }))
+      }
     } catch (e) {
       throw new IntegrationError('VERIFICATION_FAILED', (e as Error).message)
     }
@@ -81,18 +121,26 @@ export function releasesService(db: Db, deps: ReleaseDeps) {
   }
 
   return {
-    /** Releases of the project, newest version first, with their linked store versions. */
+    /** Releases of the project grouped by app group, newest version first. */
     async listForProject(projectId: string) {
-      const rows = await db.query.releases.findMany({ where: eq(schema.releases.projectId, projectId) })
-      const versions = await versionsFor(rows.map((r) => r.id))
+      const rows = await db
+        .select({ release: schema.releases, groupName: schema.appGroups.name })
+        .from(schema.releases)
+        .innerJoin(schema.appGroups, eq(schema.releases.groupId, schema.appGroups.id))
+        .where(eq(schema.releases.projectId, projectId))
+      const versions = await versionsFor(rows.map((r) => r.release.id))
       return rows
-        .map((r) => ({
+        .map(({ release: r, groupName }) => ({
           id: r.id,
           version: r.version,
+          groupId: r.groupId,
+          groupName,
           notesMode: r.notesMode,
-          versions: versions.filter((v) => v.releaseId === r.id).map(({ releaseId: _r, integrationId: _i, ...v }) => v),
+          versions: versions
+            .filter((v) => v.releaseId === r.id)
+            .map(({ releaseId: _r, integrationId: _i, appExternalId: _e, ...v }) => v),
         }))
-        .sort((a, b) => compareVersions(b.version, a.version))
+        .sort((a, b) => a.groupName.localeCompare(b.groupName) || compareVersions(b.version, a.version))
     },
 
     async get(projectId: string, releaseId: string) {
@@ -113,7 +161,7 @@ export function releasesService(db: Db, deps: ReleaseDeps) {
         version: release.version,
         notesMode: release.notesMode,
         updatedAt: release.updatedAt,
-        versions: versions.map(({ releaseId: _r, integrationId: _i, ...v }) => v),
+        versions: versions.map(({ releaseId: _r, integrationId: _i, appExternalId: _e, ...v }) => v),
         notes: notes.map((n) => ({ scope: n.scope, locale: n.locale, text: n.text, updatedAt: n.updatedAt })),
         storeLocalizations: localizations.map((l) => ({
           appVersionId: l.appVersionId,
@@ -151,8 +199,9 @@ export function releasesService(db: Db, deps: ReleaseDeps) {
       const versions = await versionsFor([release.id])
       const now = new Date()
       for (const v of versions) {
-        if (!v.integrationId || v.platform !== 'ios') continue
-        const locs = await snapshotLocalizations(projectId, { id: v.id, externalId: v.externalId, integrationId: v.integrationId })
+        const sv = toSnapshotVersion(v)
+        if (!sv) continue
+        const locs = await snapshotLocalizations(projectId, sv)
         const scope = resolveNoteScope(release.notesMode, v.platform)
         for (const l of locs) {
           if (!l.whatsNew) continue
@@ -180,11 +229,12 @@ export function releasesService(db: Db, deps: ReleaseDeps) {
       // Make sure every editable version has a snapshot (we need localization ids).
       const store = new Map<string, Awaited<ReturnType<typeof snapshotLocalizations>>>()
       for (const v of versions) {
-        if (!v.integrationId || v.platform !== 'ios') continue
+        const sv = toSnapshotVersion(v)
+        if (!sv) continue
         let locs = await db.query.appVersionLocalizations.findMany({
           where: eq(schema.appVersionLocalizations.appVersionId, v.id),
         })
-        if (locs.length === 0) locs = await snapshotLocalizations(projectId, { id: v.id, externalId: v.externalId, integrationId: v.integrationId })
+        if (locs.length === 0) locs = await snapshotLocalizations(projectId, sv)
         store.set(v.id, locs)
       }
 
@@ -200,21 +250,47 @@ export function releasesService(db: Db, deps: ReleaseDeps) {
         const result: PushResult = { ...plan, pushed: [], error: null }
         results.push(result)
         if (!plan.editable || plan.changes.length === 0) continue
-        const v = versions.find((x) => x.id === plan.appVersionId)!
-        const client = await deps.integrations.appStoreClientFor(projectId, v.integrationId!)
-        for (const change of plan.changes) {
-          const loc = store.get(v.id)!.find((l) => l.locale === change.locale)!
-          try {
-            await client.updateVersionLocalization(loc.externalId, { whatsNew: change.to })
-          } catch (e) {
-            result.error = `${change.locale}: ${(e as Error).message}`
-            break
+        const v = toSnapshotVersion(versions.find((x) => x.id === plan.appVersionId)!)
+        if (!v) continue
+        const locs = store.get(v.id)!
+        const markPushed = (locales: Array<{ locale: string; to: string }>) =>
+          Promise.all(
+            locales.map((c) =>
+              db
+                .update(schema.appVersionLocalizations)
+                .set({ whatsNew: c.to, syncedAt: new Date() })
+                .where(eq(schema.appVersionLocalizations.id, locs.find((l) => l.locale === c.locale)!.id)),
+            ),
+          )
+
+        if (v.platform === 'ios') {
+          const client = await deps.integrations.appStoreClientFor(projectId, v.integrationId)
+          for (const change of plan.changes) {
+            const loc = locs.find((l) => l.locale === change.locale)!
+            try {
+              await client.updateVersionLocalization(loc.externalId, { whatsNew: change.to })
+            } catch (e) {
+              result.error = `${change.locale}: ${(e as Error).message}`
+              break
+            }
+            await markPushed([change])
+            result.pushed.push(change.locale)
           }
-          await db
-            .update(schema.appVersionLocalizations)
-            .set({ whatsNew: change.to, syncedAt: new Date() })
-            .where(eq(schema.appVersionLocalizations.id, loc.id))
-          result.pushed.push(change.locale)
+        } else {
+          // Google Play takes all languages of a release in one committed edit.
+          const client = await deps.integrations.googlePlayClientFor(projectId, v.integrationId)
+          try {
+            await client.updateReleaseNotes(
+              v.appExternalId,
+              v.storePlatform,
+              v.versionString,
+              plan.changes.map((c) => ({ language: c.locale, text: c.to })),
+            )
+            await markPushed(plan.changes)
+            result.pushed.push(...plan.changes.map((c) => c.locale))
+          } catch (e) {
+            result.error = (e as Error).message
+          }
         }
       }
       return results

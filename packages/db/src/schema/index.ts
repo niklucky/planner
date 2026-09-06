@@ -1,5 +1,6 @@
 export * from './apps'
 export * from './auth'
+export * from './groups'
 export * from './integrations'
 export * from './projects'
 export * from './releases'

@@ -2,6 +2,7 @@ import { Page } from '@planner/frontend'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, getRouteApi } from '@tanstack/react-router'
 import { AppStoreIntegration } from '../../../../components/app-store-integration'
+import { GooglePlayIntegration } from '../../../../components/google-play-integration'
 import { useTRPC } from '../../../../lib/trpc'
 
 const projectRoute = getRouteApi('/_app/projects/$projectId')
@@ -17,10 +18,12 @@ function IntegrationsPage() {
   const trpc = useTRPC()
   const { data: integrations = [] } = useQuery(trpc.integrations.list.queryOptions({ projectId: project.id }))
   const appStore = integrations.find((i) => i.provider === 'app_store')
+  const googlePlay = integrations.find((i) => i.provider === 'google_play')
 
   return (
     <Page title="Integrations">
       <AppStoreIntegration projectId={project.id} integration={appStore} />
+      <GooglePlayIntegration projectId={project.id} integration={googlePlay} />
     </Page>
   )
 }

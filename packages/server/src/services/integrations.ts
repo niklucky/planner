@@ -1,10 +1,20 @@
 import { type Db, schema } from '@planner/db'
-import type { AppStoreCredentials, ImportAppInput, Integration, RemoteApp, RemoteVersion } from '@planner/shared'
+import type {
+  AppStoreCredentials,
+  GooglePlayCredentialsInput,
+  ImportAppInput,
+  ImportGooglePlayAppInput,
+  Integration,
+  RemoteApp,
+  RemoteVersion,
+} from '@planner/shared'
 import { and, desc, eq, sql } from 'drizzle-orm'
 import type { SecretBox } from '../crypto/secret-box'
 
 type IntegrationRow = typeof schema.integrations.$inferSelect
 import { AppStoreError, createAppStoreClient } from '../integrations/app-store/client'
+import { type GoogleServiceAccount, parseServiceAccount } from '../integrations/google-play/auth'
+import { GooglePlayError, createGooglePlayClient } from '../integrations/google-play/client'
 import { linkVersionsToReleases } from '../releases/link'
 
 export type IntegrationErrorCode = 'NOT_FOUND' | 'VERIFICATION_FAILED' | 'ALREADY_IMPORTED' | 'NOT_LINKED'
@@ -37,7 +47,8 @@ function toPublic(row: IntegrationRow): Integration {
 }
 
 function describe(e: unknown) {
-  return e instanceof AppStoreError ? e.message : `Unexpected error: ${(e as Error).message}`
+  if (e instanceof AppStoreError || e instanceof GooglePlayError) return e.message
+  return `Unexpected error: ${(e as Error).message}`
 }
 
 export function integrationsService(db: Db, deps: IntegrationDeps) {
@@ -50,8 +61,20 @@ export function integrationsService(db: Db, deps: IntegrationDeps) {
   }
 
   function appStoreClient(row: IntegrationRow) {
+    if (row.provider !== 'app_store') throw new IntegrationError('NOT_FOUND', 'Not an App Store integration')
     const creds = JSON.parse(deps.secretBox.open(row.credentials)) as AppStoreCredentials
     return createAppStoreClient(creds)
+  }
+
+  function googlePlayClient(row: IntegrationRow) {
+    if (row.provider !== 'google_play') throw new IntegrationError('NOT_FOUND', 'Not a Google Play integration')
+    const sa = JSON.parse(deps.secretBox.open(row.credentials)) as GoogleServiceAccount
+    return createGooglePlayClient(sa)
+  }
+
+  async function createGroup(projectId: string, name: string) {
+    const [group] = await db.insert(schema.appGroups).values({ projectId, name }).returning()
+    return group!
   }
 
   return {
@@ -91,18 +114,44 @@ export function integrationsService(db: Db, deps: IntegrationDeps) {
       return toPublic(row!)
     },
 
+    /** Verifies the service account can obtain a token, then stores it encrypted. */
+    async connectGooglePlay(projectId: string, input: GooglePlayCredentialsInput): Promise<Integration> {
+      let sa: GoogleServiceAccount
+      try {
+        sa = parseServiceAccount(input.serviceAccountJson)
+        await createGooglePlayClient(sa).verify()
+      } catch (e) {
+        throw new IntegrationError('VERIFICATION_FAILED', describe(e))
+      }
+      const now = new Date()
+      const values = {
+        credentials: deps.secretBox.seal(JSON.stringify(sa)),
+        metadata: { clientEmail: sa.client_email },
+        status: 'connected' as const,
+        lastError: null,
+        lastVerifiedAt: now,
+        updatedAt: now,
+      }
+      const [row] = await db
+        .insert(schema.integrations)
+        .values({ projectId, provider: 'google_play', ...values })
+        .onConflictDoUpdate({ target: [schema.integrations.projectId, schema.integrations.provider], set: values })
+        .returning()
+      return toPublic(row!)
+    },
+
     /** Re-checks the stored key and records the outcome. */
     async verify(projectId: string, integrationId: string): Promise<Integration> {
       const row = await requireRow(projectId, integrationId)
       const now = new Date()
       let update: Partial<typeof schema.integrations.$inferInsert>
       try {
-        const apps = await appStoreClient(row).listApps()
-        update = {
-          status: 'connected',
-          lastError: null,
-          lastVerifiedAt: now,
-          metadata: { ...row.metadata, appCount: String(apps.length) },
+        if (row.provider === 'app_store') {
+          const apps = await appStoreClient(row).listApps()
+          update = { status: 'connected', lastError: null, lastVerifiedAt: now, metadata: { ...row.metadata, appCount: String(apps.length) } }
+        } else {
+          await googlePlayClient(row).verify()
+          update = { status: 'connected', lastError: null, lastVerifiedAt: now }
         }
       } catch (e) {
         update = { status: 'error', lastError: describe(e) }
@@ -134,10 +183,12 @@ export function integrationsService(db: Db, deps: IntegrationDeps) {
       } catch (e) {
         throw new IntegrationError('VERIFICATION_FAILED', describe(e))
       }
+      const group = await createGroup(projectId, remote.name)
       const [app] = await db
         .insert(schema.apps)
         .values({
           projectId,
+          groupId: group.id,
           integrationId: row.id,
           externalId: remote.id,
           name: remote.name,
@@ -146,8 +197,44 @@ export function integrationsService(db: Db, deps: IntegrationDeps) {
         })
         .onConflictDoNothing({ target: [schema.apps.integrationId, schema.apps.externalId] })
         .returning()
-      if (!app) throw new IntegrationError('ALREADY_IMPORTED', 'This app is already in the project')
+      if (!app) {
+        await db.delete(schema.appGroups).where(eq(schema.appGroups.id, group.id))
+        throw new IntegrationError('ALREADY_IMPORTED', 'This app is already in the project')
+      }
       // Best effort: versions can always be synced again from the UI.
+      await this.syncVersions(projectId, app.id).catch((e: unknown) =>
+        console.warn(`version sync after import failed for app ${app.id}:`, (e as Error).message),
+      )
+      return app
+    },
+
+    /** Adds a Google Play app by package name, in a group of its own. */
+    async importGooglePlayApp(projectId: string, input: ImportGooglePlayAppInput) {
+      const row = await requireRow(projectId, input.integrationId)
+      let info: Awaited<ReturnType<ReturnType<typeof googlePlayClient>['getAppInfo']>>
+      try {
+        info = await googlePlayClient(row).getAppInfo(input.packageName)
+      } catch (e) {
+        throw new IntegrationError('VERIFICATION_FAILED', describe(e))
+      }
+      const group = await createGroup(projectId, info.title)
+      const [app] = await db
+        .insert(schema.apps)
+        .values({
+          projectId,
+          groupId: group.id,
+          integrationId: row.id,
+          externalId: info.packageName,
+          name: info.title,
+          platform: 'android',
+          bundleId: info.packageName,
+        })
+        .onConflictDoNothing({ target: [schema.apps.integrationId, schema.apps.externalId] })
+        .returning()
+      if (!app) {
+        await db.delete(schema.appGroups).where(eq(schema.appGroups.id, group.id))
+        throw new IntegrationError('ALREADY_IMPORTED', 'This app is already in the project')
+      }
       await this.syncVersions(projectId, app.id).catch((e: unknown) =>
         console.warn(`version sync after import failed for app ${app.id}:`, (e as Error).message),
       )
@@ -166,7 +253,10 @@ export function integrationsService(db: Db, deps: IntegrationDeps) {
       const integration = await requireRow(projectId, app.integrationId)
       let remote: RemoteVersion[]
       try {
-        remote = await appStoreClient(integration).listVersions(app.externalId)
+        remote =
+          app.platform === 'ios'
+            ? await appStoreClient(integration).listVersions(app.externalId)
+            : await googlePlayClient(integration).listVersions(app.externalId)
       } catch (e) {
         throw new IntegrationError('VERIFICATION_FAILED', describe(e))
       }
@@ -207,9 +297,12 @@ export function integrationsService(db: Db, deps: IntegrationDeps) {
         .orderBy(desc(schema.appVersions.storeCreatedAt))
     },
 
-    /** Store client for an integration of the project. */
+    /** Store clients for an integration of the project. */
     async appStoreClientFor(projectId: string, integrationId: string) {
       return appStoreClient(await requireRow(projectId, integrationId))
+    },
+    async googlePlayClientFor(projectId: string, integrationId: string) {
+      return googlePlayClient(await requireRow(projectId, integrationId))
     },
 
     async remove(projectId: string, integrationId: string) {

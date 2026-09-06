@@ -93,7 +93,7 @@ export function ReleaseNotesEditor({ projectId, releaseId }: { projectId: string
       <Stack>
         {release.versions.map((v) => (
           <Row key={v.id} secondary={formatStoreState(v.state)}>
-            {v.appName} · {formatStorePlatform(v.storePlatform)}
+            {v.appName} · {v.platform === 'android' ? `Android · ${formatStorePlatform(v.storePlatform)}` : formatStorePlatform(v.storePlatform)}
           </Row>
         ))}
       </Stack>

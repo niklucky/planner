@@ -1,4 +1,4 @@
-import { Columns, Text } from '@planner/frontend'
+import { Columns, Stack, Text } from '@planner/frontend'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, getRouteApi } from '@tanstack/react-router'
 import { z } from 'zod'
@@ -28,20 +28,30 @@ function ReleasesTab() {
     return <Text>No releases yet. Sync an app's versions from the Overview to see them here.</Text>
   }
 
+  const groupIds = Array.from(new Set(releases.map((r) => r.groupId)))
+
   return (
     <Columns
-      aside={releases.map((r) => (
-        <NavLink
-          key={r.id}
-          to="/projects/$projectId/stores/releases"
-          params={{ projectId: project.id }}
-          search={{ release: r.id }}
-          data-status={r.id === selected?.id ? 'active' : undefined}
-          trailing={r.versions.map((v) => (v.platform === 'ios' ? 'iOS' : 'Android')).join(' · ')}
-        >
-          {r.version}
-        </NavLink>
-      ))}
+      aside={groupIds.map((groupId) => {
+        const items = releases.filter((r) => r.groupId === groupId)
+        return (
+          <Stack key={groupId}>
+            {groupIds.length > 1 && <Text>{items[0]!.groupName}</Text>}
+            {items.map((r) => (
+              <NavLink
+                key={r.id}
+                to="/projects/$projectId/stores/releases"
+                params={{ projectId: project.id }}
+                search={{ release: r.id }}
+                data-status={r.id === selected?.id ? 'active' : undefined}
+                trailing={r.versions.map((v) => (v.platform === 'ios' ? 'iOS' : 'Android')).join(' · ')}
+              >
+                {r.version}
+              </NavLink>
+            ))}
+          </Stack>
+        )
+      })}
     >
       {selected && <ReleaseNotesEditor key={selected.id} projectId={project.id} releaseId={selected.id} />}
     </Columns>

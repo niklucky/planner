@@ -1,13 +1,14 @@
 import { NOTES_MODES, NOTE_SCOPES } from '@planner/shared'
 import { pgEnum, pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core'
+import { appGroups } from './groups'
 import { projects } from './projects'
 
 export const notesModeEnum = pgEnum('notes_mode', NOTES_MODES)
 export const noteScopeEnum = pgEnum('note_scope', NOTE_SCOPES)
 
 /**
- * A project-level release, e.g. "3.0.1", grouping the store versions of the
- * project's apps that carry that version string. Owns the release notes.
+ * A release of an app group, e.g. "3.0.1", grouping the store versions of the
+ * group's apps that carry that version string. Owns the release notes.
  */
 export const releases = pgTable(
   'releases',
@@ -16,12 +17,15 @@ export const releases = pgTable(
     projectId: uuid('project_id')
       .notNull()
       .references(() => projects.id, { onDelete: 'cascade' }),
+    groupId: uuid('group_id')
+      .notNull()
+      .references(() => appGroups.id, { onDelete: 'cascade' }),
     version: text('version').notNull(),
     notesMode: notesModeEnum('notes_mode').notNull().default('shared'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [unique().on(t.projectId, t.version)],
+  (t) => [unique().on(t.groupId, t.version)],
 )
 
 /** Our copy of the release notes: the source of truth that gets pushed to stores. */

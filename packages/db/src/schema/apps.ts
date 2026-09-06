@@ -1,5 +1,6 @@
 import { PLATFORMS } from '@planner/shared'
 import { pgEnum, pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core'
+import { appGroups } from './groups'
 import { integrations } from './integrations'
 import { projects } from './projects'
 import { releases } from './releases'
@@ -14,6 +15,9 @@ export const apps = pgTable(
     projectId: uuid('project_id')
       .notNull()
       .references(() => projects.id, { onDelete: 'cascade' }),
+    groupId: uuid('group_id')
+      .notNull()
+      .references(() => appGroups.id, { onDelete: 'restrict' }),
     integrationId: uuid('integration_id').references(() => integrations.id, { onDelete: 'set null' }),
     /** The store's own id (Apple app id / Google package name). */
     externalId: text('external_id'),
