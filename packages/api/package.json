@@ -1,0 +1,25 @@
+{
+  "name": "@planner/api",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.1",
+    "@hono/trpc-server": "^0.4.2",
+    "@planner/db": "workspace:*",
+    "@planner/server": "workspace:*",
+    "@planner/shared": "workspace:*",
+    "@trpc/server": "^11.18.0",
+    "hono": "^4.13.7"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.13"
+  }
+}

@@ -1,0 +1,81 @@
+:root {
+  /* typography */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 22px;
+
+  /* spacing (4px scale) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+
+  /* layout */
+  --sidebar-width: 240px;
+  --sidebar-width-collapsed: 56px;
+  --subnav-width: 220px;
+  --row-height: 32px;
+  --control-height: 36px;
+
+  --duration: 150ms;
+
+  /* light */
+  color-scheme: light;
+  --color-bg: #ffffff;
+  --color-bg-subtle: #f9f9f9;
+  --color-bg-sunken: #f3f3f3;
+  --color-bg-elevated: #ffffff;
+  --color-fg: #171717;
+  --color-fg-muted: #6f6f6f;
+  --color-fg-faint: #a3a3a3;
+  --color-hover: rgba(0, 0, 0, 0.05);
+  --color-active: rgba(0, 0, 0, 0.08);
+  --color-accent: #2563eb;
+  --color-danger: #dc2626;
+  --shadow-menu: 0 4px 16px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --color-bg: #141414;
+    --color-bg-subtle: #101010;
+    --color-bg-sunken: #0c0c0c;
+    --color-bg-elevated: #1e1e1e;
+    --color-fg: #ededed;
+    --color-fg-muted: #8b8b8b;
+    --color-fg-faint: #5a5a5a;
+    --color-hover: rgba(255, 255, 255, 0.06);
+    --color-active: rgba(255, 255, 255, 0.1);
+    --color-accent: #3b82f6;
+    --color-danger: #ef4444;
+    --shadow-menu: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-bg: #141414;
+  --color-bg-subtle: #101010;
+  --color-bg-sunken: #0c0c0c;
+  --color-bg-elevated: #1e1e1e;
+  --color-fg: #ededed;
+  --color-fg-muted: #8b8b8b;
+  --color-fg-faint: #5a5a5a;
+  --color-hover: rgba(255, 255, 255, 0.06);
+  --color-active: rgba(255, 255, 255, 0.1);
+  --color-accent: #3b82f6;
+  --color-danger: #ef4444;
+  --shadow-menu: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}

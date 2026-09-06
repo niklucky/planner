@@ -1,0 +1,18 @@
+.avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  border-radius: var(--radius-sm);
+  background: var(--color-active);
+  color: var(--color-fg-muted);
+  font-size: calc(var(--avatar-size) * 0.55);
+  font-weight: 600;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.avatar[data-shape='round'] {
+  border-radius: 50%;
+}

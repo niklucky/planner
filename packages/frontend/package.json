@@ -1,0 +1,22 @@
+{
+  "name": "@planner/frontend",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./src/styles/index.css"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@planner/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "react": "^19.2.8"
+  },
+  "peerDependencies": {
+    "react": "^19.2.8"
+  }
+}

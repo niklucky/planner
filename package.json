@@ -1,0 +1,28 @@
+{
+  "name": "planner",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @planner/app --filter @planner/api dev",
+    "dev:web": "pnpm --filter @planner/web dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "compose:up": "docker compose -f compose.local.yml up -d --wait",
+    "compose:down": "docker compose -f compose.local.yml down",
+    "db:generate": "pnpm --filter @planner/db generate",
+    "db:migrate": "pnpm --filter @planner/db migrate",
+    "db:studio": "pnpm --filter @planner/db studio",
+    "start": "pnpm --filter @planner/api start"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
+  }
+}

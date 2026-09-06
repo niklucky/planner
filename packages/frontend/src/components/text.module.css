@@ -1,0 +1,11 @@
+.muted {
+  color: var(--color-fg-muted);
+}
+
+.link {
+  color: var(--color-fg-muted);
+}
+
+.link:hover {
+  color: var(--color-fg);
+}
