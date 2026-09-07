@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.124.0",
     "@planner/db": "workspace:*",
     "@planner/shared": "workspace:*",
     "drizzle-orm": "^0.45.2",

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const INTEGRATION_PROVIDERS = ['app_store', 'google_play'] as const
+export const INTEGRATION_PROVIDERS = ['app_store', 'google_play', 'translation'] as const
 export const integrationProviderSchema = z.enum(INTEGRATION_PROVIDERS)
 export type IntegrationProvider = z.infer<typeof integrationProviderSchema>
 

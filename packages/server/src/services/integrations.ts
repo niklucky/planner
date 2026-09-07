@@ -7,7 +7,9 @@ import type {
   Integration,
   RemoteApp,
   RemoteVersion,
+  TranslationSettings,
 } from '@planner/shared'
+import { translationLabel } from '@planner/shared'
 import { and, desc, eq, sql } from 'drizzle-orm'
 import type { SecretBox } from '../crypto/secret-box'
 
@@ -16,6 +18,7 @@ import { AppStoreError, createAppStoreClient } from '../integrations/app-store/c
 import { type GoogleServiceAccount, parseServiceAccount } from '../integrations/google-play/auth'
 import { GooglePlayError, createGooglePlayClient } from '../integrations/google-play/client'
 import { linkVersionsToReleases } from '../releases/link'
+import { TranslationError, createTranslator } from '../translation'
 
 export type IntegrationErrorCode = 'NOT_FOUND' | 'VERIFICATION_FAILED' | 'ALREADY_IMPORTED' | 'NOT_LINKED'
 
@@ -47,7 +50,7 @@ function toPublic(row: IntegrationRow): Integration {
 }
 
 function describe(e: unknown) {
-  if (e instanceof AppStoreError || e instanceof GooglePlayError) return e.message
+  if (e instanceof AppStoreError || e instanceof GooglePlayError || e instanceof TranslationError) return e.message
   return `Unexpected error: ${(e as Error).message}`
 }
 
@@ -70,6 +73,11 @@ export function integrationsService(db: Db, deps: IntegrationDeps) {
     if (row.provider !== 'google_play') throw new IntegrationError('NOT_FOUND', 'Not a Google Play integration')
     const sa = JSON.parse(deps.secretBox.open(row.credentials)) as GoogleServiceAccount
     return createGooglePlayClient(sa)
+  }
+
+  function translator(row: IntegrationRow) {
+    if (row.provider !== 'translation') throw new IntegrationError('NOT_FOUND', 'Not a translation integration')
+    return createTranslator(JSON.parse(deps.secretBox.open(row.credentials)) as TranslationSettings)
   }
 
   async function createGroup(projectId: string, name: string) {
@@ -140,6 +148,41 @@ export function integrationsService(db: Db, deps: IntegrationDeps) {
       return toPublic(row!)
     },
 
+    /** Verifies the translation provider key, then stores it encrypted. */
+    async connectTranslation(projectId: string, settings: TranslationSettings): Promise<Integration> {
+      try {
+        await createTranslator(settings).verify()
+      } catch (e) {
+        throw new IntegrationError('VERIFICATION_FAILED', describe(e))
+      }
+      const now = new Date()
+      const metadata: Record<string, string> =
+        settings.kind === 'llm' ? { kind: 'llm', model: settings.model } : { kind: 'deepl', plan: settings.plan }
+      metadata.label = translationLabel(settings)
+      const values = {
+        credentials: deps.secretBox.seal(JSON.stringify(settings)),
+        metadata,
+        status: 'connected' as const,
+        lastError: null,
+        lastVerifiedAt: now,
+        updatedAt: now,
+      }
+      const [row] = await db
+        .insert(schema.integrations)
+        .values({ projectId, provider: 'translation', ...values })
+        .onConflictDoUpdate({ target: [schema.integrations.projectId, schema.integrations.provider], set: values })
+        .returning()
+      return toPublic(row!)
+    },
+
+    /** The project's translator, or null when translation isn't set up. */
+    async translatorFor(projectId: string) {
+      const row = await db.query.integrations.findFirst({
+        where: and(eq(schema.integrations.projectId, projectId), eq(schema.integrations.provider, 'translation')),
+      })
+      return row ? translator(row) : null
+    },
+
     /** Re-checks the stored key and records the outcome. */
     async verify(projectId: string, integrationId: string): Promise<Integration> {
       const row = await requireRow(projectId, integrationId)
@@ -149,8 +192,11 @@ export function integrationsService(db: Db, deps: IntegrationDeps) {
         if (row.provider === 'app_store') {
           const apps = await appStoreClient(row).listApps()
           update = { status: 'connected', lastError: null, lastVerifiedAt: now, metadata: { ...row.metadata, appCount: String(apps.length) } }
-        } else {
+        } else if (row.provider === 'google_play') {
           await googlePlayClient(row).verify()
+          update = { status: 'connected', lastError: null, lastVerifiedAt: now }
+        } else {
+          await translator(row).verify()
           update = { status: 'connected', lastError: null, lastVerifiedAt: now }
         }
       } catch (e) {

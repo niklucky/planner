@@ -100,12 +100,14 @@ export function releasesService(db: Db, deps: ReleaseDeps) {
     }
     const now = new Date()
     for (const l of remote) {
+      // Google Play returns notes wrapped in line breaks; store them as authored.
+      const whatsNew = l.whatsNew?.trim() ?? null
       await db
         .insert(schema.appVersionLocalizations)
-        .values({ appVersionId: v.id, externalId: l.id, locale: l.locale, whatsNew: l.whatsNew, syncedAt: now })
+        .values({ appVersionId: v.id, externalId: l.id, locale: l.locale, whatsNew, syncedAt: now })
         .onConflictDoUpdate({
           target: [schema.appVersionLocalizations.appVersionId, schema.appVersionLocalizations.locale],
-          set: { externalId: l.id, whatsNew: l.whatsNew, syncedAt: now },
+          set: { externalId: l.id, whatsNew, syncedAt: now },
         })
     }
     return db.query.appVersionLocalizations.findMany({ where: eq(schema.appVersionLocalizations.appVersionId, v.id) })
@@ -184,7 +186,7 @@ export function releasesService(db: Db, deps: ReleaseDeps) {
         await tx.delete(schema.releaseNotes).where(eq(schema.releaseNotes.releaseId, release.id))
         const rows = input.notes
           .filter((n) => n.text.trim().length > 0)
-          .map((n) => ({ releaseId: release.id, scope: n.scope, locale: n.locale, text: n.text, updatedAt: now }))
+          .map((n) => ({ releaseId: release.id, scope: n.scope, locale: n.locale, text: n.text.trim(), updatedAt: now }))
         if (rows.length > 0) await tx.insert(schema.releaseNotes).values(rows)
       })
       return this.get(projectId, release.id)

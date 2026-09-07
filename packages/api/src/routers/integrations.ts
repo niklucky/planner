@@ -1,6 +1,12 @@
 import { IntegrationError, type IntegrationErrorCode } from '@planner/server'
-import { appStoreCredentialsInput, googlePlayCredentialsInput, integrationIdInput } from '@planner/shared'
+import {
+  appStoreCredentialsInput,
+  googlePlayCredentialsInput,
+  integrationIdInput,
+  translationSettingsInput,
+} from '@planner/shared'
 import { TRPCError } from '@trpc/server'
+import { z } from 'zod'
 import { projectProcedure, router } from '../trpc'
 
 const codes: Record<IntegrationErrorCode, TRPCError['code']> = {
@@ -37,6 +43,10 @@ export const integrationsRouter = router({
         .connectGooglePlay(ctx.project.id, { serviceAccountJson: input.serviceAccountJson })
         .catch(rethrow),
     ),
+
+  connectTranslation: projectProcedure
+    .input(z.object({ settings: translationSettingsInput }))
+    .mutation(({ ctx, input }) => ctx.services.integrations.connectTranslation(ctx.project.id, input.settings).catch(rethrow)),
 
   verify: projectProcedure
     .input(integrationIdInput)

@@ -18,7 +18,8 @@
     "@planner/shared": "workspace:*",
     "@trpc/server": "^11.18.0",
     "hono": "^4.13.7",
-    "superjson": "^2.2.6"
+    "superjson": "^2.2.6",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "tsx": "^4.23.13"

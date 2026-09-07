@@ -64,6 +64,13 @@
       "when": 1788732439170,
       "tag": "0008_small_scorpion",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788738202902,
+      "tag": "0009_silent_lizard",
+      "breakpoints": true
     }
   ]
 }

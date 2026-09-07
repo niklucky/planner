@@ -5,6 +5,7 @@ import { type IntegrationDeps, integrationsService } from './services/integratio
 import { type ProjectDeps, projectsService } from './services/projects'
 import { releasesService } from './services/releases'
 import { screenshotsService } from './services/screenshots'
+import { translationsService } from './services/translations'
 import type { Storage } from './storage'
 
 export interface ServiceDeps extends AuthDeps, IntegrationDeps, ProjectDeps {
@@ -20,6 +21,7 @@ export function createServices(db: Db, deps: ServiceDeps) {
     projects: projectsService(db, deps),
     releases: releasesService(db, { integrations }),
     screenshots: screenshotsService(db, { integrations, storage: deps.storage }),
+    translations: translationsService({ integrations }),
   }
 }
 

@@ -192,7 +192,7 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
         if (remote.length > 0) {
           await db
             .insert(schema.appVersionLocalizations)
-            .values(remote.map((l) => ({ appVersionId: v.id, externalId: l.id, locale: l.locale, whatsNew: l.whatsNew })))
+            .values(remote.map((l) => ({ appVersionId: v.id, externalId: l.id, locale: l.locale, whatsNew: l.whatsNew?.trim() ?? null })))
             .onConflictDoNothing()
         }
         locs = await db.query.appVersionLocalizations.findMany({ where: eq(schema.appVersionLocalizations.appVersionId, v.id) })
@@ -570,7 +570,7 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
           })
           await db
             .insert(schema.appVersionLocalizations)
-            .values(remote.map((l) => ({ appVersionId: v.id, externalId: l.id, locale: l.locale, whatsNew: l.whatsNew })))
+            .values(remote.map((l) => ({ appVersionId: v.id, externalId: l.id, locale: l.locale, whatsNew: l.whatsNew?.trim() ?? null })))
             .onConflictDoNothing()
           locs = await db.query.appVersionLocalizations.findMany({
             where: eq(schema.appVersionLocalizations.appVersionId, v.id),

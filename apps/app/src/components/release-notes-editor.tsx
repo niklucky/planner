@@ -31,6 +31,8 @@ export function ReleaseNotesEditor({ projectId, releaseId }: { projectId: string
   const query = useQuery(trpc.releases.get.queryOptions({ projectId, releaseId }))
   const release = query.data
   const { data: allReleases = [] } = useQuery(trpc.releases.list.queryOptions({ projectId }))
+  const { data: integrations = [] } = useQuery(trpc.integrations.list.queryOptions({ projectId }))
+  const translationReady = integrations.some((i) => i.provider === 'translation' && i.status === 'connected')
 
   // Other releases (and their note scopes) that notes can be copied from.
   const sources = useMemo<SourceOption[]>(
@@ -113,6 +115,11 @@ export function ReleaseNotesEditor({ projectId, releaseId }: { projectId: string
     return Array.from(set).sort()
   }, [release, notes])
 
+  // Hooks for machine translation live here so they run on every render, before the early return.
+  const [translateFrom, setTranslateFrom] = useState<string>('')
+  const translate = useMutation(trpc.translations.translate.mutationOptions())
+  const [translateNote, setTranslateNote] = useState<string | null>(null)
+
   if (!release) return <Text>{query.error?.message ?? 'Loading…'}</Text>
 
   const scopes: NoteScope[] = notesMode === 'shared' ? ['shared'] : platforms
@@ -152,6 +159,37 @@ export function ReleaseNotesEditor({ projectId, releaseId }: { projectId: string
     (n, scope) => n + locales.filter((l) => !notes[keyOf(scope, l)]?.trim() && sourceTextFor(l)).length,
     0,
   )
+
+  // Machine translation from one filled locale into the empty ones.
+  const filledLocales = (scope: NoteScope) => locales.filter((l) => notes[keyOf(scope, l)]?.trim())
+  const translateSource = (scope: NoteScope) => {
+    const filled = filledLocales(scope)
+    if (translateFrom && filled.includes(translateFrom)) return translateFrom
+    return filled.find((l) => l.toLowerCase().startsWith('en')) ?? filled[0]
+  }
+  const runTranslate = async (scope: NoteScope, targets: string[]) => {
+    const from = translateSource(scope)
+    if (!from || targets.length === 0) return
+    setTranslateNote(null)
+    const result = await translate.mutateAsync({
+      projectId,
+      text: notes[keyOf(scope, from)] ?? '',
+      sourceLocale: from,
+      targetLocales: targets,
+    })
+    setNotes((prev) => {
+      const next = { ...prev }
+      for (const t of result.translations) next[keyOf(scope, t.locale)] = t.text
+      return next
+    })
+    if (result.translations.length > 0) setDirty(true)
+    if (result.unsupported.length > 0) setTranslateNote(`Not translated: ${result.unsupported.join(', ')}`)
+  }
+  const translateMissingTargets = (scope: NoteScope) => {
+    const from = translateSource(scope)
+    return from ? locales.filter((l) => l !== from && !notes[keyOf(scope, l)]?.trim()) : []
+  }
+  const translateMissingCount = scopes.reduce((n, scope) => n + translateMissingTargets(scope).length, 0)
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -205,6 +243,28 @@ export function ReleaseNotesEditor({ projectId, releaseId }: { projectId: string
         )}
         {lastPull && <Text>Store text pulled {lastPull.toLocaleString()}</Text>}
 
+        {translationReady && scopes.length > 0 && (
+          <Inline>
+            <Select value={translateSource(scopes[0]!) ?? ''} onChange={(e) => setTranslateFrom(e.target.value)}>
+              {filledLocales(scopes[0]!).length === 0 && <option value="">Translate from…</option>}
+              {filledLocales(scopes[0]!).map((l) => (
+                <option key={l} value={l}>
+                  Translate from {l}
+                </option>
+              ))}
+            </Select>
+            <Button
+              type="button"
+              onClick={() => Promise.all(scopes.map((scope) => runTranslate(scope, translateMissingTargets(scope))))}
+              disabled={translateMissingCount === 0 || translate.isPending}
+            >
+              {translate.isPending ? 'Translating…' : `Translate missing (${translateMissingCount})`}
+            </Button>
+          </Inline>
+        )}
+        {translate.error && <Text>{translate.error.message}</Text>}
+        {translateNote && <Text>{translateNote}</Text>}
+
         {sources.length > 0 && (
           <Inline>
             <Select value={activeSourceKey} onChange={(e) => setSourceKey(e.target.value)}>
@@ -236,11 +296,18 @@ export function ReleaseNotesEditor({ projectId, releaseId }: { projectId: string
                   key={locale}
                   label={locale}
                   action={
-                    fromSource !== undefined && fromSource !== current ? (
-                      <Button type="button" size="sm" onClick={() => update(scope, locale, fromSource)}>
-                        Copy
-                      </Button>
-                    ) : undefined
+                    <Inline>
+                      {fromSource !== undefined && fromSource !== current && (
+                        <Button type="button" size="sm" onClick={() => update(scope, locale, fromSource)}>
+                          Copy
+                        </Button>
+                      )}
+                      {translationReady && !current.trim() && translateSource(scope) && translateSource(scope) !== locale && (
+                        <Button type="button" size="sm" onClick={() => runTranslate(scope, [locale])} disabled={translate.isPending}>
+                          Translate
+                        </Button>
+                      )}
+                    </Inline>
                   }
                 >
                   <Textarea
