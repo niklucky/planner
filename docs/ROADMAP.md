@@ -18,10 +18,9 @@ Working notes on what to do next. Kept short on purpose; update as items land.
 - Exercise the three write paths that have never run against real stores:
   push screenshots to App Store Connect, push notes to Google Play, a real translation.
   Do it on a safe release; fix whatever surfaces.
-- Docker image: builds and runs locally with `docker-compose.yml` (migrate, static app,
-  sign in verified 2026-09-27). Still to do on the VPS: set `APP_URL` to the public https
-  address, put TLS in front, run `docker compose up -d`. The API runs from TypeScript source
-  via tsx inside the image (627 MB); slimming it is optional.
+- Deployed: https://planner.spectron.dev runs on the VPS from the GitHub pipeline
+  (2026-09-27). See deployment/README.md. The image runs the API from TypeScript source via
+  tsx (627 MB); slimming it is optional.
 - CI and deploy: done (see deployment/README.md). GitHub Actions runs Biome, typecheck and
   tests on PRs; main builds the image to GHCR and deploys over SSH.
 
