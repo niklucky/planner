@@ -1,13 +1,13 @@
 import { Button, Field, Form, Inline, Row, Section, Select, Stack, Text, Textarea } from '@planner/frontend'
 import {
-  type NoteScope,
-  type NotesMode,
-  type Platform,
-  RELEASE_NOTE_MAX_LENGTH,
   formatStorePlatform,
   formatStoreState,
   matchLocale,
+  type NoteScope,
+  type NotesMode,
+  type Platform,
   planPush,
+  RELEASE_NOTE_MAX_LENGTH,
 } from '@planner/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
@@ -47,14 +47,21 @@ export function ReleaseNotesEditor({ projectId, releaseId }: { projectId: string
             const suffix = platforms.length > 0 ? ` · ${platforms.map(name).join(' + ')}` : ''
             return [{ key: `${r.id}:shared`, releaseId: r.id, scope: 'shared' as const, label: `${label}${suffix}` }]
           }
-          return platforms.map((p) => ({ key: `${r.id}:${p}`, releaseId: r.id, scope: p, label: `${label} · ${name(p)}` }))
+          return platforms.map((p) => ({
+            key: `${r.id}:${p}`,
+            releaseId: r.id,
+            scope: p,
+            label: `${label} · ${name(p)}`,
+          }))
         }),
     [allReleases, releaseId],
   )
   // Default to the same version in another group when there is exactly one.
   const [sourceKey, setSourceKey] = useState<string | null>(null)
   const defaultSource = useMemo(() => {
-    const sameVersion = sources.filter((s) => allReleases.find((r) => r.id === s.releaseId)?.version === release?.version)
+    const sameVersion = sources.filter(
+      (s) => allReleases.find((r) => r.id === s.releaseId)?.version === release?.version,
+    )
     return sameVersion.length === 1 ? sameVersion[0]!.key : ''
   }, [sources, allReleases, release])
   const activeSourceKey = sourceKey ?? defaultSource
@@ -103,10 +110,7 @@ export function ReleaseNotesEditor({ projectId, releaseId }: { projectId: string
     }),
   )
 
-  const platforms = useMemo(
-    () => Array.from(new Set(release?.versions.map((v) => v.platform) ?? [])),
-    [release],
-  )
+  const platforms = useMemo(() => Array.from(new Set(release?.versions.map((v) => v.platform) ?? [])), [release])
   const locales = useMemo(() => {
     const set = new Set<string>()
     for (const n of release?.notes ?? []) set.add(n.locale)
@@ -197,7 +201,9 @@ export function ReleaseNotesEditor({ projectId, releaseId }: { projectId: string
       projectId,
       releaseId,
       notesMode,
-      notes: scopes.flatMap((scope) => locales.map((locale) => ({ scope, locale, text: notes[keyOf(scope, locale)] ?? '' }))),
+      notes: scopes.flatMap((scope) =>
+        locales.map((locale) => ({ scope, locale, text: notes[keyOf(scope, locale)] ?? '' })),
+      ),
     })
   }
 
@@ -206,7 +212,10 @@ export function ReleaseNotesEditor({ projectId, releaseId }: { projectId: string
       <Stack>
         {release.versions.map((v) => (
           <Row key={v.id} secondary={formatStoreState(v.state)}>
-            {v.appName} · {v.platform === 'android' ? `Android · ${formatStorePlatform(v.storePlatform)}` : formatStorePlatform(v.storePlatform)}
+            {v.appName} ·{' '}
+            {v.platform === 'android'
+              ? `Android · ${formatStorePlatform(v.storePlatform)}`
+              : formatStorePlatform(v.storePlatform)}
           </Row>
         ))}
       </Stack>
@@ -302,11 +311,19 @@ export function ReleaseNotesEditor({ projectId, releaseId }: { projectId: string
                           Copy
                         </Button>
                       )}
-                      {translationReady && !current.trim() && translateSource(scope) && translateSource(scope) !== locale && (
-                        <Button type="button" size="sm" onClick={() => runTranslate(scope, [locale])} disabled={translate.isPending}>
-                          Translate
-                        </Button>
-                      )}
+                      {translationReady &&
+                        !current.trim() &&
+                        translateSource(scope) &&
+                        translateSource(scope) !== locale && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={() => runTranslate(scope, [locale])}
+                            disabled={translate.isPending}
+                          >
+                            Translate
+                          </Button>
+                        )}
                     </Inline>
                   }
                 >

@@ -6,8 +6,8 @@ import { type FormEvent, useEffect, useState } from 'react'
 import { z } from 'zod'
 import { InviteHint, useInvitePreview } from '../../components/invite-hint'
 import { AppLink } from '../../components/nav-link'
-import { inviteTokenFromRedirect } from '../../lib/invite'
 import { type FieldErrors, parseForm } from '../../lib/form'
+import { inviteTokenFromRedirect } from '../../lib/invite'
 import { useTRPC } from '../../lib/trpc'
 
 const searchSchema = z.object({ redirect: z.string().optional() })
@@ -51,14 +51,24 @@ function RegisterPage() {
     <AuthPage
       logo={<Logo>P</Logo>}
       title="Create account"
-      links={<AppLink to="/login" search={{ redirect }}>Already have an account? Sign in</AppLink>}
+      links={
+        <AppLink to="/login" search={{ redirect }}>
+          Already have an account? Sign in
+        </AppLink>
+      }
     >
       <Form onSubmit={onSubmit} error={register.error?.message} noValidate>
         <Field label="Name" error={errors.name}>
           <Input name="name" autoComplete="name" autoFocus />
         </Field>
         <Field label="Email" error={errors.email}>
-          <Input name="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <Input
+            name="email"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </Field>
         <InviteHint preview={invite.data} email={email} />
         <Field label="Password" error={errors.password}>

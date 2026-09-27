@@ -1,6 +1,6 @@
 import type { Services } from '@planner/server'
 import { projectScopedInput } from '@planner/shared'
-import { TRPCError, initTRPC } from '@trpc/server'
+import { initTRPC, TRPCError } from '@trpc/server'
 import superjson from 'superjson'
 import type { SessionCookie } from './session-cookie'
 

@@ -18,7 +18,9 @@ function InvitePage() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const close = () => navigate({ to: '/' })
-  const preview = useQuery(trpc.projects.previewInvite.queryOptions({ token }, { enabled: token.length > 0, retry: false }))
+  const preview = useQuery(
+    trpc.projects.previewInvite.queryOptions({ token }, { enabled: token.length > 0, retry: false }),
+  )
   const accept = useMutation(
     trpc.projects.acceptInvite.mutationOptions({
       onSuccess: async (project) => {

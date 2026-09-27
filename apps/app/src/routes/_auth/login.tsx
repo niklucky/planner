@@ -6,8 +6,8 @@ import { type FormEvent, useState } from 'react'
 import { z } from 'zod'
 import { InviteHint, useInvitePreview } from '../../components/invite-hint'
 import { AppLink } from '../../components/nav-link'
-import { inviteTokenFromRedirect } from '../../lib/invite'
 import { type FieldErrors, parseForm } from '../../lib/form'
+import { inviteTokenFromRedirect } from '../../lib/invite'
 import { useTRPC } from '../../lib/trpc'
 
 const searchSchema = z.object({ redirect: z.string().optional() })

@@ -3,15 +3,15 @@ import { basename } from 'node:path'
 import { type Db, schema } from '@planner/db'
 import {
   DEVICE_TYPES,
+  isVersionEditable,
+  type ReorderScreenshotsInput,
   SCREENSHOT_CONTENT_TYPES,
   SCREENSHOT_MAX_BYTES,
   type Screenshot,
   type ScreenshotPushPlanVersion,
   type ScreenshotPushResultVersion,
   type ScreenshotSlot,
-  type ReorderScreenshotsInput,
   type ScreenshotSlotPlan,
-  isVersionEditable,
   screenshotsPerSetLimit,
 } from '@planner/shared'
 import { and, asc, eq, inArray, max } from 'drizzle-orm'
@@ -19,8 +19,8 @@ import { contentTypeFor, imageSize } from '../images/size'
 import type { AppStoreClient } from '../integrations/app-store/client'
 import type { GooglePlayClient } from '../integrations/google-play/client'
 import type { Storage } from '../storage'
-import { IntegrationError } from './integrations'
 import type { integrationsService } from './integrations'
+import { IntegrationError } from './integrations'
 
 export interface ScreenshotDeps {
   storage: Storage
@@ -66,7 +66,15 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
     await deps.storage.put(storageKey, bytes, contentType)
     const [file] = await db
       .insert(schema.files)
-      .values({ projectId, storageKey, contentType, size: bytes.byteLength, width: size?.width, height: size?.height, sha256 })
+      .values({
+        projectId,
+        storageKey,
+        contentType,
+        size: bytes.byteLength,
+        width: size?.width,
+        height: size?.height,
+        sha256,
+      })
       .returning()
     return file!
   }
@@ -114,7 +122,6 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
     }
   }
 
-
   /** Concrete operations for one (locale, deviceType) slot, from local rows and the remote set. */
   type SlotWork = {
     plan: ScreenshotSlotPlan
@@ -150,7 +157,9 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
         const remote = set?.screenshots ?? []
         const remoteIds = new Set(remote.map((r) => r.id))
         const toUpload = mine.filter((l) => !l.storeExternalId || !remoteIds.has(l.storeExternalId))
-        const keptIds = new Set(mine.map((l) => l.storeExternalId).filter((id): id is string => !!id && remoteIds.has(id)))
+        const keptIds = new Set(
+          mine.map((l) => l.storeExternalId).filter((id): id is string => !!id && remoteIds.has(id)),
+        )
         const toDelete = remote.map((r) => r.id).filter((id) => !keptIds.has(id))
         const sameOrder =
           toUpload.length === 0 &&
@@ -166,7 +175,15 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
           overLimit: mine.length > screenshotsPerSetLimit('ios'),
         }
         if (plan.createSet || plan.uploads || plan.deletes || plan.reorder) {
-          work.push({ plan, localizationId: loc.externalId, setId: set?.id ?? null, local: mine, toDelete, toUpload, finalOrderKnown: true })
+          work.push({
+            plan,
+            localizationId: loc.externalId,
+            setId: set?.id ?? null,
+            local: mine,
+            toDelete,
+            toUpload,
+            finalOrderKnown: true,
+          })
         }
       }
     }
@@ -180,11 +197,18 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
       .from(schema.appVersions)
       .innerJoin(schema.apps, eq(schema.appVersions.appId, schema.apps.id))
       .where(and(eq(schema.appVersions.releaseId, releaseId), eq(schema.apps.platform, 'ios')))
-    const out: Array<{ v: (typeof rows)[number]['v']; app: (typeof rows)[number]['app']; client: AppStoreClient; locs: Array<{ externalId: string; locale: string }> }> = []
+    const out: Array<{
+      v: (typeof rows)[number]['v']
+      app: (typeof rows)[number]['app']
+      client: AppStoreClient
+      locs: Array<{ externalId: string; locale: string }>
+    }> = []
     for (const { v, app } of rows) {
       if (!app.integrationId) continue
       const client = await deps.integrations.appStoreClientFor(projectId, app.integrationId)
-      let locs = await db.query.appVersionLocalizations.findMany({ where: eq(schema.appVersionLocalizations.appVersionId, v.id) })
+      let locs = await db.query.appVersionLocalizations.findMany({
+        where: eq(schema.appVersionLocalizations.appVersionId, v.id),
+      })
       if (locs.length === 0) {
         const remote = await client.listVersionLocalizations(v.externalId).catch((e: Error) => {
           throw new IntegrationError('VERIFICATION_FAILED', e.message)
@@ -192,16 +216,24 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
         if (remote.length > 0) {
           await db
             .insert(schema.appVersionLocalizations)
-            .values(remote.map((l) => ({ appVersionId: v.id, externalId: l.id, locale: l.locale, whatsNew: l.whatsNew?.trim() ?? null })))
+            .values(
+              remote.map((l) => ({
+                appVersionId: v.id,
+                externalId: l.id,
+                locale: l.locale,
+                whatsNew: l.whatsNew?.trim() ?? null,
+              })),
+            )
             .onConflictDoNothing()
         }
-        locs = await db.query.appVersionLocalizations.findMany({ where: eq(schema.appVersionLocalizations.appVersionId, v.id) })
+        locs = await db.query.appVersionLocalizations.findMany({
+          where: eq(schema.appVersionLocalizations.appVersionId, v.id),
+        })
       }
       out.push({ v, app, client, locs })
     }
     return out
   }
-
 
   const ANDROID_IMAGE_TYPES = DEVICE_TYPES.android.map((d) => d.id)
 
@@ -231,7 +263,11 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
   }
 
   /** Slots whose local images differ from the listing (membership or order). */
-  async function playSlotWork(client: GooglePlayClient, packageName: string, releaseId: string): Promise<PlaySlotWork[]> {
+  async function playSlotWork(
+    client: GooglePlayClient,
+    packageName: string,
+    releaseId: string,
+  ): Promise<PlaySlotWork[]> {
     const local = await db.query.screenshots.findMany({
       where: and(eq(schema.screenshots.releaseId, releaseId), eq(schema.screenshots.platform, 'android')),
       orderBy: [asc(schema.screenshots.position)],
@@ -302,7 +338,10 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
       const current = new Set(rows.map((r) => r.id))
       const given = new Set(input.ids)
       if (current.size !== given.size || [...current].some((id) => !given.has(id))) {
-        throw new IntegrationError('VERIFICATION_FAILED', 'Order does not match the current screenshots; reload and retry')
+        throw new IntegrationError(
+          'VERIFICATION_FAILED',
+          'Order does not match the current screenshots; reload and retry',
+        )
       }
       const now = new Date()
       await db.transaction(async (tx) => {
@@ -382,7 +421,9 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
         for (const slot of work) {
           try {
             if (slot.plan.overLimit) {
-              throw new Error(`${slot.plan.locale} ${slot.plan.deviceType}: more than ${screenshotsPerSetLimit('ios')} screenshots`)
+              throw new Error(
+                `${slot.plan.locale} ${slot.plan.deviceType}: more than ${screenshotsPerSetLimit('ios')} screenshots`,
+              )
             }
             let setId = slot.setId
             if (!setId) setId = (await client.createScreenshotSet(slot.localizationId, slot.plan.deviceType)).id
@@ -416,7 +457,12 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
               await db
                 .update(schema.screenshots)
                 .set({ storeSetId: setId, syncedAt: new Date() })
-                .where(inArray(schema.screenshots.id, slot.local.map((l) => l.id)))
+                .where(
+                  inArray(
+                    schema.screenshots.id,
+                    slot.local.map((l) => l.id),
+                  ),
+                )
             }
           } catch (e) {
             result.error = `${slot.plan.locale} ${slot.plan.deviceType}: ${(e as Error).message}`
@@ -460,7 +506,8 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
           let position = 0
           for (const image of images) {
             const res = await fetch(fullSize(image.url))
-            if (!res.ok) throw new IntegrationError('VERIFICATION_FAILED', `Could not download listing image (${res.status})`)
+            if (!res.ok)
+              throw new IntegrationError('VERIFICATION_FAILED', `Could not download listing image (${res.status})`)
             const file = await storeFile(projectId, new Uint8Array(await res.arrayBuffer()))
             await db.insert(schema.screenshots).values({
               releaseId: release.id,
@@ -487,7 +534,14 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
         const work = await playSlotWork(client, app.externalId!, release.id).catch((e: Error) => {
           throw new IntegrationError('VERIFICATION_FAILED', e.message)
         })
-        plans.push({ appVersionId: app.id, appName: app.name, versionString: 'listing', state: 'LISTING', editable: true, slots: work.map((w) => w.plan) })
+        plans.push({
+          appVersionId: app.id,
+          appName: app.name,
+          versionString: 'listing',
+          state: 'LISTING',
+          editable: true,
+          slots: work.map((w) => w.plan),
+        })
       }
       return plans
     },
@@ -513,7 +567,10 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
           const work = await playSlotWork(client, app.externalId!, release.id)
           result.slots = work.map((w) => w.plan)
           const over = work.find((w) => w.plan.overLimit)
-          if (over) throw new Error(`${over.plan.locale} ${over.plan.deviceType}: more than ${screenshotsPerSetLimit('android')} screenshots`)
+          if (over)
+            throw new Error(
+              `${over.plan.locale} ${over.plan.deviceType}: more than ${screenshotsPerSetLimit('android')} screenshots`,
+            )
           if (work.length === 0) continue
           const slots = []
           for (const w of work) {
@@ -528,11 +585,16 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
           }
           const replaced = await client.replaceImages(app.externalId!, slots)
           for (const w of work) {
-            const ids = replaced.find((r) => r.language === w.plan.locale && r.imageType === w.plan.deviceType)?.ids ?? []
+            const ids =
+              replaced.find((r) => r.language === w.plan.locale && r.imageType === w.plan.deviceType)?.ids ?? []
             for (const [i, row] of w.local.entries()) {
               await db
                 .update(schema.screenshots)
-                .set({ storeExternalId: ids[i] ?? null, storeSetId: `${w.plan.locale}/${w.plan.deviceType}`, syncedAt: new Date() })
+                .set({
+                  storeExternalId: ids[i] ?? null,
+                  storeSetId: `${w.plan.locale}/${w.plan.deviceType}`,
+                  syncedAt: new Date(),
+                })
                 .where(eq(schema.screenshots.id, row.id))
             }
             result.uploaded += w.plan.uploads
@@ -570,7 +632,14 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
           })
           await db
             .insert(schema.appVersionLocalizations)
-            .values(remote.map((l) => ({ appVersionId: v.id, externalId: l.id, locale: l.locale, whatsNew: l.whatsNew?.trim() ?? null })))
+            .values(
+              remote.map((l) => ({
+                appVersionId: v.id,
+                externalId: l.id,
+                locale: l.locale,
+                whatsNew: l.whatsNew?.trim() ?? null,
+              })),
+            )
             .onConflictDoNothing()
           locs = await db.query.appVersionLocalizations.findMany({
             where: eq(schema.appVersionLocalizations.appVersionId, v.id),
@@ -599,7 +668,8 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
             for (const shot of set.screenshots) {
               if (!shot.url) continue
               const res = await fetch(shot.url)
-              if (!res.ok) throw new IntegrationError('VERIFICATION_FAILED', `Could not download ${shot.fileName} (${res.status})`)
+              if (!res.ok)
+                throw new IntegrationError('VERIFICATION_FAILED', `Could not download ${shot.fileName} (${res.status})`)
               const file = await storeFile(projectId, new Uint8Array(await res.arrayBuffer()))
               await db.insert(schema.screenshots).values({
                 releaseId: release.id,

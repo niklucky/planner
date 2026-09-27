@@ -22,11 +22,13 @@ export const releasesRouter = router({
     .input(releaseIdInput)
     .query(({ ctx, input }) => ctx.services.releases.get(ctx.project.id, input.releaseId).catch(rethrow)),
 
-  saveNotes: projectProcedure.input(saveReleaseNotesInput).mutation(({ ctx, input }) =>
-    ctx.services.releases
-      .saveNotes(ctx.project.id, { releaseId: input.releaseId, notesMode: input.notesMode, notes: input.notes })
-      .catch(rethrow),
-  ),
+  saveNotes: projectProcedure
+    .input(saveReleaseNotesInput)
+    .mutation(({ ctx, input }) =>
+      ctx.services.releases
+        .saveNotes(ctx.project.id, { releaseId: input.releaseId, notesMode: input.notesMode, notes: input.notes })
+        .catch(rethrow),
+    ),
 
   pushNotes: projectProcedure
     .input(releaseIdInput)

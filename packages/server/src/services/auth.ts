@@ -55,7 +55,10 @@ export function authService(db: Db, deps: AuthDeps) {
         const user = toUser(row!)
         return { user, session: await createSession(user.id) }
       } catch (e) {
-        if ((e as { code?: string }).code === UNIQUE_VIOLATION || (e as { cause?: { code?: string } }).cause?.code === UNIQUE_VIOLATION) {
+        if (
+          (e as { code?: string }).code === UNIQUE_VIOLATION ||
+          (e as { cause?: { code?: string } }).cause?.code === UNIQUE_VIOLATION
+        ) {
           throw new AuthError('EMAIL_TAKEN', 'Email is already registered')
         }
         throw e
@@ -122,7 +125,10 @@ export function authService(db: Db, deps: AuthDeps) {
       const now = new Date()
       await db.transaction(async (tx) => {
         await tx.update(schema.users).set({ passwordHash, updatedAt: now }).where(eq(schema.users.id, reset.userId))
-        await tx.update(schema.passwordResetTokens).set({ usedAt: now }).where(eq(schema.passwordResetTokens.id, reset.id))
+        await tx
+          .update(schema.passwordResetTokens)
+          .set({ usedAt: now })
+          .where(eq(schema.passwordResetTokens.id, reset.id))
         await tx.delete(schema.sessions).where(eq(schema.sessions.userId, reset.userId))
       })
     },

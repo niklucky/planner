@@ -1,5 +1,11 @@
 import { type Db, schema } from '@planner/db'
-import { type PushPlanVersion, type SaveReleaseNotesInput, compareVersions, planPush, resolveNoteScope } from '@planner/shared'
+import {
+  compareVersions,
+  type PushPlanVersion,
+  planPush,
+  resolveNoteScope,
+  type SaveReleaseNotesInput,
+} from '@planner/shared'
 import { and, eq, inArray } from 'drizzle-orm'
 import type { integrationsService } from './integrations'
 import { IntegrationError } from './integrations'
@@ -186,7 +192,13 @@ export function releasesService(db: Db, deps: ReleaseDeps) {
         await tx.delete(schema.releaseNotes).where(eq(schema.releaseNotes.releaseId, release.id))
         const rows = input.notes
           .filter((n) => n.text.trim().length > 0)
-          .map((n) => ({ releaseId: release.id, scope: n.scope, locale: n.locale, text: n.text.trim(), updatedAt: now }))
+          .map((n) => ({
+            releaseId: release.id,
+            scope: n.scope,
+            locale: n.locale,
+            text: n.text.trim(),
+            updatedAt: now,
+          }))
         if (rows.length > 0) await tx.insert(schema.releaseNotes).values(rows)
       })
       return this.get(projectId, release.id)

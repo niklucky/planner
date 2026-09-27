@@ -1,4 +1,4 @@
-import { NOTES_MODES, NOTE_SCOPES } from '@planner/shared'
+import { NOTE_SCOPES, NOTES_MODES } from '@planner/shared'
 import { pgEnum, pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core'
 import { appGroups } from './groups'
 import { projects } from './projects'

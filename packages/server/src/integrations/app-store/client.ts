@@ -1,5 +1,5 @@
 import type { AppStoreCredentials, RemoteApp, RemoteVersion } from '@planner/shared'
-import { TOKEN_TTL_SECONDS, createAppStoreToken } from './token'
+import { createAppStoreToken, TOKEN_TTL_SECONDS } from './token'
 
 const BASE_URL = 'https://api.appstoreconnect.apple.com'
 
@@ -28,7 +28,8 @@ interface AppsResponse {
 }
 
 const APP_FIELDS = 'fields[apps]=name,bundleId,sku,primaryLocale'
-const VERSION_FIELDS = 'fields[appStoreVersions]=versionString,appVersionState,appStoreState,platform,releaseType,createdDate'
+const VERSION_FIELDS =
+  'fields[appStoreVersions]=versionString,appVersionState,appStoreState,platform,releaseType,createdDate'
 
 interface VersionResource {
   id: string
@@ -181,7 +182,9 @@ export function createAppStoreClient(creds: AppStoreCredentials, fetchImpl: type
         `/v1/appStoreVersions/${encodeURIComponent(versionId)}/appStoreVersionLocalizations?limit=50&fields[appStoreVersionLocalizations]=locale,whatsNew`
       while (path) {
         const page: { data: LocalizationResource[]; links?: { next?: string } } = await request(path)
-        out.push(...page.data.map((l) => ({ id: l.id, locale: l.attributes.locale, whatsNew: l.attributes.whatsNew ?? null })))
+        out.push(
+          ...page.data.map((l) => ({ id: l.id, locale: l.attributes.locale, whatsNew: l.attributes.whatsNew ?? null })),
+        )
         path = page.links?.next?.replace(BASE_URL, '')
       }
       return out
@@ -204,9 +207,20 @@ export function createAppStoreClient(creds: AppStoreCredentials, fetchImpl: type
           const asset = shot.attributes.imageAsset
           const url =
             asset?.templateUrl && asset.width && asset.height
-              ? asset.templateUrl.replace('{w}', String(asset.width)).replace('{h}', String(asset.height)).replace('{f}', 'png')
+              ? asset.templateUrl
+                  .replace('{w}', String(asset.width))
+                  .replace('{h}', String(asset.height))
+                  .replace('{f}', 'png')
               : null
-          return [{ id, fileName: shot.attributes.fileName ?? id, width: asset?.width ?? null, height: asset?.height ?? null, url }]
+          return [
+            {
+              id,
+              fileName: shot.attributes.fileName ?? id,
+              width: asset?.width ?? null,
+              height: asset?.height ?? null,
+              url,
+            },
+          ]
         }),
       }))
     },
@@ -250,7 +264,11 @@ export function createAppStoreClient(creds: AppStoreCredentials, fetchImpl: type
       for (const op of operations) {
         const chunk = bytes.subarray(op.offset, op.offset + op.length)
         const headers = Object.fromEntries((op.requestHeaders ?? []).map((h) => [h.name, h.value]))
-        const res = await fetchImpl(op.url, { method: op.method, headers, body: chunk as unknown as RequestInit['body'] })
+        const res = await fetchImpl(op.url, {
+          method: op.method,
+          headers,
+          body: chunk as unknown as RequestInit['body'],
+        })
         if (!res.ok) throw new AppStoreError(`Upload chunk failed (${res.status})`, res.status)
       }
     },
@@ -259,7 +277,13 @@ export function createAppStoreClient(creds: AppStoreCredentials, fetchImpl: type
     async commitScreenshot(screenshotId: string, md5Hex: string) {
       await request(`/v1/appScreenshots/${encodeURIComponent(screenshotId)}`, {
         method: 'PATCH',
-        body: { data: { type: 'appScreenshots', id: screenshotId, attributes: { uploaded: true, sourceFileChecksum: md5Hex } } },
+        body: {
+          data: {
+            type: 'appScreenshots',
+            id: screenshotId,
+            attributes: { uploaded: true, sourceFileChecksum: md5Hex },
+          },
+        },
       })
     },
 

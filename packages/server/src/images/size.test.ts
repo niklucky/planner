@@ -11,7 +11,25 @@ function png(width: number, height: number) {
 
 function jpeg(width: number, height: number) {
   // SOI, APP0 (length 16), SOF0 with dimensions.
-  const b = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0, 16, ...new Array(14).fill(0), 0xff, 0xc0, 0, 17, 8, 0, 0, 0, 0, 3])
+  const b = new Uint8Array([
+    0xff,
+    0xd8,
+    0xff,
+    0xe0,
+    0,
+    16,
+    ...new Array(14).fill(0),
+    0xff,
+    0xc0,
+    0,
+    17,
+    8,
+    0,
+    0,
+    0,
+    0,
+    3,
+  ])
   new DataView(b.buffer).setUint16(25, height)
   new DataView(b.buffer).setUint16(27, width)
   return b

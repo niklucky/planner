@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Planner</title>
     <script>
-      try {
-        var t = JSON.parse(localStorage.getItem('planner.theme'))
-        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t
-      } catch (e) {}
+      ;(() => {
+        try {
+          const theme = JSON.parse(localStorage.getItem('planner.theme'))
+          if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme
+        } catch {}
+      })()
     </script>
   </head>
   <body>

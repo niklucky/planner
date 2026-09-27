@@ -25,7 +25,15 @@ export function TranslationIntegration({ projectId, integration }: { projectId: 
   )
 }
 
-function SettingsForm({ projectId, onDone, onCancel }: { projectId: string; onDone: () => void; onCancel?: () => void }) {
+function SettingsForm({
+  projectId,
+  onDone,
+  onCancel,
+}: {
+  projectId: string
+  onDone: () => void
+  onCancel?: () => void
+}) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const [kind, setKind] = useState<'llm' | 'deepl'>('llm')
@@ -90,7 +98,15 @@ function SettingsForm({ projectId, onDone, onCancel }: { projectId: string; onDo
   )
 }
 
-function ConnectedView({ projectId, integration, onReplace }: { projectId: string; integration: Integration; onReplace: () => void }) {
+function ConnectedView({
+  projectId,
+  integration,
+  onReplace,
+}: {
+  projectId: string
+  integration: Integration
+  onReplace: () => void
+}) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const invalidate = () => queryClient.invalidateQueries(trpc.integrations.pathFilter())

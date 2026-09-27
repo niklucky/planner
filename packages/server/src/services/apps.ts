@@ -11,7 +11,11 @@ export function appsService(db: Db) {
     },
 
     listGroups(projectId: string) {
-      return db.select().from(schema.appGroups).where(eq(schema.appGroups.projectId, projectId)).orderBy(schema.appGroups.createdAt)
+      return db
+        .select()
+        .from(schema.appGroups)
+        .where(eq(schema.appGroups.projectId, projectId))
+        .orderBy(schema.appGroups.createdAt)
     },
 
     /** All synced versions of all apps in the project, newest first. */

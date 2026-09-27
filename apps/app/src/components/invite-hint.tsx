@@ -22,8 +22,8 @@ export function InviteHint({
   }
   return (
     <Text>
-      The invitation to {preview.projectName} was sent to {preview.email}. With a different email you won't be added to the
-      project.
+      The invitation to {preview.projectName} was sent to {preview.email}. With a different email you won't be added to
+      the project.
     </Text>
   )
 }

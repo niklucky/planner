@@ -61,9 +61,7 @@ function ProjectOverview() {
           {apps
             .filter((app) => app.groupId === group.id)
             .map((app) => {
-              const appVersions = versions.filter(
-                (v) => v.appId === app.id && v.state !== 'REPLACED_WITH_NEW_VERSION',
-              )
+              const appVersions = versions.filter((v) => v.appId === app.id && v.state !== 'REPLACED_WITH_NEW_VERSION')
               const syncing = sync.isPending && sync.variables?.appId === app.id
               return (
                 <Stack key={app.id}>

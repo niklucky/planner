@@ -1,0 +1,4 @@
+# Real environment files and deploy keys never go into git
+.env.*
+!.env.*.example
+keys/

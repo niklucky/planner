@@ -1,7 +1,20 @@
 import { describe, expect, it } from 'vitest'
 import { matchLocale } from './locales'
 
-const google = ['ar', 'de-DE', 'en-US', 'en-GB', 'es-ES', 'es-419', 'hi-IN', 'ru-RU', 'zh-CN', 'zh-TW', 'pt-BR', 'pt-PT']
+const google = [
+  'ar',
+  'de-DE',
+  'en-US',
+  'en-GB',
+  'es-ES',
+  'es-419',
+  'hi-IN',
+  'ru-RU',
+  'zh-CN',
+  'zh-TW',
+  'pt-BR',
+  'pt-PT',
+]
 
 describe('matchLocale', () => {
   it('matches exact and case-insensitive', () => {

@@ -1,6 +1,6 @@
 import type { Services, UploadedFile } from '@planner/server'
 import { screenshotSlotInput } from '@planner/shared'
-import { type Context as HonoContext, Hono } from 'hono'
+import { Hono, type Context as HonoContext } from 'hono'
 import { getCookie } from 'hono/cookie'
 import { SESSION_COOKIE } from './session-cookie'
 

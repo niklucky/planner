@@ -14,11 +14,12 @@ import { and, desc, eq, sql } from 'drizzle-orm'
 import type { SecretBox } from '../crypto/secret-box'
 
 type IntegrationRow = typeof schema.integrations.$inferSelect
+
 import { AppStoreError, createAppStoreClient } from '../integrations/app-store/client'
 import { type GoogleServiceAccount, parseServiceAccount } from '../integrations/google-play/auth'
-import { GooglePlayError, createGooglePlayClient } from '../integrations/google-play/client'
+import { createGooglePlayClient, GooglePlayError } from '../integrations/google-play/client'
 import { linkVersionsToReleases } from '../releases/link'
-import { TranslationError, createTranslator } from '../translation'
+import { createTranslator, TranslationError } from '../translation'
 
 export type IntegrationErrorCode = 'NOT_FOUND' | 'VERIFICATION_FAILED' | 'ALREADY_IMPORTED' | 'NOT_LINKED'
 
@@ -191,7 +192,12 @@ export function integrationsService(db: Db, deps: IntegrationDeps) {
       try {
         if (row.provider === 'app_store') {
           const apps = await appStoreClient(row).listApps()
-          update = { status: 'connected', lastError: null, lastVerifiedAt: now, metadata: { ...row.metadata, appCount: String(apps.length) } }
+          update = {
+            status: 'connected',
+            lastError: null,
+            lastVerifiedAt: now,
+            metadata: { ...row.metadata, appCount: String(apps.length) },
+          }
         } else if (row.provider === 'google_play') {
           await googlePlayClient(row).verify()
           update = { status: 'connected', lastError: null, lastVerifiedAt: now }

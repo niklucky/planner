@@ -20,8 +20,8 @@
   color: var(--color-fg);
 }
 
-.item[data-status='active'],
-.item[aria-expanded='true'] {
+.item[data-status="active"],
+.item[aria-expanded="true"] {
   background: var(--color-active);
   color: var(--color-fg);
 }

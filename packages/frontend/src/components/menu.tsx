@@ -1,9 +1,9 @@
 import {
+  cloneElement,
+  createContext,
   type MouseEvent,
   type ReactElement,
   type ReactNode,
-  cloneElement,
-  createContext,
   useCallback,
   useContext,
   useEffect,
@@ -121,5 +121,5 @@ export function MenuItem({ children, value, danger, onSelect, keepOpen }: MenuIt
 }
 
 export function MenuSeparator() {
-  return <div role="separator" className={styles.separator} />
+  return <hr className={styles.separator} />
 }

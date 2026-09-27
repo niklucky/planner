@@ -86,27 +86,26 @@ export function resolveNoteScope(notesMode: NotesMode, platform: 'ios' | 'androi
 
 /** What pushing the release's notes would change, per App Store version. */
 export function planPush(input: PushPlanInput): PushPlanVersion[] {
-  return input.versions
-    .map((v) => {
-      const scope = resolveNoteScope(input.notesMode, v.platform)
-      const notes = input.notes.filter((n) => n.scope === scope && n.text.trim().length > 0)
-      const store = input.storeLocalizations.filter((l) => l.appVersionId === v.id)
-      const plan: PushPlanVersion = {
-        appVersionId: v.id,
-        appName: v.appName,
-        versionString: v.versionString,
-        state: v.state,
-        editable: isVersionEditable(v.platform, v.state),
-        changes: [],
-        unchanged: [],
-        missingInStore: [],
-      }
-      for (const note of notes) {
-        const loc = store.find((l) => l.locale === note.locale)
-        if (!loc) plan.missingInStore.push(note.locale)
-        else if ((loc.whatsNew ?? '') === note.text) plan.unchanged.push(note.locale)
-        else plan.changes.push({ locale: note.locale, from: loc.whatsNew, to: note.text })
-      }
-      return plan
-    })
+  return input.versions.map((v) => {
+    const scope = resolveNoteScope(input.notesMode, v.platform)
+    const notes = input.notes.filter((n) => n.scope === scope && n.text.trim().length > 0)
+    const store = input.storeLocalizations.filter((l) => l.appVersionId === v.id)
+    const plan: PushPlanVersion = {
+      appVersionId: v.id,
+      appName: v.appName,
+      versionString: v.versionString,
+      state: v.state,
+      editable: isVersionEditable(v.platform, v.state),
+      changes: [],
+      unchanged: [],
+      missingInStore: [],
+    }
+    for (const note of notes) {
+      const loc = store.find((l) => l.locale === note.locale)
+      if (!loc) plan.missingInStore.push(note.locale)
+      else if ((loc.whatsNew ?? '') === note.text) plan.unchanged.push(note.locale)
+      else plan.changes.push({ locale: note.locale, from: loc.whatsNew, to: note.text })
+    }
+    return plan
+  })
 }

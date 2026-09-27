@@ -1,4 +1,4 @@
-import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 
 /** Signed-out pages. Already signed-in users are sent to the app. */
 export const Route = createFileRoute('/_auth')({

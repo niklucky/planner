@@ -1,0 +1,124 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, dev]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  checks:
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Lint and format
+        run: pnpm exec biome ci .
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Unit tests
+        run: pnpm test
+
+  dev:
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "dev branch has no pipeline yet"
+
+  build:
+    if: github.ref == 'refs/heads/main'
+    needs: checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: meta
+        run: echo "image=ghcr.io/${GITHUB_REPOSITORY,,}:${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.image }}
+            ghcr.io/${{ github.repository }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.APP_URL }}
+    permissions:
+      contents: read
+      packages: read
+    env:
+      SSH_HOST: ${{ vars.SSH_HOST }}
+      APP_HOME: /data/planner
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: SSH key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy
+          chmod 600 ~/.ssh/deploy
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Compose .env from environment secrets and variables
+        env:
+          SECRETS: ${{ toJSON(secrets) }}
+          VARS: ${{ toJSON(vars) }}
+        run: |
+          {
+            echo "IMAGE=${{ needs.build.outputs.image }}"
+            jq -r 'to_entries[] | select(.key | test("^(github_token|SSH_)") | not) | "\(.key)=\(.value)"' <<< "$VARS"
+            jq -r 'to_entries[] | select(.key | test("^(github_token|SSH_)") | not) | "\(.key)=\(.value)"' <<< "$SECRETS"
+          } > deploy.env
+
+      - name: Upload compose file and .env
+        run: |
+          scp -i ~/.ssh/deploy deployment/docker-compose.production.yml "github@$SSH_HOST:$APP_HOME/docker-compose.yml"
+          scp -i ~/.ssh/deploy deploy.env "github@$SSH_HOST:$APP_HOME/.env"
+          ssh -i ~/.ssh/deploy "github@$SSH_HOST" "chmod 600 $APP_HOME/.env"
+
+      - name: Pull and restart
+        run: |
+          ssh -i ~/.ssh/deploy "github@$SSH_HOST" bash -s <<'REMOTE'
+            set -euo pipefail
+            cd /data/planner
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            docker compose pull --quiet
+            docker compose up -d --remove-orphans
+            docker image prune -f >/dev/null
+            docker compose ps
+          REMOTE
+
+      - name: Health check
+        run: |
+          for i in $(seq 1 20); do
+            if curl -fsS "${{ vars.APP_URL }}/api/health"; then echo; exit 0; fi
+            sleep 3
+          done
+          echo "app did not become healthy"; exit 1

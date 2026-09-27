@@ -1,6 +1,6 @@
 import { createPublicKey, generateKeyPairSync, verify } from 'node:crypto'
 import { describe, expect, it } from 'vitest'
-import { TOKEN_TTL_SECONDS, createAppStoreToken } from './token'
+import { createAppStoreToken, TOKEN_TTL_SECONDS } from './token'
 
 const { privateKey } = generateKeyPairSync('ec', { namedCurve: 'prime256v1' })
 const pem = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString()
@@ -19,7 +19,12 @@ describe('App Store Connect token', () => {
       exp: 1_700_000_000 + TOKEN_TTL_SECONDS,
       aud: 'appstoreconnect-v1',
     })
-    const ok = verify('sha256', Buffer.from(`${h}.${p}`), { key: createPublicKey(privateKey), dsaEncoding: 'ieee-p1363' }, Buffer.from(s, 'base64url'))
+    const ok = verify(
+      'sha256',
+      Buffer.from(`${h}.${p}`),
+      { key: createPublicKey(privateKey), dsaEncoding: 'ieee-p1363' },
+      Buffer.from(s, 'base64url'),
+    )
     expect(ok).toBe(true)
   })
 

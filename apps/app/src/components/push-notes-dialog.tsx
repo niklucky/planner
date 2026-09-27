@@ -1,5 +1,5 @@
 import { Button, Dialog, Inline, Row, Stack, Text } from '@planner/frontend'
-import { type PushPlanVersion, formatStoreState } from '@planner/shared'
+import { formatStoreState, type PushPlanVersion } from '@planner/shared'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTRPC } from '../lib/trpc'
 
@@ -46,7 +46,10 @@ export function PushNotesDialog({ projectId, releaseId, plan, onClose }: Props) 
                   {p.changes.length > 0 && `Update ${p.changes.map((c) => c.locale).join(', ')}. `}
                   {p.unchanged.length > 0 && `${p.unchanged.length} unchanged. `}
                   {p.missingInStore.length > 0 && `Not in store: ${p.missingInStore.join(', ')}. `}
-                  {p.changes.length === 0 && p.unchanged.length === 0 && p.missingInStore.length === 0 && 'No notes to push.'}
+                  {p.changes.length === 0 &&
+                    p.unchanged.length === 0 &&
+                    p.missingInStore.length === 0 &&
+                    'No notes to push.'}
                 </Text>
               )}
             </Stack>

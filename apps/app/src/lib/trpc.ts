@@ -1,8 +1,8 @@
 import type { AppRouter } from '@planner/api'
 import { QueryClient } from '@tanstack/react-query'
 import { createTRPCClient, httpBatchLink } from '@trpc/client'
-import superjson from 'superjson'
 import { createTRPCContext, createTRPCOptionsProxy } from '@trpc/tanstack-react-query'
+import superjson from 'superjson'
 
 export const queryClient = new QueryClient()
 

@@ -27,7 +27,8 @@ export function createDeepSeekTranslator(apiKey: string, model: string): Transla
   return {
     async verify() {
       const res = await request<{ data?: Array<{ id: string }> }>('/models')
-      if (!res.data?.some((m) => m.id === model)) throw new TranslationError(`Model ${model} is not available for this key`)
+      if (!res.data?.some((m) => m.id === model))
+        throw new TranslationError(`Model ${model} is not available for this key`)
     },
 
     async translate(input: TranslateInput): Promise<TranslateResult> {

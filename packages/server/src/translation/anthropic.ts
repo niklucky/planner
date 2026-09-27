@@ -18,7 +18,8 @@ export function createAnthropicTranslator(apiKey: string, model: string): Transl
       return await fn()
     } catch (e) {
       if (e instanceof Anthropic.AuthenticationError) throw new TranslationError('Anthropic rejected the API key')
-      if (e instanceof Anthropic.RateLimitError) throw new TranslationError('Anthropic rate limit reached, try again shortly')
+      if (e instanceof Anthropic.RateLimitError)
+        throw new TranslationError('Anthropic rate limit reached, try again shortly')
       if (e instanceof Anthropic.APIError) throw new TranslationError(`Anthropic error ${e.status}: ${e.message}`)
       throw e
     }
@@ -40,7 +41,9 @@ export function createAnthropicTranslator(apiKey: string, model: string): Transl
         }),
       )
       if (response.stop_reason === 'refusal') {
-        throw new TranslationError(`The model declined to translate this text${response.stop_details?.explanation ? `: ${response.stop_details.explanation}` : ''}`)
+        throw new TranslationError(
+          `The model declined to translate this text${response.stop_details?.explanation ? `: ${response.stop_details.explanation}` : ''}`,
+        )
       }
       const parsed = response.parsed_output
       if (!parsed) throw new TranslationError('The model returned an unreadable answer')

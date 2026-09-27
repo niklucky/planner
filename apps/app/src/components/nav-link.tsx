@@ -1,5 +1,5 @@
 import { NavItem, Tab, TextLink } from '@planner/frontend'
-import { type LinkComponent, createLink } from '@tanstack/react-router'
+import { createLink, type LinkComponent } from '@tanstack/react-router'
 
 const CreatedNavLink = createLink(NavItem)
 const CreatedTextLink = createLink(TextLink)

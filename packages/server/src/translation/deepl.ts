@@ -3,8 +3,39 @@ import type { Translator } from './index'
 import { TranslationError } from './index'
 
 const TARGETS = new Set([
-  'AR', 'BG', 'CS', 'DA', 'DE', 'EL', 'EN-GB', 'EN-US', 'ES', 'ET', 'FI', 'FR', 'HU', 'ID', 'IT', 'JA', 'KO', 'LT', 'LV',
-  'NB', 'NL', 'PL', 'PT-BR', 'PT-PT', 'RO', 'RU', 'SK', 'SL', 'SV', 'TR', 'UK', 'ZH-HANS', 'ZH-HANT',
+  'AR',
+  'BG',
+  'CS',
+  'DA',
+  'DE',
+  'EL',
+  'EN-GB',
+  'EN-US',
+  'ES',
+  'ET',
+  'FI',
+  'FR',
+  'HU',
+  'ID',
+  'IT',
+  'JA',
+  'KO',
+  'LT',
+  'LV',
+  'NB',
+  'NL',
+  'PL',
+  'PT-BR',
+  'PT-PT',
+  'RO',
+  'RU',
+  'SK',
+  'SL',
+  'SV',
+  'TR',
+  'UK',
+  'ZH-HANS',
+  'ZH-HANT',
 ])
 const BRITISH = new Set(['gb', 'au', 'nz', 'ie', 'in', 'za'])
 
@@ -30,7 +61,11 @@ export function createDeepLTranslator(apiKey: string, plan: 'free' | 'pro'): Tra
   async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     const res = await fetch(`${base}${path}`, {
       ...init,
-      headers: { authorization: `DeepL-Auth-Key ${apiKey}`, 'content-type': 'application/json', ...(init.headers ?? {}) },
+      headers: {
+        authorization: `DeepL-Auth-Key ${apiKey}`,
+        'content-type': 'application/json',
+        ...(init.headers ?? {}),
+      },
     })
     const text = await res.text()
     if (!res.ok) {

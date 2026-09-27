@@ -25,7 +25,8 @@ function rethrow(e: unknown): never {
 }
 
 function requireOwner(ctx: Context & { project: { role: string } }) {
-  if (ctx.project.role !== 'owner') throw new TRPCError({ code: 'FORBIDDEN', message: 'Only the project owner can do this' })
+  if (ctx.project.role !== 'owner')
+    throw new TRPCError({ code: 'FORBIDDEN', message: 'Only the project owner can do this' })
 }
 
 export const projectsRouter = router({
@@ -69,7 +70,9 @@ export const projectsRouter = router({
 
   acceptInvite: protectedProcedure
     .input(acceptInviteInput)
-    .mutation(({ ctx, input }) => ctx.services.projects.acceptInvitation(ctx.user.id, { token: input.token }).catch(rethrow)),
+    .mutation(({ ctx, input }) =>
+      ctx.services.projects.acceptInvitation(ctx.user.id, { token: input.token }).catch(rethrow),
+    ),
 
   /** Invitations addressed to the signed-in user's email. */
   myInvitations: protectedProcedure.query(({ ctx }) => ctx.services.projects.listInvitationsForUser(ctx.user.id)),
@@ -82,5 +85,7 @@ export const projectsRouter = router({
 
   declineMyInvitation: protectedProcedure
     .input(invitationIdInput)
-    .mutation(({ ctx, input }) => ctx.services.projects.declineInvitation(ctx.user.id, input.invitationId).catch(rethrow)),
+    .mutation(({ ctx, input }) =>
+      ctx.services.projects.declineInvitation(ctx.user.id, input.invitationId).catch(rethrow),
+    ),
 })

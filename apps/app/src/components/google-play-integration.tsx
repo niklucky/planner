@@ -1,5 +1,5 @@
 import { Button, Field, Form, Inline, Input, Row, Section, Stack, Text, Textarea } from '@planner/frontend'
-import { type Integration, googlePlayCredentialsInput, importGooglePlayAppInput } from '@planner/shared'
+import { googlePlayCredentialsInput, type Integration, importGooglePlayAppInput } from '@planner/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { type FormEvent, useState } from 'react'
 import { type FieldErrors, parseForm } from '../lib/form'
@@ -25,7 +25,15 @@ export function GooglePlayIntegration({ projectId, integration }: { projectId: s
   )
 }
 
-function CredentialsForm({ projectId, onDone, onCancel }: { projectId: string; onDone: () => void; onCancel?: () => void }) {
+function CredentialsForm({
+  projectId,
+  onDone,
+  onCancel,
+}: {
+  projectId: string
+  onDone: () => void
+  onCancel?: () => void
+}) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const [errors, setErrors] = useState<FieldErrors>({})
@@ -65,7 +73,15 @@ function CredentialsForm({ projectId, onDone, onCancel }: { projectId: string; o
   )
 }
 
-function ConnectedView({ projectId, integration, onReplace }: { projectId: string; integration: Integration; onReplace: () => void }) {
+function ConnectedView({
+  projectId,
+  integration,
+  onReplace,
+}: {
+  projectId: string
+  integration: Integration
+  onReplace: () => void
+}) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const [errors, setErrors] = useState<FieldErrors>({})
@@ -85,7 +101,11 @@ function ConnectedView({ projectId, integration, onReplace }: { projectId: strin
     const form = e.currentTarget
     const { data, errors } = parseForm(e, importGooglePlayAppInput.pick({ packageName: true }))
     setErrors(errors)
-    if (data) importApp.mutate({ projectId, integrationId: integration.id, packageName: data.packageName }, { onSuccess: () => form.reset() })
+    if (data)
+      importApp.mutate(
+        { projectId, integrationId: integration.id, packageName: data.packageName },
+        { onSuccess: () => form.reset() },
+      )
   }
 
   const checked = integration.lastVerifiedAt ? new Date(integration.lastVerifiedAt).toLocaleString() : 'never'

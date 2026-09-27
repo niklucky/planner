@@ -11,6 +11,10 @@
     "dev:web": "pnpm --filter @planner/web dev",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "check": "biome check --write .",
     "test": "vitest run",
     "test:watch": "vitest",
     "compose:up": "docker compose -f compose.local.yml up -d --wait",
@@ -21,6 +25,7 @@
     "start": "pnpm --filter @planner/api start"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.14",
     "@types/node": "^26.4.1",
     "typescript": "^7.0.2",
     "vitest": "^5.0.0"

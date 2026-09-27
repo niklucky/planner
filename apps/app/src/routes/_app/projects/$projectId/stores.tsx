@@ -1,5 +1,5 @@
 import { Page, Tabs } from '@planner/frontend'
-import { Outlet, createFileRoute, getRouteApi } from '@tanstack/react-router'
+import { createFileRoute, getRouteApi, Outlet } from '@tanstack/react-router'
 import { TabLink } from '../../../../components/nav-link'
 
 const projectRoute = getRouteApi('/_app/projects/$projectId')

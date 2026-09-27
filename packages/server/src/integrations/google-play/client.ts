@@ -1,5 +1,5 @@
 import type { RemoteVersion } from '@planner/shared'
-import { type GoogleAccessToken, type GoogleServiceAccount, fetchGoogleAccessToken } from './auth'
+import { fetchGoogleAccessToken, type GoogleAccessToken, type GoogleServiceAccount } from './auth'
 
 const BASE_URL = 'https://androidpublisher.googleapis.com/androidpublisher/v3/applications'
 const UPLOAD_URL = 'https://androidpublisher.googleapis.com/upload/androidpublisher/v3/applications'
@@ -76,16 +76,29 @@ export function createGooglePlayClient(sa: GoogleServiceAccount, fetchImpl: type
 
   async function request<T>(
     path: string,
-    init: { method?: string; body?: unknown; raw?: { bytes: Uint8Array; contentType: string }; absolute?: boolean } = {},
+    init: {
+      method?: string
+      body?: unknown
+      raw?: { bytes: Uint8Array; contentType: string }
+      absolute?: boolean
+    } = {},
   ): Promise<T> {
     const url = init.absolute ? path : `${BASE_URL}${path}`
     const res = await fetchImpl(url, {
       method: init.method ?? 'GET',
       headers: {
         authorization: `Bearer ${await token()}`,
-        ...(init.raw ? { 'content-type': init.raw.contentType } : init.body !== undefined ? { 'content-type': 'application/json' } : {}),
+        ...(init.raw
+          ? { 'content-type': init.raw.contentType }
+          : init.body !== undefined
+            ? { 'content-type': 'application/json' }
+            : {}),
       },
-      body: init.raw ? (init.raw.bytes as unknown as RequestInit['body']) : init.body !== undefined ? JSON.stringify(init.body) : undefined,
+      body: init.raw
+        ? (init.raw.bytes as unknown as RequestInit['body'])
+        : init.body !== undefined
+          ? JSON.stringify(init.body)
+          : undefined,
     })
     if (res.status === 204) return undefined as T
     const text = await res.text()
@@ -141,7 +154,9 @@ export function createGooglePlayClient(sa: GoogleServiceAccount, fetchImpl: type
 
     async listTracks(packageName: string): Promise<PlayTrack[]> {
       return withEdit(packageName, async (editId) => {
-        const res = await request<{ tracks?: PlayTrack[] }>(`/${encodeURIComponent(packageName)}/edits/${editId}/tracks`)
+        const res = await request<{ tracks?: PlayTrack[] }>(
+          `/${encodeURIComponent(packageName)}/edits/${editId}/tracks`,
+        )
         return res.tracks ?? []
       })
     },

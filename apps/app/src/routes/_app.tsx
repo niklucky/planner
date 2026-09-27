@@ -1,6 +1,6 @@
 import { AppShell } from '@planner/frontend'
 import { useQuery } from '@tanstack/react-query'
-import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import { useState } from 'react'
 import { CreateProjectDialog } from '../components/create-project-dialog'
 import { InvitationsDialog } from '../components/invitations-dialog'

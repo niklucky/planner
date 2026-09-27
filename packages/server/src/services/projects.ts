@@ -11,7 +11,13 @@ import { and, eq, gt, isNull } from 'drizzle-orm'
 import { generateToken, hashToken } from '../auth/tokens'
 import type { Mailer } from '../mail'
 
-export type ProjectErrorCode = 'NOT_FOUND' | 'FORBIDDEN' | 'ALREADY_MEMBER' | 'INVALID_INVITE' | 'EMAIL_MISMATCH' | 'MAIL_FAILED'
+export type ProjectErrorCode =
+  | 'NOT_FOUND'
+  | 'FORBIDDEN'
+  | 'ALREADY_MEMBER'
+  | 'INVALID_INVITE'
+  | 'EMAIL_MISMATCH'
+  | 'MAIL_FAILED'
 
 export class ProjectError extends Error {
   constructor(
@@ -99,7 +105,13 @@ export function projectsService(db: Db, deps: ProjectDeps) {
         ),
         orderBy: schema.projectInvitations.createdAt,
       })
-      return rows.map((r) => ({ id: r.id, email: r.email, role: r.role, createdAt: r.createdAt, expiresAt: r.expiresAt }))
+      return rows.map((r) => ({
+        id: r.id,
+        email: r.email,
+        role: r.role,
+        createdAt: r.createdAt,
+        expiresAt: r.expiresAt,
+      }))
     },
 
     /**
@@ -116,7 +128,10 @@ export function projectsService(db: Db, deps: ProjectDeps) {
         if (member) throw new ProjectError('ALREADY_MEMBER', 'Already a member of this project')
       }
       const previous = await db.query.projectInvitations.findFirst({
-        where: and(eq(schema.projectInvitations.projectId, projectId), eq(schema.projectInvitations.email, input.email)),
+        where: and(
+          eq(schema.projectInvitations.projectId, projectId),
+          eq(schema.projectInvitations.email, input.email),
+        ),
       })
       const { token, hash } = generateToken()
       const expiresAt = new Date(Date.now() + INVITE_TTL_MS)
@@ -125,7 +140,14 @@ export function projectsService(db: Db, deps: ProjectDeps) {
         .values({ projectId, email: input.email, role: input.role, tokenHash: hash, invitedBy: inviterId, expiresAt })
         .onConflictDoUpdate({
           target: [schema.projectInvitations.projectId, schema.projectInvitations.email],
-          set: { tokenHash: hash, role: input.role, invitedBy: inviterId, expiresAt, acceptedAt: null, createdAt: new Date() },
+          set: {
+            tokenHash: hash,
+            role: input.role,
+            invitedBy: inviterId,
+            expiresAt,
+            acceptedAt: null,
+            createdAt: new Date(),
+          },
         })
         .returning()
       const inviter = await db.query.users.findFirst({ where: eq(schema.users.id, inviterId) })
@@ -139,7 +161,10 @@ export function projectsService(db: Db, deps: ProjectDeps) {
       } catch (e) {
         // Don't leave an invitation nobody received: restore the previous one or drop it.
         if (previous) {
-          await db.update(schema.projectInvitations).set({ tokenHash: previous.tokenHash, expiresAt: previous.expiresAt, acceptedAt: previous.acceptedAt }).where(eq(schema.projectInvitations.id, invitation!.id))
+          await db
+            .update(schema.projectInvitations)
+            .set({ tokenHash: previous.tokenHash, expiresAt: previous.expiresAt, acceptedAt: previous.acceptedAt })
+            .where(eq(schema.projectInvitations.id, invitation!.id))
         } else {
           await db.delete(schema.projectInvitations).where(eq(schema.projectInvitations.id, invitation!.id))
         }
@@ -156,7 +181,11 @@ export function projectsService(db: Db, deps: ProjectDeps) {
     /** Read-only look at an invitation, for the accept page. */
     async previewInvitation(token: string) {
       const invite = await db.query.projectInvitations.findFirst({
-        where: and(eq(schema.projectInvitations.tokenHash, hashToken(token)), isNull(schema.projectInvitations.acceptedAt), gt(schema.projectInvitations.expiresAt, new Date())),
+        where: and(
+          eq(schema.projectInvitations.tokenHash, hashToken(token)),
+          isNull(schema.projectInvitations.acceptedAt),
+          gt(schema.projectInvitations.expiresAt, new Date()),
+        ),
       })
       if (!invite) throw new ProjectError('INVALID_INVITE', 'This invitation is invalid or has expired')
       const project = await requireProject(invite.projectId)
@@ -197,7 +226,9 @@ export function projectsService(db: Db, deps: ProjectDeps) {
     async acceptInvitation(userId: string, by: { token?: string; invitationId?: string }): Promise<ProjectMembership> {
       const invite = await db.query.projectInvitations.findFirst({
         where: and(
-          by.token ? eq(schema.projectInvitations.tokenHash, hashToken(by.token)) : eq(schema.projectInvitations.id, by.invitationId ?? ''),
+          by.token
+            ? eq(schema.projectInvitations.tokenHash, hashToken(by.token))
+            : eq(schema.projectInvitations.id, by.invitationId ?? ''),
           isNull(schema.projectInvitations.acceptedAt),
           gt(schema.projectInvitations.expiresAt, new Date()),
         ),
@@ -205,14 +236,20 @@ export function projectsService(db: Db, deps: ProjectDeps) {
       if (!invite) throw new ProjectError('INVALID_INVITE', 'This invitation is invalid or has expired')
       const user = await db.query.users.findFirst({ where: eq(schema.users.id, userId) })
       if (!user || user.email !== invite.email) {
-        throw new ProjectError('EMAIL_MISMATCH', `This invitation was sent to ${invite.email}. Sign in with that account to accept it.`)
+        throw new ProjectError(
+          'EMAIL_MISMATCH',
+          `This invitation was sent to ${invite.email}. Sign in with that account to accept it.`,
+        )
       }
       await db.transaction(async (tx) => {
         await tx
           .insert(schema.projectMembers)
           .values({ projectId: invite.projectId, userId, role: invite.role })
           .onConflictDoNothing()
-        await tx.update(schema.projectInvitations).set({ acceptedAt: new Date() }).where(eq(schema.projectInvitations.id, invite.id))
+        await tx
+          .update(schema.projectInvitations)
+          .set({ acceptedAt: new Date() })
+          .where(eq(schema.projectInvitations.id, invite.id))
       })
       return (await this.getForUser(userId, invite.projectId))!
     },

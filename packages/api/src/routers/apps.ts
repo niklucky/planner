@@ -24,17 +24,21 @@ function rethrow(e: unknown): never {
 export const appsRouter = router({
   list: projectProcedure.query(({ ctx }) => ctx.services.apps.listForProject(ctx.project.id)),
 
-  importFromStore: projectProcedure.input(importAppInput).mutation(({ ctx, input }) =>
-    ctx.services.integrations
-      .importApp(ctx.project.id, { integrationId: input.integrationId, externalId: input.externalId })
-      .catch(rethrow),
-  ),
+  importFromStore: projectProcedure
+    .input(importAppInput)
+    .mutation(({ ctx, input }) =>
+      ctx.services.integrations
+        .importApp(ctx.project.id, { integrationId: input.integrationId, externalId: input.externalId })
+        .catch(rethrow),
+    ),
 
-  importFromGooglePlay: projectProcedure.input(importGooglePlayAppInput).mutation(({ ctx, input }) =>
-    ctx.services.integrations
-      .importGooglePlayApp(ctx.project.id, { integrationId: input.integrationId, packageName: input.packageName })
-      .catch(rethrow),
-  ),
+  importFromGooglePlay: projectProcedure
+    .input(importGooglePlayAppInput)
+    .mutation(({ ctx, input }) =>
+      ctx.services.integrations
+        .importGooglePlayApp(ctx.project.id, { integrationId: input.integrationId, packageName: input.packageName })
+        .catch(rethrow),
+    ),
 
   groups: projectProcedure.query(({ ctx }) => ctx.services.apps.listGroups(ctx.project.id)),
 
@@ -46,7 +50,9 @@ export const appsRouter = router({
 
   renameGroup: projectProcedure
     .input(renameAppGroupInput)
-    .mutation(({ ctx, input }) => ctx.services.apps.renameGroup(ctx.project.id, input.groupId, input.name).catch(rethrow)),
+    .mutation(({ ctx, input }) =>
+      ctx.services.apps.renameGroup(ctx.project.id, input.groupId, input.name).catch(rethrow),
+    ),
 
   versions: projectProcedure.query(({ ctx }) => ctx.services.apps.listVersionsForProject(ctx.project.id)),
 

@@ -93,7 +93,10 @@ function MembersPage() {
                   secondary={
                     <Inline>
                       <span>Expires {inv.expiresAt.toLocaleDateString()}</span>
-                      <Button onClick={() => revoke.mutate({ ...input, invitationId: inv.id })} disabled={revoke.isPending}>
+                      <Button
+                        onClick={() => revoke.mutate({ ...input, invitationId: inv.id })}
+                        disabled={revoke.isPending}
+                      >
                         Revoke
                       </Button>
                     </Inline>

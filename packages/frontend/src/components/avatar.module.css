@@ -13,6 +13,6 @@
   text-transform: uppercase;
 }
 
-.avatar[data-shape='round'] {
+.avatar[data-shape="round"] {
   border-radius: 50%;
 }

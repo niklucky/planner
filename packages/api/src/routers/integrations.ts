@@ -24,17 +24,15 @@ function rethrow(e: unknown): never {
 export const integrationsRouter = router({
   list: projectProcedure.query(({ ctx }) => ctx.services.integrations.listForProject(ctx.project.id)),
 
-  connectAppStore: projectProcedure
-    .input(appStoreCredentialsInput)
-    .mutation(({ ctx, input }) =>
-      ctx.services.integrations
-        .connectAppStore(ctx.project.id, {
-          issuerId: input.issuerId,
-          keyId: input.keyId,
-          privateKey: input.privateKey,
-        })
-        .catch(rethrow),
-    ),
+  connectAppStore: projectProcedure.input(appStoreCredentialsInput).mutation(({ ctx, input }) =>
+    ctx.services.integrations
+      .connectAppStore(ctx.project.id, {
+        issuerId: input.issuerId,
+        keyId: input.keyId,
+        privateKey: input.privateKey,
+      })
+      .catch(rethrow),
+  ),
 
   connectGooglePlay: projectProcedure
     .input(googlePlayCredentialsInput)
@@ -46,7 +44,9 @@ export const integrationsRouter = router({
 
   connectTranslation: projectProcedure
     .input(z.object({ settings: translationSettingsInput }))
-    .mutation(({ ctx, input }) => ctx.services.integrations.connectTranslation(ctx.project.id, input.settings).catch(rethrow)),
+    .mutation(({ ctx, input }) =>
+      ctx.services.integrations.connectTranslation(ctx.project.id, input.settings).catch(rethrow),
+    ),
 
   verify: projectProcedure
     .input(integrationIdInput)

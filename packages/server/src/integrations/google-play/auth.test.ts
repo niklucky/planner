@@ -18,7 +18,9 @@ describe('Google service account auth', () => {
       iat: 1_700_000_000,
       exp: 1_700_003_600,
     })
-    expect(verify('sha256', Buffer.from(`${h}.${p}`), createPublicKey(privateKey), Buffer.from(s, 'base64url'))).toBe(true)
+    expect(verify('sha256', Buffer.from(`${h}.${p}`), createPublicKey(privateKey), Buffer.from(s, 'base64url'))).toBe(
+      true,
+    )
   })
 
   it('rejects JSON without the required fields', () => {

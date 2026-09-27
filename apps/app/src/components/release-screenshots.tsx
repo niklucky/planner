@@ -1,5 +1,17 @@
-import { Button, Gallery, GalleryEmpty, Inline, Row, Select, Stack, Text, Thumbnail, moveItem, useDragReorder } from '@planner/frontend'
-import { DEVICE_TYPES, type Platform, type Screenshot, formatDeviceType } from '@planner/shared'
+import {
+  Button,
+  Gallery,
+  GalleryEmpty,
+  Inline,
+  moveItem,
+  Row,
+  Select,
+  Stack,
+  Text,
+  Thumbnail,
+  useDragReorder,
+} from '@planner/frontend'
+import { DEVICE_TYPES, formatDeviceType, type Platform, type Screenshot } from '@planner/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo, useRef, useState } from 'react'
 import { useTRPC } from '../lib/trpc'
@@ -104,7 +116,12 @@ export function ReleaseScreenshots({ projectId, releaseId, platforms, locales }:
         )}
       </Inline>
       {pushing && (
-        <PushScreenshotsDialog projectId={projectId} releaseId={releaseId} platform={pushing} onClose={() => setPushing(null)} />
+        <PushScreenshotsDialog
+          projectId={projectId}
+          releaseId={releaseId}
+          platform={pushing}
+          onClose={() => setPushing(null)}
+        />
       )}
       {imported !== undefined && <Text>Imported {imported} screenshots.</Text>}
       {message && <Text>{message}</Text>}
@@ -145,7 +162,10 @@ export function ReleaseScreenshots({ projectId, releaseId, platforms, locales }:
                   <UploadButton
                     disabled={busy}
                     onFiles={(files) => {
-                      upload.mutate({ slot: { platform, locale: currentLocale, deviceType: newDevice[platform] }, files })
+                      upload.mutate({
+                        slot: { platform, locale: currentLocale, deviceType: newDevice[platform] },
+                        files,
+                      })
                       setNewDevice((d) => ({ ...d, [platform]: '' }))
                     }}
                   />
@@ -176,11 +196,7 @@ function DeviceSlot({
   onRemove: (id: string) => void
   onReorder: (ids: string[]) => void
 }) {
-  const drag = useDragReorder((from, to) =>
-    onReorder(
-      moveItem(shots, from, to).map((s) => s.id),
-    ),
-  )
+  const drag = useDragReorder((from, to) => onReorder(moveItem(shots, from, to).map((s) => s.id)))
   return (
     <Stack>
       <Row secondary={<UploadButton disabled={disabled} onFiles={onUpload} />}>

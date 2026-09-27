@@ -27,10 +27,10 @@ export function createServices(db: Db, deps: ServiceDeps) {
 
 export type Services = ReturnType<typeof createServices>
 
+export { createSecretBox, type SecretBox } from './crypto/secret-box'
+export { createConsoleMailer, createResendMailer, type Mail, type Mailer } from './mail'
 export { AuthError, type AuthErrorCode } from './services/auth'
 export { IntegrationError, type IntegrationErrorCode } from './services/integrations'
 export { ProjectError, type ProjectErrorCode } from './services/projects'
-export { type SecretBox, createSecretBox } from './crypto/secret-box'
-export { type Mail, type Mailer, createConsoleMailer, createResendMailer } from './mail'
-export { type Storage, createLocalStorage } from './storage'
-export { type UploadedFile } from './services/screenshots'
+export type { UploadedFile } from './services/screenshots'
+export { createLocalStorage, type Storage } from './storage'

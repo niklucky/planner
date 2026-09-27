@@ -1,0 +1,28 @@
+# Rendered by provision.sh: __DOMAIN__, __PORT__, __MEDIA_DIR__
+# certbot --nginx adds the TLS server block and the http→https redirect.
+server {
+    listen 80;
+    listen [::]:80;
+    server_name __DOMAIN__;
+
+    # Screenshot uploads are capped at 20 MB by the app
+    client_max_body_size 25m;
+
+    # Uploaded files, served straight from disk
+    location /media/ {
+        alias __MEDIA_DIR__/;
+        try_files $uri =404;
+        expires 30d;
+        add_header Cache-Control "public";
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:__PORT__;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 120s;
+    }
+}

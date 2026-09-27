@@ -21,6 +21,8 @@ export function Dialog({ open, title, onClose, children }: DialogProps) {
   }, [open])
 
   return (
+    // Backdrop click is a pointer-only affordance; keyboard users close with Escape (onCancel).
+    // biome-ignore lint/a11y/useKeyWithClickEvents: see above
     <dialog
       ref={ref}
       className={styles.dialog}

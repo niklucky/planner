@@ -15,7 +15,7 @@
   color: var(--color-fg);
 }
 
-.tab[data-status='active'] {
+.tab[data-status="active"] {
   color: var(--color-fg);
   border-bottom-color: var(--color-fg);
 }

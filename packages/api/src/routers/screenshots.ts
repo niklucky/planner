@@ -38,23 +38,33 @@ export const screenshotsRouter = router({
 
   planAppStorePush: projectProcedure
     .input(releaseIdInput)
-    .query(({ ctx, input }) => ctx.services.screenshots.planAppStorePush(ctx.project.id, input.releaseId).catch(rethrow)),
+    .query(({ ctx, input }) =>
+      ctx.services.screenshots.planAppStorePush(ctx.project.id, input.releaseId).catch(rethrow),
+    ),
 
   pushToAppStore: projectProcedure
     .input(releaseIdInput)
-    .mutation(({ ctx, input }) => ctx.services.screenshots.pushToAppStore(ctx.project.id, input.releaseId).catch(rethrow)),
+    .mutation(({ ctx, input }) =>
+      ctx.services.screenshots.pushToAppStore(ctx.project.id, input.releaseId).catch(rethrow),
+    ),
 
   pullFromGooglePlay: projectProcedure
     .input(releaseIdInput)
-    .mutation(({ ctx, input }) => ctx.services.screenshots.pullFromGooglePlay(ctx.project.id, input.releaseId).catch(rethrow)),
+    .mutation(({ ctx, input }) =>
+      ctx.services.screenshots.pullFromGooglePlay(ctx.project.id, input.releaseId).catch(rethrow),
+    ),
 
   planGooglePlayPush: projectProcedure
     .input(releaseIdInput)
-    .query(({ ctx, input }) => ctx.services.screenshots.planGooglePlayPush(ctx.project.id, input.releaseId).catch(rethrow)),
+    .query(({ ctx, input }) =>
+      ctx.services.screenshots.planGooglePlayPush(ctx.project.id, input.releaseId).catch(rethrow),
+    ),
 
   pushToGooglePlay: projectProcedure
     .input(releaseIdInput)
-    .mutation(({ ctx, input }) => ctx.services.screenshots.pushToGooglePlay(ctx.project.id, input.releaseId).catch(rethrow)),
+    .mutation(({ ctx, input }) =>
+      ctx.services.screenshots.pushToGooglePlay(ctx.project.id, input.releaseId).catch(rethrow),
+    ),
 
   pullFromAppStore: projectProcedure
     .input(releaseIdInput)

@@ -1,5 +1,5 @@
 import { Button, Field, Form, Inline, Input, Row, Section, Stack, Text, Textarea } from '@planner/frontend'
-import { type Integration, appStoreCredentialsInput } from '@planner/shared'
+import { appStoreCredentialsInput, type Integration } from '@planner/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { type FormEvent, useState } from 'react'
 import { type FieldErrors, parseForm } from '../lib/form'
@@ -11,7 +11,9 @@ export function AppStoreIntegration({ projectId, integration }: { projectId: str
 
   return (
     <Section title="App Store Connect">
-      {integration && !showForm && <ConnectedView projectId={projectId} integration={integration} onReplace={() => setEditing(true)} />}
+      {integration && !showForm && (
+        <ConnectedView projectId={projectId} integration={integration} onReplace={() => setEditing(true)} />
+      )}
       {showForm && (
         <CredentialsForm
           projectId={projectId}
@@ -23,7 +25,15 @@ export function AppStoreIntegration({ projectId, integration }: { projectId: str
   )
 }
 
-function CredentialsForm({ projectId, onDone, onCancel }: { projectId: string; onDone: () => void; onCancel?: () => void }) {
+function CredentialsForm({
+  projectId,
+  onDone,
+  onCancel,
+}: {
+  projectId: string
+  onDone: () => void
+  onCancel?: () => void
+}) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const [errors, setErrors] = useState<FieldErrors>({})
@@ -69,7 +79,15 @@ function CredentialsForm({ projectId, onDone, onCancel }: { projectId: string; o
   )
 }
 
-function ConnectedView({ projectId, integration, onReplace }: { projectId: string; integration: Integration; onReplace: () => void }) {
+function ConnectedView({
+  projectId,
+  integration,
+  onReplace,
+}: {
+  projectId: string
+  integration: Integration
+  onReplace: () => void
+}) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const invalidate = () => queryClient.invalidateQueries(trpc.integrations.pathFilter())

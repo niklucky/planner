@@ -12,7 +12,7 @@
   background: var(--color-hover);
 }
 
-.thumb[draggable='true'] {
+.thumb[draggable="true"] {
   cursor: grab;
 }
 

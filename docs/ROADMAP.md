@@ -22,7 +22,8 @@ Working notes on what to do next. Kept short on purpose; update as items land.
   sign in verified 2026-09-27). Still to do on the VPS: set `APP_URL` to the public https
   address, put TLS in front, run `docker compose up -d`. The API runs from TypeScript source
   via tsx inside the image (627 MB); slimming it is optional.
-- CI job for typecheck and tests.
+- CI and deploy: done (see deployment/README.md). GitHub Actions runs Biome, typecheck and
+  tests on PRs; main builds the image to GHCR and deploys over SSH.
 
 ### 2. Store listing metadata
 

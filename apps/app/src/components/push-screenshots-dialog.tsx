@@ -1,9 +1,9 @@
 import { Button, Dialog, Inline, Row, Stack, Text } from '@planner/frontend'
 import {
-  type Platform,
-  type ScreenshotSlotPlan,
   formatDeviceType,
   formatStoreState,
+  type Platform,
+  type ScreenshotSlotPlan,
   screenshotsPerSetLimit,
 } from '@planner/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
