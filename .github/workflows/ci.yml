@@ -87,16 +87,21 @@ jobs:
           chmod 600 ~/.ssh/deploy
           ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
-      - name: Compose .env from environment secrets and variables
-        env:
-          SECRETS: ${{ toJSON(secrets) }}
-          VARS: ${{ toJSON(vars) }}
+      # Every value that reaches the server is listed here by name. Add new ones
+      # to deployment/.env.production, upload with github-env.sh, then add a line below.
+      - name: Write .env for the server
         run: |
-          {
-            echo "IMAGE=${{ needs.build.outputs.image }}"
-            jq -r 'to_entries[] | select(.key | test("^(github_token|SSH_)") | not) | "\(.key)=\(.value)"' <<< "$VARS"
-            jq -r 'to_entries[] | select(.key | test("^(github_token|SSH_)") | not) | "\(.key)=\(.value)"' <<< "$SECRETS"
-          } > deploy.env
+          cat > deploy.env <<EOF
+          IMAGE=${{ needs.build.outputs.image }}
+          APP_URL=${{ vars.APP_URL }}
+          PORT=${{ vars.PORT }}
+          DB_DIR=${{ vars.DB_DIR }}
+          MEDIA_DIR=${{ vars.MEDIA_DIR }}
+          EMAIL_FROM=${{ vars.EMAIL_FROM }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}
+          RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
+          EOF
 
       - name: Upload compose file and .env
         run: |

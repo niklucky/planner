@@ -23,6 +23,9 @@ GitHub Actions on every push to `main`. Everything here is per environment; only
 
        deployment/github-env.sh production
 
+   Every value the deploy job sends to the server is listed by name in
+   `.github/workflows/ci.yml` (job `deploy`); add a line there for any new key.
+
 4. Push to `main`. The workflow runs checks, builds `ghcr.io/<owner>/planner`, copies
    `docker-compose.production.yml` and a generated `.env` to `/data/planner`, then runs
    `docker compose pull && up -d` as user `github`.
