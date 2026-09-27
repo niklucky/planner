@@ -7,6 +7,8 @@ import type { SessionCookie } from './session-cookie'
 export interface Context {
   services: Services
   session: SessionCookie
+  /** The public API root when reached directly, e.g. https://planner.example.com/public/v1. */
+  publicUrl: string
 }
 
 const t = initTRPC.context<Context>().create({ transformer: superjson })

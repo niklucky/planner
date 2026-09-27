@@ -15,6 +15,7 @@ export const translationsRouter = router({
     ctx.services.translations
       .translate(ctx.project.id, {
         text: input.text,
+        purpose: input.purpose,
         sourceLocale: input.sourceLocale,
         targetLocales: input.targetLocales,
       })

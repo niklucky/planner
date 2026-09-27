@@ -43,6 +43,7 @@
   --color-active: rgba(0, 0, 0, 0.08);
   --color-accent: #2563eb;
   --color-danger: #dc2626;
+  --color-warning: #b45309;
   --shadow-menu: 0 4px 16px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06);
 }
 
@@ -60,6 +61,7 @@
     --color-active: rgba(255, 255, 255, 0.1);
     --color-accent: #3b82f6;
     --color-danger: #ef4444;
+    --color-warning: #f59e0b;
     --shadow-menu: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
   }
 }
@@ -77,5 +79,6 @@
   --color-active: rgba(255, 255, 255, 0.1);
   --color-accent: #3b82f6;
   --color-danger: #ef4444;
+  --color-warning: #f59e0b;
   --shadow-menu: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
 }

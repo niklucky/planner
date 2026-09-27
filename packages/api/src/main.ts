@@ -23,6 +23,7 @@ const app = createApp(services, {
   staticDir: production ? env.STATIC_DIR : undefined,
   // Browsers drop Secure cookies on plain http, so follow the public URL's scheme.
   secureCookies: env.APP_URL.startsWith('https://'),
+  appUrl: env.APP_URL,
 })
 
 serve({ fetch: app.fetch, port: env.PORT }, (info) => {

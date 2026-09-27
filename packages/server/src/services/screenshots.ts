@@ -21,6 +21,7 @@ import type { GooglePlayClient } from '../integrations/google-play/client'
 import type { Storage } from '../storage'
 import type { integrationsService } from './integrations'
 import { IntegrationError } from './integrations'
+import { fileUsedByOnboardings } from './onboardings'
 
 export interface ScreenshotDeps {
   storage: Storage
@@ -110,11 +111,12 @@ export function screenshotsService(db: Db, deps: ScreenshotDeps) {
     }
   }
 
-  /** Deletes file rows (and bytes) no screenshot references any more. */
+  /** Deletes file rows (and bytes) nothing references any more: no screenshot, onboarding page or release. */
   async function pruneFiles(fileIds: string[]) {
     for (const fileId of new Set(fileIds)) {
       const stillUsed = await db.query.screenshots.findFirst({ where: eq(schema.screenshots.fileId, fileId) })
       if (stillUsed) continue
+      if (await fileUsedByOnboardings(db, fileId)) continue
       const file = await db.query.files.findFirst({ where: eq(schema.files.id, fileId) })
       if (!file) continue
       await db.delete(schema.files).where(eq(schema.files.id, fileId))

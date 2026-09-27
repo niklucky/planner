@@ -10,6 +10,10 @@ Working notes on what to do next. Kept short on purpose; update as items land.
 - Apps and store versions with state, synced per app
 - Release notes: pull, edit, copy from another release, translate, push (both stores)
 - Screenshots: pull, upload, delete, drag-to-reorder, push (both stores)
+- Onboardings (spec: "Planner: Onboardings"): app profiles per app group, draft editor (pages,
+  copy grid per language, machine translation with review), publish with validation and
+  "offer it again", JSON import/export, project API keys, and the public read API
+  (`/public/v1/onboardings/{key}`, `/public/v1/files/{sha256}`) for apps behind their own proxy
 
 ## Next, in order
 
@@ -42,7 +46,15 @@ Releases tab. Later: submit for review and watch the state change.
 - S3 storage backend behind the existing `Storage` interface
 - Org Overview page (currently empty)
 
-### 5. Later
+### 5. Onboardings, later
+
+- Draft preview for testers (a preview token that reads the draft), `min_app_version` per
+  release, A/B variants and targeting, per-page analytics (needs an events endpoint),
+  scheduled publishing
+- Decide: who approves machine translations before a language goes live; whether audiences
+  become a generic `when.audiences` next to `when.platforms`
+
+### 6. Later
 
 - Analytics from both stores
 - Periodic background sync instead of manual buttons

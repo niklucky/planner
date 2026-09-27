@@ -24,6 +24,8 @@ import { Route as AppProjectsProjectIdAnalyticsRouteImport } from './routes/_app
 import { Route as AppProjectsProjectIdIntegrationsRouteImport } from './routes/_app/projects/$projectId/integrations'
 import { Route as AppProjectsProjectIdMembersRouteImport } from './routes/_app/projects/$projectId/members'
 import { Route as AppProjectsProjectIdStoresRouteImport } from './routes/_app/projects/$projectId/stores'
+import { Route as AppProjectsProjectIdOnboardingsIndexRouteImport } from './routes/_app/projects/$projectId/onboardings/index'
+import { Route as AppProjectsProjectIdOnboardingsOnboardingIdRouteImport } from './routes/_app/projects/$projectId/onboardings/$onboardingId'
 import { Route as AppProjectsProjectIdStoresIndexRouteImport } from './routes/_app/projects/$projectId/stores/index'
 import { Route as AppProjectsProjectIdStoresReleasesRouteImport } from './routes/_app/projects/$projectId/stores/releases'
 
@@ -105,6 +107,18 @@ const AppProjectsProjectIdStoresRoute =
     path: '/stores',
     getParentRoute: () => AppProjectsProjectIdRoute,
   } as any)
+const AppProjectsProjectIdOnboardingsIndexRoute =
+  AppProjectsProjectIdOnboardingsIndexRouteImport.update({
+    id: '/onboardings/',
+    path: '/onboardings/',
+    getParentRoute: () => AppProjectsProjectIdRoute,
+  } as any)
+const AppProjectsProjectIdOnboardingsOnboardingIdRoute =
+  AppProjectsProjectIdOnboardingsOnboardingIdRouteImport.update({
+    id: '/onboardings/$onboardingId',
+    path: '/onboardings/$onboardingId',
+    getParentRoute: () => AppProjectsProjectIdRoute,
+  } as any)
 const AppProjectsProjectIdStoresIndexRoute =
   AppProjectsProjectIdStoresIndexRouteImport.update({
     id: '/',
@@ -132,7 +146,9 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId/members': typeof AppProjectsProjectIdMembersRoute
   '/projects/$projectId/stores': typeof AppProjectsProjectIdStoresRouteWithChildren
   '/projects/$projectId/': typeof AppProjectsProjectIdIndexRoute
+  '/projects/$projectId/onboardings/$onboardingId': typeof AppProjectsProjectIdOnboardingsOnboardingIdRoute
   '/projects/$projectId/stores/releases': typeof AppProjectsProjectIdStoresReleasesRoute
+  '/projects/$projectId/onboardings/': typeof AppProjectsProjectIdOnboardingsIndexRoute
   '/projects/$projectId/stores/': typeof AppProjectsProjectIdStoresIndexRoute
 }
 export interface FileRoutesByTo {
@@ -147,7 +163,9 @@ export interface FileRoutesByTo {
   '/projects/$projectId/integrations': typeof AppProjectsProjectIdIntegrationsRoute
   '/projects/$projectId/members': typeof AppProjectsProjectIdMembersRoute
   '/projects/$projectId': typeof AppProjectsProjectIdIndexRoute
+  '/projects/$projectId/onboardings/$onboardingId': typeof AppProjectsProjectIdOnboardingsOnboardingIdRoute
   '/projects/$projectId/stores/releases': typeof AppProjectsProjectIdStoresReleasesRoute
+  '/projects/$projectId/onboardings': typeof AppProjectsProjectIdOnboardingsIndexRoute
   '/projects/$projectId/stores': typeof AppProjectsProjectIdStoresIndexRoute
 }
 export interface FileRoutesById {
@@ -167,7 +185,9 @@ export interface FileRoutesById {
   '/_app/projects/$projectId/members': typeof AppProjectsProjectIdMembersRoute
   '/_app/projects/$projectId/stores': typeof AppProjectsProjectIdStoresRouteWithChildren
   '/_app/projects/$projectId/': typeof AppProjectsProjectIdIndexRoute
+  '/_app/projects/$projectId/onboardings/$onboardingId': typeof AppProjectsProjectIdOnboardingsOnboardingIdRoute
   '/_app/projects/$projectId/stores/releases': typeof AppProjectsProjectIdStoresReleasesRoute
+  '/_app/projects/$projectId/onboardings/': typeof AppProjectsProjectIdOnboardingsIndexRoute
   '/_app/projects/$projectId/stores/': typeof AppProjectsProjectIdStoresIndexRoute
 }
 export interface FileRouteTypes {
@@ -186,7 +206,9 @@ export interface FileRouteTypes {
     | '/projects/$projectId/members'
     | '/projects/$projectId/stores'
     | '/projects/$projectId/'
+    | '/projects/$projectId/onboardings/$onboardingId'
     | '/projects/$projectId/stores/releases'
+    | '/projects/$projectId/onboardings/'
     | '/projects/$projectId/stores/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -201,7 +223,9 @@ export interface FileRouteTypes {
     | '/projects/$projectId/integrations'
     | '/projects/$projectId/members'
     | '/projects/$projectId'
+    | '/projects/$projectId/onboardings/$onboardingId'
     | '/projects/$projectId/stores/releases'
+    | '/projects/$projectId/onboardings'
     | '/projects/$projectId/stores'
   id:
     | '__root__'
@@ -220,7 +244,9 @@ export interface FileRouteTypes {
     | '/_app/projects/$projectId/members'
     | '/_app/projects/$projectId/stores'
     | '/_app/projects/$projectId/'
+    | '/_app/projects/$projectId/onboardings/$onboardingId'
     | '/_app/projects/$projectId/stores/releases'
+    | '/_app/projects/$projectId/onboardings/'
     | '/_app/projects/$projectId/stores/'
   fileRoutesById: FileRoutesById
 }
@@ -336,6 +362,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProjectsProjectIdStoresRouteImport
       parentRoute: typeof AppProjectsProjectIdRoute
     }
+    '/_app/projects/$projectId/onboardings/': {
+      id: '/_app/projects/$projectId/onboardings/'
+      path: '/onboardings'
+      fullPath: '/projects/$projectId/onboardings/'
+      preLoaderRoute: typeof AppProjectsProjectIdOnboardingsIndexRouteImport
+      parentRoute: typeof AppProjectsProjectIdRoute
+    }
+    '/_app/projects/$projectId/onboardings/$onboardingId': {
+      id: '/_app/projects/$projectId/onboardings/$onboardingId'
+      path: '/onboardings/$onboardingId'
+      fullPath: '/projects/$projectId/onboardings/$onboardingId'
+      preLoaderRoute: typeof AppProjectsProjectIdOnboardingsOnboardingIdRouteImport
+      parentRoute: typeof AppProjectsProjectIdRoute
+    }
     '/_app/projects/$projectId/stores/': {
       id: '/_app/projects/$projectId/stores/'
       path: '/'
@@ -376,6 +416,8 @@ interface AppProjectsProjectIdRouteChildren {
   AppProjectsProjectIdMembersRoute: typeof AppProjectsProjectIdMembersRoute
   AppProjectsProjectIdStoresRoute: typeof AppProjectsProjectIdStoresRouteWithChildren
   AppProjectsProjectIdIndexRoute: typeof AppProjectsProjectIdIndexRoute
+  AppProjectsProjectIdOnboardingsOnboardingIdRoute: typeof AppProjectsProjectIdOnboardingsOnboardingIdRoute
+  AppProjectsProjectIdOnboardingsIndexRoute: typeof AppProjectsProjectIdOnboardingsIndexRoute
 }
 
 const AppProjectsProjectIdRouteChildren: AppProjectsProjectIdRouteChildren = {
@@ -384,6 +426,10 @@ const AppProjectsProjectIdRouteChildren: AppProjectsProjectIdRouteChildren = {
   AppProjectsProjectIdMembersRoute: AppProjectsProjectIdMembersRoute,
   AppProjectsProjectIdStoresRoute: AppProjectsProjectIdStoresRouteWithChildren,
   AppProjectsProjectIdIndexRoute: AppProjectsProjectIdIndexRoute,
+  AppProjectsProjectIdOnboardingsOnboardingIdRoute:
+    AppProjectsProjectIdOnboardingsOnboardingIdRoute,
+  AppProjectsProjectIdOnboardingsIndexRoute:
+    AppProjectsProjectIdOnboardingsIndexRoute,
 }
 
 const AppProjectsProjectIdRouteWithChildren =

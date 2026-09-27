@@ -1,0 +1,3943 @@
+{
+  "id": "capsule-intro",
+  "version": 1,
+  "defaultLocale": "en",
+  "locales": {
+    "ru": {
+      "actions": [
+        {
+          "action": "next",
+          "label": "Далее"
+        },
+        {
+          "action": "skip",
+          "label": "Пропустить"
+        }
+      ],
+      "pages": [
+        {
+          "id": "more-than-cards",
+          "title": "Кошелёк теперь хранит не только карты",
+          "body": "Появилась Капсула — хранилище того, что вы не готовы передать прямо сейчас, но не хотите, чтобы это потерялось, если вы станете недоступны.",
+          "fields": {
+            "kicker": "Новое в Кошельке",
+            "kicker-audience": "upgraded",
+            "scene": "more-than-cards"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "only-you-know",
+          "title": "Есть вещи, которые знаете только вы",
+          "body": "Пароли, коды двухфакторной защиты, доступ к счетам, seed-фразы криптокошельков и многое другое, что никто кроме вас не сможет восстановить. И пока вы рядом, это не выглядит проблемой.",
+          "fields": {
+            "scene": "only-you-know"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#3B4FA8"
+            },
+            {
+              "key": "background-from",
+              "value": "#C8D0F4"
+            },
+            {
+              "key": "background-to",
+              "value": "#DEE3F9"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "unexpected",
+          "title": "Но внезапное не предупреждает — потому оно и внезапное",
+          "body": "Мы же, как всегда, откладываем такие вещи на потом, потому что сегодня-то всё в порядке. А к тому, что может случиться внезапно, подготовиться можно только заранее.",
+          "fields": {
+            "scene": "unexpected"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#454F5E"
+            },
+            {
+              "key": "background-from",
+              "value": "#CCD3DD"
+            },
+            {
+              "key": "background-to",
+              "value": "#E0E5EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "too-soon",
+          "title": "Передать сейчас — рано, а не передать вообще — рискованно",
+          "body": "Пока всё в порядке, незачем передавать информацию другим и плодить места, где она будет храниться. Но подготовиться стоит заранее — в нужный момент передать её самостоятельно может быть уже невозможно.",
+          "fields": {
+            "scene": "too-soon"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#B96D14"
+            },
+            {
+              "key": "background-from",
+              "value": "#F6E5C2"
+            },
+            {
+              "key": "background-to",
+              "value": "#FCF2DE"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "who-and-when",
+          "title": "Кому — решаете сейчас.\nКогда — решат обстоятельства",
+          "body": "Вы выбираете человека и запечатываете Капсулу. Пока вы можете контролировать доступ, она остаётся запечатанной. Если не сможете — Капсула передаст то, о чём вы позаботились заранее.",
+          "fields": {
+            "scene": "who-and-when"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#0F7B9C"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4EAF8"
+            },
+            {
+              "key": "background-to",
+              "value": "#DDF3FB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "stay-sealed",
+          "title": "И пусть Капсула ещё долго лежит запечатанной",
+          "body": "Вы уже сделали главное — позаботились заранее. Теперь просто время от времени возвращайтесь к ней: обновляйте то, что изменилось, и добавляйте то, что однажды может оказаться важным.",
+          "fields": {
+            "scene": "stay-sealed"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#1B8A44"
+            },
+            {
+              "key": "background-from",
+              "value": "#CBF1DA"
+            },
+            {
+              "key": "background-to",
+              "value": "#E3F8EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "prepare",
+          "title": "Подготовьте первую Капсулу",
+          "body": "Это пять минут, и ничего не открывается сегодня. Изменить или удалить Капсулу можно в любой момент.",
+          "actions": [
+            {
+              "action": "next",
+              "label": "Подготовить Капсулу"
+            },
+            {
+              "action": "skip",
+              "label": "Пропустить"
+            }
+          ],
+          "fields": {
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "subscription",
+          "title": "Капсула — по подписке",
+          "body": "Первый месяц бесплатно. Дальше — Basic: одна Капсула, вложения и передача выбранному человеку.",
+          "actions": [
+            {
+              "action": "paywall",
+              "label": "Начать месяц бесплатно"
+            },
+            {
+              "action": "skip",
+              "label": "Пропустить"
+            }
+          ],
+          "fields": {
+            "kicker": "Подписка",
+            "note": "Карты остаются бесплатными — как и обещали с 2017 года. Подписка нужна только для Капсул.",
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "actions": [
+        {
+          "action": "next",
+          "label": "Next"
+        },
+        {
+          "action": "skip",
+          "label": "Skip"
+        }
+      ],
+      "pages": [
+        {
+          "id": "more-than-cards",
+          "title": "Wallet now holds more than cards",
+          "body": "Meet Capsule — a place to store what you’re not ready to share right now, but don’t want to lose if you’re ever unavailable.",
+          "fields": {
+            "kicker": "What’s new in Wallet",
+            "kicker-audience": "upgraded",
+            "scene": "more-than-cards"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "only-you-know",
+          "title": "There are things only you know",
+          "body": "Passwords, two-factor authentication codes, access to accounts, crypto wallet seed phrases, and much more that no one else could recover. As long as you’re around, that doesn’t seem like a problem.",
+          "fields": {
+            "scene": "only-you-know"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#3B4FA8"
+            },
+            {
+              "key": "background-from",
+              "value": "#C8D0F4"
+            },
+            {
+              "key": "background-to",
+              "value": "#DEE3F9"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "unexpected",
+          "title": "The unexpected comes without warning. That’s why it’s unexpected",
+          "body": "As usual, we put these things off because everything is fine today. But the only way to prepare for something sudden is before it happens.",
+          "fields": {
+            "scene": "unexpected"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#454F5E"
+            },
+            {
+              "key": "background-from",
+              "value": "#CCD3DD"
+            },
+            {
+              "key": "background-to",
+              "value": "#E0E5EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "too-soon",
+          "title": "It’s too soon to share — but never sharing is a risk",
+          "body": "While all is well, there’s no need to share information with others or have it stored in more places. But it’s worth preparing ahead of time — you may not be able to share it yourself when the moment comes.",
+          "fields": {
+            "scene": "too-soon"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#B96D14"
+            },
+            {
+              "key": "background-from",
+              "value": "#F6E5C2"
+            },
+            {
+              "key": "background-to",
+              "value": "#FCF2DE"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "who-and-when",
+          "title": "Who? You decide now.\nWhen? Circumstances decide",
+          "body": "You choose a person and seal the Capsule. As long as you can control access, it stays sealed. If you can’t, the Capsule will pass on what you prepared in advance.",
+          "fields": {
+            "scene": "who-and-when"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#0F7B9C"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4EAF8"
+            },
+            {
+              "key": "background-to",
+              "value": "#DDF3FB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "stay-sealed",
+          "title": "And may your Capsule stay sealed for a long time to come",
+          "body": "You’ve already done the most important thing: prepared ahead of time. Now just revisit it occasionally to update what’s changed and add anything that might matter one day.",
+          "fields": {
+            "scene": "stay-sealed"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#1B8A44"
+            },
+            {
+              "key": "background-from",
+              "value": "#CBF1DA"
+            },
+            {
+              "key": "background-to",
+              "value": "#E3F8EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "prepare",
+          "title": "Prepare your first Capsule",
+          "body": "It takes five minutes, and nothing opens today. You can change or delete the Capsule at any time.",
+          "actions": [
+            {
+              "action": "next",
+              "label": "Prepare a Capsule"
+            },
+            {
+              "action": "skip",
+              "label": "Skip"
+            }
+          ],
+          "fields": {
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "subscription",
+          "title": "Capsule is a subscription",
+          "body": "Your first month is free. After that, Basic: one Capsule, attachments, and handover to the person you choose.",
+          "actions": [
+            {
+              "action": "paywall",
+              "label": "Start your free month"
+            },
+            {
+              "action": "skip",
+              "label": "Skip"
+            }
+          ],
+          "fields": {
+            "kicker": "Subscription",
+            "note": "Cards remain free — just as we’ve promised since 2017. Only Capsules require a subscription.",
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        }
+      ]
+    },
+    "de": {
+      "actions": [
+        {
+          "action": "next",
+          "label": "Weiter"
+        },
+        {
+          "action": "skip",
+          "label": "Überspringen"
+        }
+      ],
+      "pages": [
+        {
+          "id": "more-than-cards",
+          "title": "Die Geldbörse speichert jetzt mehr als nur Karten",
+          "body": "Die Kapsel ist da: ein Speicher für das, was du jetzt noch nicht weitergeben möchtest, das aber nicht verloren gehen soll, wenn du einmal nicht erreichbar bist.",
+          "fields": {
+            "kicker": "Neues in der Geldbörse",
+            "kicker-audience": "upgraded",
+            "scene": "more-than-cards"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "only-you-know",
+          "title": "Manches weißt nur du",
+          "body": "Passwörter, Codes für die Zwei-Faktor-Authentifizierung, Kontozugänge, Seed-Phrasen für Krypto-Wallets und vieles mehr, das niemand außer dir wiederherstellen kann. Solange du da bist, scheint das kein Problem zu sein.",
+          "fields": {
+            "scene": "only-you-know"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#3B4FA8"
+            },
+            {
+              "key": "background-from",
+              "value": "#C8D0F4"
+            },
+            {
+              "key": "background-to",
+              "value": "#DEE3F9"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "unexpected",
+          "title": "Unvorhergesehenes kündigt sich nicht an — sonst wäre es nicht unvorhergesehen",
+          "body": "Wie so oft schieben wir solche Dinge auf, weil heute ja alles in Ordnung ist. Doch auf etwas, das plötzlich passieren kann, kann man sich nur im Voraus vorbereiten.",
+          "fields": {
+            "scene": "unexpected"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#454F5E"
+            },
+            {
+              "key": "background-from",
+              "value": "#CCD3DD"
+            },
+            {
+              "key": "background-to",
+              "value": "#E0E5EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "too-soon",
+          "title": "Jetzt weitergeben ist zu früh. Gar nicht weitergeben ist riskant",
+          "body": "Solange alles in Ordnung ist, musst du Informationen weder mit anderen teilen noch an zusätzlichen Orten speichern. Vorbereiten solltest du dich trotzdem rechtzeitig — wenn es darauf ankommt, kannst du sie vielleicht nicht mehr selbst weitergeben.",
+          "fields": {
+            "scene": "too-soon"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#B96D14"
+            },
+            {
+              "key": "background-from",
+              "value": "#F6E5C2"
+            },
+            {
+              "key": "background-to",
+              "value": "#FCF2DE"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "who-and-when",
+          "title": "An wen? Das entscheidest du jetzt.\nWann? Das entscheiden die Umstände",
+          "body": "Du wählst eine Person und versiegelst die Kapsel. Solange du den Zugriff kontrollieren kannst, bleibt sie versiegelt. Wenn du das nicht mehr kannst, gibt die Kapsel weiter, was du im Voraus vorbereitet hast.",
+          "fields": {
+            "scene": "who-and-when"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#0F7B9C"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4EAF8"
+            },
+            {
+              "key": "background-to",
+              "value": "#DDF3FB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "stay-sealed",
+          "title": "Hoffentlich bleibt deine Kapsel noch lange versiegelt",
+          "body": "Das Wichtigste hast du schon getan: rechtzeitig vorgesorgt. Ruf die Kapsel jetzt einfach ab und zu wieder auf, aktualisiere, was sich geändert hat, und ergänze, was eines Tages wichtig sein könnte.",
+          "fields": {
+            "scene": "stay-sealed"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#1B8A44"
+            },
+            {
+              "key": "background-from",
+              "value": "#CBF1DA"
+            },
+            {
+              "key": "background-to",
+              "value": "#E3F8EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "prepare",
+          "title": "Bereite deine erste Kapsel vor",
+          "body": "Das dauert fünf Minuten, und heute wird nichts geöffnet. Du kannst die Kapsel jederzeit ändern oder löschen.",
+          "actions": [
+            {
+              "action": "next",
+              "label": "Kapsel vorbereiten"
+            },
+            {
+              "action": "skip",
+              "label": "Überspringen"
+            }
+          ],
+          "fields": {
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "subscription",
+          "title": "Die Kapsel gibt es im Abo",
+          "body": "Der erste Monat ist kostenlos. Danach Basic: eine Kapsel, Anhänge und die Übergabe an die Person, die du wählst.",
+          "actions": [
+            {
+              "action": "paywall",
+              "label": "Gratismonat starten"
+            },
+            {
+              "action": "skip",
+              "label": "Überspringen"
+            }
+          ],
+          "fields": {
+            "kicker": "Abo",
+            "note": "Karten bleiben kostenlos — so, wie wir es seit 2017 versprechen. Nur für Kapseln brauchst du ein Abo.",
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        }
+      ]
+    },
+    "es": {
+      "actions": [
+        {
+          "action": "next",
+          "label": "Siguiente"
+        },
+        {
+          "action": "skip",
+          "label": "Omitir"
+        }
+      ],
+      "pages": [
+        {
+          "id": "more-than-cards",
+          "title": "La Cartera ahora guarda más que tarjetas",
+          "body": "Llega la Cápsula: un espacio para guardar lo que aún no quieres compartir, pero tampoco quieres que se pierda si dejas de estar disponible.",
+          "fields": {
+            "kicker": "Novedades en la Cartera",
+            "kicker-audience": "upgraded",
+            "scene": "more-than-cards"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "only-you-know",
+          "title": "Hay cosas que solo tú sabes",
+          "body": "Contraseñas, códigos de autenticación de dos factores, acceso a cuentas, frases semilla de monederos de criptomonedas y mucho más que nadie salvo tú podría recuperar. Mientras estás presente, no parece un problema.",
+          "fields": {
+            "scene": "only-you-know"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#3B4FA8"
+            },
+            {
+              "key": "background-from",
+              "value": "#C8D0F4"
+            },
+            {
+              "key": "background-to",
+              "value": "#DEE3F9"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "unexpected",
+          "title": "Lo inesperado no avisa. Por eso es inesperado",
+          "body": "Como siempre, dejamos estas cosas para después porque hoy todo está bien. Pero solo podemos prepararnos para lo que puede ocurrir de repente antes de que suceda.",
+          "fields": {
+            "scene": "unexpected"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#454F5E"
+            },
+            {
+              "key": "background-from",
+              "value": "#CCD3DD"
+            },
+            {
+              "key": "background-to",
+              "value": "#E0E5EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "too-soon",
+          "title": "Es pronto para compartirlo. Pero no hacerlo nunca es un riesgo",
+          "body": "Mientras todo esté bien, no hace falta compartir la información con otras personas ni guardarla en más sitios. Pero conviene prepararse con tiempo: cuando llegue el momento, quizá ya no puedas transmitirla personalmente.",
+          "fields": {
+            "scene": "too-soon"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#B96D14"
+            },
+            {
+              "key": "background-from",
+              "value": "#F6E5C2"
+            },
+            {
+              "key": "background-to",
+              "value": "#FCF2DE"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "who-and-when",
+          "title": "¿A quién? Lo decides ahora.\n¿Cuándo? Lo decidirán las circunstancias",
+          "body": "Eliges a una persona y sellas la Cápsula. Mientras puedas controlar el acceso, permanecerá sellada. Si dejas de poder hacerlo, la Cápsula entregará lo que preparaste con antelación.",
+          "fields": {
+            "scene": "who-and-when"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#0F7B9C"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4EAF8"
+            },
+            {
+              "key": "background-to",
+              "value": "#DDF3FB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "stay-sealed",
+          "title": "Y ojalá tu Cápsula siga sellada mucho tiempo",
+          "body": "Ya has hecho lo más importante: prepararte con tiempo. Ahora solo tienes que volver a ella de vez en cuando para actualizar lo que haya cambiado y añadir lo que algún día pueda ser importante.",
+          "fields": {
+            "scene": "stay-sealed"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#1B8A44"
+            },
+            {
+              "key": "background-from",
+              "value": "#CBF1DA"
+            },
+            {
+              "key": "background-to",
+              "value": "#E3F8EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "prepare",
+          "title": "Prepara tu primera Cápsula",
+          "body": "Son cinco minutos y hoy no se abre nada. Puedes modificar o eliminar la Cápsula en cualquier momento.",
+          "actions": [
+            {
+              "action": "next",
+              "label": "Preparar una Cápsula"
+            },
+            {
+              "action": "skip",
+              "label": "Omitir"
+            }
+          ],
+          "fields": {
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "subscription",
+          "title": "La Cápsula funciona con suscripción",
+          "body": "El primer mes es gratis. Después, Basic: una Cápsula, archivos adjuntos y la entrega a la persona que elijas.",
+          "actions": [
+            {
+              "action": "paywall",
+              "label": "Empezar el mes gratis"
+            },
+            {
+              "action": "skip",
+              "label": "Omitir"
+            }
+          ],
+          "fields": {
+            "kicker": "Suscripción",
+            "note": "Las tarjetas siguen siendo gratuitas, como prometemos desde 2017. Solo las Cápsulas requieren una suscripción.",
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        }
+      ]
+    },
+    "fr": {
+      "actions": [
+        {
+          "action": "next",
+          "label": "Suivant"
+        },
+        {
+          "action": "skip",
+          "label": "Passer"
+        }
+      ],
+      "pages": [
+        {
+          "id": "more-than-cards",
+          "title": "Le Portefeuille ne garde plus seulement des cartes",
+          "body": "Voici la Capsule : un espace de stockage pour ce que vous n’êtes pas prêt à transmettre maintenant, mais que vous ne voulez pas perdre si vous devenez indisponible.",
+          "fields": {
+            "kicker": "Du nouveau dans le Portefeuille",
+            "kicker-audience": "upgraded",
+            "scene": "more-than-cards"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "only-you-know",
+          "title": "Il y a des choses que vous seul savez",
+          "body": "Mots de passe, codes d’authentification à deux facteurs, accès aux comptes, phrases de récupération des portefeuilles de cryptomonnaies et bien d’autres choses que personne d’autre que vous ne pourrait retrouver. Tant que vous êtes là, cela ne semble pas poser de problème.",
+          "fields": {
+            "scene": "only-you-know"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#3B4FA8"
+            },
+            {
+              "key": "background-from",
+              "value": "#C8D0F4"
+            },
+            {
+              "key": "background-to",
+              "value": "#DEE3F9"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "unexpected",
+          "title": "L’imprévu ne prévient pas. C’est justement ce qui le rend imprévu",
+          "body": "Comme toujours, nous remettons ces choses à plus tard, puisque tout va bien aujourd’hui. Mais pour faire face à ce qui peut arriver sans prévenir, il faut s’y préparer à l’avance.",
+          "fields": {
+            "scene": "unexpected"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#454F5E"
+            },
+            {
+              "key": "background-from",
+              "value": "#CCD3DD"
+            },
+            {
+              "key": "background-to",
+              "value": "#E0E5EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "too-soon",
+          "title": "Transmettre maintenant, c’est trop tôt. Ne jamais transmettre, c’est risqué",
+          "body": "Tant que tout va bien, inutile de transmettre vos informations à d’autres personnes ou de multiplier les endroits où elles sont stockées. Mieux vaut pourtant anticiper : le moment venu, vous ne pourrez peut-être plus les transmettre vous-même.",
+          "fields": {
+            "scene": "too-soon"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#B96D14"
+            },
+            {
+              "key": "background-from",
+              "value": "#F6E5C2"
+            },
+            {
+              "key": "background-to",
+              "value": "#FCF2DE"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "who-and-when",
+          "title": "À qui ? Vous décidez maintenant.\nQuand ? Les circonstances en décideront",
+          "body": "Vous choisissez une personne et scellez la Capsule. Tant que vous pouvez contrôler l’accès, elle reste scellée. Si vous ne le pouvez plus, la Capsule transmettra ce que vous avez préparé à l’avance.",
+          "fields": {
+            "scene": "who-and-when"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#0F7B9C"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4EAF8"
+            },
+            {
+              "key": "background-to",
+              "value": "#DDF3FB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "stay-sealed",
+          "title": "Et que votre Capsule reste scellée encore longtemps",
+          "body": "Vous avez déjà fait l’essentiel : anticiper. Il suffit maintenant d’y revenir de temps en temps pour mettre à jour ce qui a changé et ajouter ce qui pourrait un jour avoir de l’importance.",
+          "fields": {
+            "scene": "stay-sealed"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#1B8A44"
+            },
+            {
+              "key": "background-from",
+              "value": "#CBF1DA"
+            },
+            {
+              "key": "background-to",
+              "value": "#E3F8EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "prepare",
+          "title": "Préparez votre première Capsule",
+          "body": "Cela prend cinq minutes et rien ne s’ouvre aujourd’hui. Vous pouvez modifier ou supprimer la Capsule à tout moment.",
+          "actions": [
+            {
+              "action": "next",
+              "label": "Préparer une Capsule"
+            },
+            {
+              "action": "skip",
+              "label": "Passer"
+            }
+          ],
+          "fields": {
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "subscription",
+          "title": "La Capsule est proposée sur abonnement",
+          "body": "Le premier mois est offert. Ensuite, Basic : une Capsule, des pièces jointes et la transmission à la personne de votre choix.",
+          "actions": [
+            {
+              "action": "paywall",
+              "label": "Commencer le mois offert"
+            },
+            {
+              "action": "skip",
+              "label": "Passer"
+            }
+          ],
+          "fields": {
+            "kicker": "Abonnement",
+            "note": "Les cartes restent gratuites, comme nous le promettons depuis 2017. Seules les Capsules nécessitent un abonnement.",
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        }
+      ]
+    },
+    "it": {
+      "actions": [
+        {
+          "action": "next",
+          "label": "Avanti"
+        },
+        {
+          "action": "skip",
+          "label": "Salta"
+        }
+      ],
+      "pages": [
+        {
+          "id": "more-than-cards",
+          "title": "Il Portafoglio ora custodisce più delle sole carte",
+          "body": "Arriva la Capsula: uno spazio per custodire ciò che non sei ancora pronto a condividere, ma che non vuoi vada perso se non fossi più raggiungibile.",
+          "fields": {
+            "kicker": "Novità nel Portafoglio",
+            "kicker-audience": "upgraded",
+            "scene": "more-than-cards"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "only-you-know",
+          "title": "Ci sono cose che sai soltanto tu",
+          "body": "Password, codici di autenticazione a due fattori, accesso ai conti, frasi seed dei portafogli di criptovalute e molto altro che nessuno tranne te potrebbe recuperare. Finché ci sei, non sembra un problema.",
+          "fields": {
+            "scene": "only-you-know"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#3B4FA8"
+            },
+            {
+              "key": "background-from",
+              "value": "#C8D0F4"
+            },
+            {
+              "key": "background-to",
+              "value": "#DEE3F9"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "unexpected",
+          "title": "Gli imprevisti non avvisano. Altrimenti non sarebbero imprevisti",
+          "body": "Come sempre, rimandiamo queste cose perché oggi va tutto bene. Ma per affrontare ciò che può succedere all’improvviso, bisogna prepararsi prima.",
+          "fields": {
+            "scene": "unexpected"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#454F5E"
+            },
+            {
+              "key": "background-from",
+              "value": "#CCD3DD"
+            },
+            {
+              "key": "background-to",
+              "value": "#E0E5EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "too-soon",
+          "title": "Condividere ora è troppo presto. Non farlo mai è rischioso",
+          "body": "Finché tutto va bene, non c’è motivo di condividere le informazioni con altri o di conservarle in più posti. Ma conviene prepararsi per tempo: al momento del bisogno, potresti non essere più in grado di trasmetterle di persona.",
+          "fields": {
+            "scene": "too-soon"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#B96D14"
+            },
+            {
+              "key": "background-from",
+              "value": "#F6E5C2"
+            },
+            {
+              "key": "background-to",
+              "value": "#FCF2DE"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "who-and-when",
+          "title": "A chi? Lo decidi adesso.\nQuando? Lo decideranno le circostanze",
+          "body": "Scegli una persona e sigilli la Capsula. Finché puoi controllare l’accesso, rimane sigillata. Se non potrai più farlo, la Capsula trasmetterà ciò che hai preparato in anticipo.",
+          "fields": {
+            "scene": "who-and-when"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#0F7B9C"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4EAF8"
+            },
+            {
+              "key": "background-to",
+              "value": "#DDF3FB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "stay-sealed",
+          "title": "E che la tua Capsula resti sigillata ancora a lungo",
+          "body": "Hai già fatto la cosa più importante: prepararti per tempo. Ora basta tornarci ogni tanto, aggiornare ciò che è cambiato e aggiungere quello che un giorno potrebbe essere importante.",
+          "fields": {
+            "scene": "stay-sealed"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#1B8A44"
+            },
+            {
+              "key": "background-from",
+              "value": "#CBF1DA"
+            },
+            {
+              "key": "background-to",
+              "value": "#E3F8EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "prepare",
+          "title": "Prepara la tua prima Capsula",
+          "body": "Bastano cinque minuti e oggi non si apre nulla. Puoi modificare o eliminare la Capsula in qualsiasi momento.",
+          "actions": [
+            {
+              "action": "next",
+              "label": "Prepara una Capsula"
+            },
+            {
+              "action": "skip",
+              "label": "Salta"
+            }
+          ],
+          "fields": {
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "subscription",
+          "title": "La Capsula è in abbonamento",
+          "body": "Il primo mese è gratis. Poi Basic: una Capsula, allegati e la consegna alla persona che scegli.",
+          "actions": [
+            {
+              "action": "paywall",
+              "label": "Inizia il mese gratis"
+            },
+            {
+              "action": "skip",
+              "label": "Salta"
+            }
+          ],
+          "fields": {
+            "kicker": "Abbonamento",
+            "note": "Le carte restano gratuite, come promettiamo dal 2017. L’abbonamento serve solo per le Capsule.",
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        }
+      ]
+    },
+    "pl": {
+      "actions": [
+        {
+          "action": "next",
+          "label": "Dalej"
+        },
+        {
+          "action": "skip",
+          "label": "Pomiń"
+        }
+      ],
+      "pages": [
+        {
+          "id": "more-than-cards",
+          "title": "Portfel przechowuje teraz nie tylko karty",
+          "body": "Pojawiła się Kapsuła — miejsce na to, czego nie chcesz jeszcze przekazywać, ale też nie chcesz stracić, gdyby nie było z Tobą kontaktu.",
+          "fields": {
+            "kicker": "Nowości w Portfelu",
+            "kicker-audience": "upgraded",
+            "scene": "more-than-cards"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "only-you-know",
+          "title": "Są rzeczy, o których wiesz tylko Ty",
+          "body": "Hasła, kody uwierzytelniania dwuskładnikowego, dostęp do kont, frazy seed portfeli kryptowalutowych i wiele innych rzeczy, których nikt poza Tobą nie odzyska. Dopóki jesteś obok, nie wydaje się to problemem.",
+          "fields": {
+            "scene": "only-you-know"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#3B4FA8"
+            },
+            {
+              "key": "background-from",
+              "value": "#C8D0F4"
+            },
+            {
+              "key": "background-to",
+              "value": "#DEE3F9"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "unexpected",
+          "title": "Niespodziewane nie daje ostrzeżenia. Właśnie dlatego jest niespodziewane",
+          "body": "Jak zwykle odkładamy takie sprawy na później, bo dziś przecież wszystko jest w porządku. Ale na to, co może wydarzyć się nagle, można przygotować się tylko wcześniej.",
+          "fields": {
+            "scene": "unexpected"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#454F5E"
+            },
+            {
+              "key": "background-from",
+              "value": "#CCD3DD"
+            },
+            {
+              "key": "background-to",
+              "value": "#E0E5EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "too-soon",
+          "title": "Teraz jest za wcześnie, by to przekazać. Ale nie przekazać wcale to ryzyko",
+          "body": "Dopóki wszystko jest w porządku, nie ma potrzeby przekazywać informacji innym ani przechowywać ich w kolejnych miejscach. Warto jednak przygotować się wcześniej — gdy nadejdzie odpowiedni moment, samodzielne przekazanie ich może już być niemożliwe.",
+          "fields": {
+            "scene": "too-soon"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#B96D14"
+            },
+            {
+              "key": "background-from",
+              "value": "#F6E5C2"
+            },
+            {
+              "key": "background-to",
+              "value": "#FCF2DE"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "who-and-when",
+          "title": "Komu? Decydujesz teraz.\nKiedy? Zdecydują okoliczności",
+          "body": "Wybierasz osobę i pieczętujesz Kapsułę. Dopóki możesz kontrolować dostęp, pozostaje zapieczętowana. Jeśli stracisz taką możliwość, Kapsuła przekaże to, co zostało przygotowane zawczasu.",
+          "fields": {
+            "scene": "who-and-when"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#0F7B9C"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4EAF8"
+            },
+            {
+              "key": "background-to",
+              "value": "#DDF3FB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "stay-sealed",
+          "title": "I oby Twoja Kapsuła jeszcze długo pozostała zapieczętowana",
+          "body": "Najważniejsze jest już zrobione — z odpowiednim wyprzedzeniem. Teraz wystarczy od czasu do czasu do niej wrócić: zaktualizować to, co się zmieniło, i dodać to, co pewnego dnia może okazać się ważne.",
+          "fields": {
+            "scene": "stay-sealed"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#1B8A44"
+            },
+            {
+              "key": "background-from",
+              "value": "#CBF1DA"
+            },
+            {
+              "key": "background-to",
+              "value": "#E3F8EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "prepare",
+          "title": "Przygotuj pierwszą Kapsułę",
+          "body": "To pięć minut, a dziś nic się nie otwiera. Kapsułę możesz w każdej chwili zmienić lub usunąć.",
+          "actions": [
+            {
+              "action": "next",
+              "label": "Przygotuj Kapsułę"
+            },
+            {
+              "action": "skip",
+              "label": "Pomiń"
+            }
+          ],
+          "fields": {
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "subscription",
+          "title": "Kapsuła w subskrypcji",
+          "body": "Pierwszy miesiąc jest bezpłatny. Potem Basic: jedna Kapsuła, załączniki i przekazanie wybranej osobie.",
+          "actions": [
+            {
+              "action": "paywall",
+              "label": "Rozpocznij darmowy miesiąc"
+            },
+            {
+              "action": "skip",
+              "label": "Pomiń"
+            }
+          ],
+          "fields": {
+            "kicker": "Subskrypcja",
+            "note": "Karty pozostają bezpłatne — zgodnie z obietnicą, którą składamy od 2017 roku. Subskrypcja jest potrzebna tylko do Kapsuł.",
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        }
+      ]
+    },
+    "pt": {
+      "actions": [
+        {
+          "action": "next",
+          "label": "Avançar"
+        },
+        {
+          "action": "skip",
+          "label": "Pular"
+        }
+      ],
+      "pages": [
+        {
+          "id": "more-than-cards",
+          "title": "A Carteira agora guarda mais do que cartões",
+          "body": "Chegou a Cápsula: um espaço para guardar o que você ainda não está pronto para compartilhar, mas não quer que se perca se você ficar indisponível.",
+          "fields": {
+            "kicker": "Novidades na Carteira",
+            "kicker-audience": "upgraded",
+            "scene": "more-than-cards"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "only-you-know",
+          "title": "Há coisas que só você sabe",
+          "body": "Senhas, códigos de autenticação de dois fatores, acesso a contas, frases de recuperação de carteiras de criptomoedas e muito mais que ninguém além de você conseguiria recuperar. Enquanto você está por perto, isso não parece um problema.",
+          "fields": {
+            "scene": "only-you-know"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#3B4FA8"
+            },
+            {
+              "key": "background-from",
+              "value": "#C8D0F4"
+            },
+            {
+              "key": "background-to",
+              "value": "#DEE3F9"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "unexpected",
+          "title": "O inesperado não avisa. É por isso que é inesperado",
+          "body": "Como sempre, deixamos essas coisas para depois, porque hoje está tudo bem. Mas só dá para se preparar para o que pode acontecer de repente antes que aconteça.",
+          "fields": {
+            "scene": "unexpected"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#454F5E"
+            },
+            {
+              "key": "background-from",
+              "value": "#CCD3DD"
+            },
+            {
+              "key": "background-to",
+              "value": "#E0E5EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "too-soon",
+          "title": "Ainda é cedo para compartilhar. Nunca compartilhar é arriscado",
+          "body": "Enquanto está tudo bem, não há por que compartilhar informações com outras pessoas nem guardá-las em mais lugares. Mas vale se preparar com antecedência: quando chegar a hora, talvez você já não consiga transmiti-las pessoalmente.",
+          "fields": {
+            "scene": "too-soon"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#B96D14"
+            },
+            {
+              "key": "background-from",
+              "value": "#F6E5C2"
+            },
+            {
+              "key": "background-to",
+              "value": "#FCF2DE"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "who-and-when",
+          "title": "Para quem? Você decide agora.\nQuando? As circunstâncias vão decidir",
+          "body": "Você escolhe uma pessoa e sela a Cápsula. Enquanto puder controlar o acesso, ela permanecerá selada. Se não puder mais, a Cápsula entregará o que você preparou com antecedência.",
+          "fields": {
+            "scene": "who-and-when"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#0F7B9C"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4EAF8"
+            },
+            {
+              "key": "background-to",
+              "value": "#DDF3FB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "stay-sealed",
+          "title": "E que sua Cápsula continue selada por muito tempo",
+          "body": "Você já fez o mais importante: se preparou com antecedência. Agora, basta voltar a ela de vez em quando para atualizar o que mudou e acrescentar o que um dia pode ser importante.",
+          "fields": {
+            "scene": "stay-sealed"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#1B8A44"
+            },
+            {
+              "key": "background-from",
+              "value": "#CBF1DA"
+            },
+            {
+              "key": "background-to",
+              "value": "#E3F8EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "prepare",
+          "title": "Prepare sua primeira Cápsula",
+          "body": "São cinco minutos, e nada se abre hoje. Você pode alterar ou excluir a Cápsula a qualquer momento.",
+          "actions": [
+            {
+              "action": "next",
+              "label": "Preparar uma Cápsula"
+            },
+            {
+              "action": "skip",
+              "label": "Pular"
+            }
+          ],
+          "fields": {
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "subscription",
+          "title": "A Cápsula funciona por assinatura",
+          "body": "O primeiro mês é grátis. Depois, Basic: uma Cápsula, anexos e a entrega para a pessoa que você escolher.",
+          "actions": [
+            {
+              "action": "paywall",
+              "label": "Começar o mês grátis"
+            },
+            {
+              "action": "skip",
+              "label": "Pular"
+            }
+          ],
+          "fields": {
+            "kicker": "Assinatura",
+            "note": "Os cartões continuam gratuitos, como prometemos desde 2017. A assinatura só é necessária para as Cápsulas.",
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        }
+      ]
+    },
+    "tr": {
+      "actions": [
+        {
+          "action": "next",
+          "label": "İleri"
+        },
+        {
+          "action": "skip",
+          "label": "Atla"
+        }
+      ],
+      "pages": [
+        {
+          "id": "more-than-cards",
+          "title": "Cüzdan artık kartlardan fazlasını saklıyor",
+          "body": "Kapsül ile tanışın: Şimdi paylaşmaya hazır olmadığınız, ama size ulaşılamadığında kaybolmasını da istemediğiniz şeyler için bir saklama alanı.",
+          "fields": {
+            "kicker": "Cüzdan’daki yenilikler",
+            "kicker-audience": "upgraded",
+            "scene": "more-than-cards"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "only-you-know",
+          "title": "Bazı şeyleri yalnızca siz bilirsiniz",
+          "body": "Parolalar, iki faktörlü kimlik doğrulama kodları, hesaplara erişim, kripto cüzdanlarının kurtarma ifadeleri ve sizden başka kimsenin geri getiremeyeceği daha pek çok şey. Siz buradayken bu bir sorun gibi görünmez.",
+          "fields": {
+            "scene": "only-you-know"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#3B4FA8"
+            },
+            {
+              "key": "background-from",
+              "value": "#C8D0F4"
+            },
+            {
+              "key": "background-to",
+              "value": "#DEE3F9"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "unexpected",
+          "title": "Beklenmedik olan haber vermez. Zaten bu yüzden beklenmediktir",
+          "body": "Her zamanki gibi bu işleri sonraya bırakırız, çünkü bugün her şey yolundadır. Oysa aniden olabilecek bir şeye ancak önceden hazırlanabiliriz.",
+          "fields": {
+            "scene": "unexpected"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#454F5E"
+            },
+            {
+              "key": "background-from",
+              "value": "#CCD3DD"
+            },
+            {
+              "key": "background-to",
+              "value": "#E0E5EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "too-soon",
+          "title": "Şimdi paylaşmak için erken. Hiç paylaşmamak ise riskli",
+          "body": "Her şey yolundayken bilgileri başkalarıyla paylaşmaya veya saklandıkları yerlerin sayısını artırmaya gerek yoktur. Yine de önceden hazırlanmak gerekir: Gerektiğinde bunları kendiniz aktarmanız artık mümkün olmayabilir.",
+          "fields": {
+            "scene": "too-soon"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#B96D14"
+            },
+            {
+              "key": "background-from",
+              "value": "#F6E5C2"
+            },
+            {
+              "key": "background-to",
+              "value": "#FCF2DE"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "who-and-when",
+          "title": "Kime? Şimdi siz karar verirsiniz.\nNe zaman? Koşullar belirleyecek",
+          "body": "Bir kişi seçer ve Kapsülü mühürlersiniz. Erişimi kontrol edebildiğiniz sürece mühürlü kalır. Bunu yapamazsanız Kapsül, önceden hazırladıklarınızı iletir.",
+          "fields": {
+            "scene": "who-and-when"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#0F7B9C"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4EAF8"
+            },
+            {
+              "key": "background-to",
+              "value": "#DDF3FB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "stay-sealed",
+          "title": "Dileriz Kapsülünüz daha uzun süre mühürlü kalır",
+          "body": "En önemli şeyi zaten yaptınız: Önceden hazırlık yaptınız. Artık zaman zaman Kapsüle dönmeniz yeterli. Değişen bilgileri güncelleyin ve bir gün önemli olabilecek şeyleri ekleyin.",
+          "fields": {
+            "scene": "stay-sealed"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#1B8A44"
+            },
+            {
+              "key": "background-from",
+              "value": "#CBF1DA"
+            },
+            {
+              "key": "background-to",
+              "value": "#E3F8EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "prepare",
+          "title": "İlk Kapsülünüzü hazırlayın",
+          "body": "Beş dakika sürer ve bugün hiçbir şey açılmaz. Kapsülü istediğiniz zaman değiştirebilir veya silebilirsiniz.",
+          "actions": [
+            {
+              "action": "next",
+              "label": "Kapsül hazırla"
+            },
+            {
+              "action": "skip",
+              "label": "Atla"
+            }
+          ],
+          "fields": {
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "subscription",
+          "title": "Kapsül abonelikle kullanılır",
+          "body": "İlk ay ücretsiz. Sonrasında Basic: bir Kapsül, ekler ve seçtiğiniz kişiye teslim.",
+          "actions": [
+            {
+              "action": "paywall",
+              "label": "Ücretsiz ayı başlat"
+            },
+            {
+              "action": "skip",
+              "label": "Atla"
+            }
+          ],
+          "fields": {
+            "kicker": "Abonelik",
+            "note": "Kartlar, 2017’den beri söz verdiğimiz gibi ücretsiz kalıyor. Abonelik yalnızca Kapsüller için gerekli.",
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        }
+      ]
+    },
+    "uk": {
+      "actions": [
+        {
+          "action": "next",
+          "label": "Далі"
+        },
+        {
+          "action": "skip",
+          "label": "Пропустити"
+        }
+      ],
+      "pages": [
+        {
+          "id": "more-than-cards",
+          "title": "Гаманець тепер зберігає не лише картки",
+          "body": "З’явилася Капсула — сховище для того, що ви поки не готові передати, але не хочете втратити, якщо станете недоступні.",
+          "fields": {
+            "kicker": "Нове в Гаманці",
+            "kicker-audience": "upgraded",
+            "scene": "more-than-cards"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "only-you-know",
+          "title": "Є речі, які знаєте тільки ви",
+          "body": "Паролі, коди двофакторної автентифікації, доступ до рахунків, seed-фрази криптогаманців і багато іншого, чого ніхто, крім вас, не зможе відновити. І поки ви поруч, це не здається проблемою.",
+          "fields": {
+            "scene": "only-you-know"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#3B4FA8"
+            },
+            {
+              "key": "background-from",
+              "value": "#C8D0F4"
+            },
+            {
+              "key": "background-to",
+              "value": "#DEE3F9"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "unexpected",
+          "title": "Несподіване не попереджає — тому воно й несподіване",
+          "body": "Ми ж, як завжди, відкладаємо такі речі на потім, адже сьогодні все гаразд. Та до того, що може статися раптово, можна підготуватися лише заздалегідь.",
+          "fields": {
+            "scene": "unexpected"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#454F5E"
+            },
+            {
+              "key": "background-from",
+              "value": "#CCD3DD"
+            },
+            {
+              "key": "background-to",
+              "value": "#E0E5EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "too-soon",
+          "title": "Передавати зараз — зарано. Не передавати взагалі — ризиковано",
+          "body": "Поки все гаразд, немає потреби передавати інформацію іншим і зберігати її в дедалі більшій кількості місць. Але підготуватися варто заздалегідь: у потрібний момент передати її самостійно може бути вже неможливо.",
+          "fields": {
+            "scene": "too-soon"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#B96D14"
+            },
+            {
+              "key": "background-from",
+              "value": "#F6E5C2"
+            },
+            {
+              "key": "background-to",
+              "value": "#FCF2DE"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "who-and-when",
+          "title": "Кому — вирішуєте зараз.\nКоли — вирішать обставини",
+          "body": "Ви обираєте людину й запечатуєте Капсулу. Поки ви можете контролювати доступ, вона залишається запечатаною. Якщо не зможете — Капсула передасть те, про що ви подбали заздалегідь.",
+          "fields": {
+            "scene": "who-and-when"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#0F7B9C"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4EAF8"
+            },
+            {
+              "key": "background-to",
+              "value": "#DDF3FB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "stay-sealed",
+          "title": "І нехай Капсула ще довго залишається запечатаною",
+          "body": "Ви вже зробили головне — подбали заздалегідь. Тепер просто час від часу повертайтеся до неї: оновлюйте те, що змінилося, і додавайте те, що одного дня може виявитися важливим.",
+          "fields": {
+            "scene": "stay-sealed"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#1B8A44"
+            },
+            {
+              "key": "background-from",
+              "value": "#CBF1DA"
+            },
+            {
+              "key": "background-to",
+              "value": "#E3F8EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "prepare",
+          "title": "Підготуйте першу Капсулу",
+          "body": "Це п’ять хвилин, і сьогодні нічого не відкривається. Змінити або видалити Капсулу можна будь-коли.",
+          "actions": [
+            {
+              "action": "next",
+              "label": "Підготувати Капсулу"
+            },
+            {
+              "action": "skip",
+              "label": "Пропустити"
+            }
+          ],
+          "fields": {
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "subscription",
+          "title": "Капсула — за підпискою",
+          "body": "Перший місяць безкоштовно. Далі — Basic: одна Капсула, вкладення та передача обраній людині.",
+          "actions": [
+            {
+              "action": "paywall",
+              "label": "Почати безкоштовний місяць"
+            },
+            {
+              "action": "skip",
+              "label": "Пропустити"
+            }
+          ],
+          "fields": {
+            "kicker": "Підписка",
+            "note": "Картки залишаються безкоштовними — як і обіцяли з 2017 року. Підписка потрібна лише для Капсул.",
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "actions": [
+        {
+          "action": "next",
+          "label": "التالي"
+        },
+        {
+          "action": "skip",
+          "label": "تخطي"
+        }
+      ],
+      "pages": [
+        {
+          "id": "more-than-cards",
+          "title": "المحفظة تحفظ الآن أكثر من مجرد بطاقات",
+          "body": "تعرّف على الكبسولة: مساحة لحفظ ما لست مستعدًا لتسليمه الآن، ولا تريد أن يضيع إذا تعذّر الوصول إليك.",
+          "fields": {
+            "kicker": "الجديد في المحفظة",
+            "kicker-audience": "upgraded",
+            "scene": "more-than-cards"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "only-you-know",
+          "title": "هناك أمور لا يعرفها سواك",
+          "body": "كلمات المرور، ورموز المصادقة الثنائية، والوصول إلى الحسابات، وعبارات الاسترداد لمحافظ العملات الرقمية، والكثير مما لا يستطيع أحد سواك استعادته. وما دمت موجودًا، لا يبدو ذلك مشكلة.",
+          "fields": {
+            "scene": "only-you-know"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#3B4FA8"
+            },
+            {
+              "key": "background-from",
+              "value": "#C8D0F4"
+            },
+            {
+              "key": "background-to",
+              "value": "#DEE3F9"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "unexpected",
+          "title": "المفاجآت لا تنذر بقدومها — وإلا لما كانت مفاجآت",
+          "body": "وكعادتنا، نؤجل هذه الأمور إلى وقت لاحق، فكل شيء على ما يرام اليوم. لكن ما قد يحدث فجأة لا يمكن الاستعداد له إلا مسبقًا.",
+          "fields": {
+            "scene": "unexpected"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#454F5E"
+            },
+            {
+              "key": "background-from",
+              "value": "#CCD3DD"
+            },
+            {
+              "key": "background-to",
+              "value": "#E0E5EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "too-soon",
+          "title": "من المبكر تسليمها الآن، لكن عدم تسليمها أبدًا مخاطرة",
+          "body": "ما دام كل شيء على ما يرام، فلا داعي لتسليم المعلومات للآخرين أو تخزينها في أماكن إضافية. لكن الاستعداد مسبقًا يستحق العناء، فقد لا تتمكن من تسليمها بنفسك حين يحين الوقت.",
+          "fields": {
+            "scene": "too-soon"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#B96D14"
+            },
+            {
+              "key": "background-from",
+              "value": "#F6E5C2"
+            },
+            {
+              "key": "background-to",
+              "value": "#FCF2DE"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "who-and-when",
+          "title": "لمن؟ أنت تقرر الآن.\nومتى؟ هذا ما ستحدده الظروف",
+          "body": "تختار شخصًا وتختم الكبسولة. وما دمت قادرًا على التحكم في الوصول، تبقى مختومة. وإن لم تتمكن من ذلك، فستُسلّم الكبسولة ما أعددته مسبقًا.",
+          "fields": {
+            "scene": "who-and-when"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#0F7B9C"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4EAF8"
+            },
+            {
+              "key": "background-to",
+              "value": "#DDF3FB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "stay-sealed",
+          "title": "ولتبقَ الكبسولة مختومة لوقت طويل",
+          "body": "لقد أنجزت الأهم: استعددت مسبقًا. والآن، ما عليك سوى العودة إليها من وقت لآخر، وتحديث ما تغيّر، وإضافة ما قد يصبح مهمًا يومًا ما.",
+          "fields": {
+            "scene": "stay-sealed"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#1B8A44"
+            },
+            {
+              "key": "background-from",
+              "value": "#CBF1DA"
+            },
+            {
+              "key": "background-to",
+              "value": "#E3F8EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "prepare",
+          "title": "جهّز أول كبسولة لك",
+          "body": "يستغرق الأمر خمس دقائق، ولن يُفتح شيء اليوم. يمكنك تعديل الكبسولة أو حذفها في أي وقت.",
+          "actions": [
+            {
+              "action": "next",
+              "label": "تجهيز الكبسولة"
+            },
+            {
+              "action": "skip",
+              "label": "تخطي"
+            }
+          ],
+          "fields": {
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "subscription",
+          "title": "الكبسولة متاحة بالاشتراك",
+          "body": "الشهر الأول مجاني. بعد ذلك خطة Basic: كبسولة واحدة ومرفقات وتسليمها إلى الشخص الذي تختاره.",
+          "actions": [
+            {
+              "action": "paywall",
+              "label": "ابدأ الشهر المجاني"
+            },
+            {
+              "action": "skip",
+              "label": "تخطي"
+            }
+          ],
+          "fields": {
+            "kicker": "الاشتراك",
+            "note": "تبقى البطاقات مجانية، كما وعدنا منذ عام 2017. الاشتراك مطلوب للكبسولات فقط.",
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        }
+      ]
+    },
+    "hi": {
+      "actions": [
+        {
+          "action": "next",
+          "label": "आगे"
+        },
+        {
+          "action": "skip",
+          "label": "छोड़ें"
+        }
+      ],
+      "pages": [
+        {
+          "id": "more-than-cards",
+          "title": "वॉलेट अब सिर्फ़ कार्ड ही नहीं रखता",
+          "body": "पेश है कैप्सूल — ऐसी चीज़ें सहेजने की जगह जिन्हें आप अभी सौंपने के लिए तैयार नहीं हैं, लेकिन नहीं चाहते कि आपसे संपर्क न हो पाने पर वे खो जाएँ।",
+          "fields": {
+            "kicker": "वॉलेट में नया क्या है",
+            "kicker-audience": "upgraded",
+            "scene": "more-than-cards"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "only-you-know",
+          "title": "कुछ बातें सिर्फ़ आप जानते हैं",
+          "body": "पासवर्ड, टू-फ़ैक्टर ऑथेंटिकेशन के कोड, खातों तक पहुँच, क्रिप्टो वॉलेट की सीड फ़्रेज़ और बहुत कुछ जिसे आपके अलावा कोई वापस नहीं पा सकता। जब तक आप साथ हैं, यह कोई समस्या नहीं लगती।",
+          "fields": {
+            "scene": "only-you-know"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#3B4FA8"
+            },
+            {
+              "key": "background-from",
+              "value": "#C8D0F4"
+            },
+            {
+              "key": "background-to",
+              "value": "#DEE3F9"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "unexpected",
+          "title": "जो अचानक होता है, वह बताकर नहीं होता — तभी तो वह अचानक होता है",
+          "body": "हम हमेशा की तरह ऐसी बातें बाद के लिए टाल देते हैं, क्योंकि आज तो सब ठीक है। लेकिन जो कभी भी अचानक हो सकता है, उसकी तैयारी पहले से ही करनी पड़ती है।",
+          "fields": {
+            "scene": "unexpected"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#454F5E"
+            },
+            {
+              "key": "background-from",
+              "value": "#CCD3DD"
+            },
+            {
+              "key": "background-to",
+              "value": "#E0E5EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "too-soon",
+          "title": "अभी सौंपना जल्दबाज़ी है, पर कभी न सौंपना भी जोखिम है",
+          "body": "जब तक सब ठीक है, जानकारी दूसरों को सौंपने या उसे और जगहों पर रखने की ज़रूरत नहीं है। फिर भी तैयारी पहले से करनी चाहिए — ज़रूरत के समय उसे ख़ुद सौंपना शायद मुमकिन न रहे।",
+          "fields": {
+            "scene": "too-soon"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#B96D14"
+            },
+            {
+              "key": "background-from",
+              "value": "#F6E5C2"
+            },
+            {
+              "key": "background-to",
+              "value": "#FCF2DE"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "who-and-when",
+          "title": "किसे सौंपना है — यह आप अभी तय करते हैं।\nकब सौंपना है — यह हालात तय करेंगे",
+          "body": "आप एक व्यक्ति चुनते हैं और कैप्सूल सील कर देते हैं। जब तक आप पहुँच पर नियंत्रण रख सकते हैं, वह सील रहता है। अगर आप ऐसा न कर सकें, तो कैप्सूल वही सौंप देगा जो आपने पहले से तैयार रखा है।",
+          "fields": {
+            "scene": "who-and-when"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#0F7B9C"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4EAF8"
+            },
+            {
+              "key": "background-to",
+              "value": "#DDF3FB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "stay-sealed",
+          "title": "और कैप्सूल लंबे समय तक यूँ ही सील रहे",
+          "body": "सबसे ज़रूरी काम आप कर चुके हैं: पहले से तैयारी। अब बस समय-समय पर इसे देखें, जो बदल गया है उसे अपडेट करें और वह सब जोड़ें जो कभी ज़रूरी हो सकता है।",
+          "fields": {
+            "scene": "stay-sealed"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#1B8A44"
+            },
+            {
+              "key": "background-from",
+              "value": "#CBF1DA"
+            },
+            {
+              "key": "background-to",
+              "value": "#E3F8EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "prepare",
+          "title": "अपना पहला कैप्सूल तैयार करें",
+          "body": "इसमें पाँच मिनट लगते हैं और आज कुछ नहीं खुलेगा। आप कैप्सूल को कभी भी बदल या मिटा सकते हैं।",
+          "actions": [
+            {
+              "action": "next",
+              "label": "कैप्सूल तैयार करें"
+            },
+            {
+              "action": "skip",
+              "label": "छोड़ें"
+            }
+          ],
+          "fields": {
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "subscription",
+          "title": "कैप्सूल सदस्यता के साथ मिलता है",
+          "body": "पहला महीना मुफ़्त है। उसके बाद Basic: एक कैप्सूल, अटैचमेंट और आपके चुने हुए व्यक्ति तक पहुँचाना।",
+          "actions": [
+            {
+              "action": "paywall",
+              "label": "मुफ़्त महीना शुरू करें"
+            },
+            {
+              "action": "skip",
+              "label": "छोड़ें"
+            }
+          ],
+          "fields": {
+            "kicker": "सदस्यता",
+            "note": "कार्ड अब भी मुफ़्त हैं — जैसा हमने 2017 से वादा किया है। सदस्यता सिर्फ़ कैप्सूल के लिए चाहिए।",
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        }
+      ]
+    },
+    "ja": {
+      "actions": [
+        {
+          "action": "next",
+          "label": "次へ"
+        },
+        {
+          "action": "skip",
+          "label": "スキップ"
+        }
+      ],
+      "pages": [
+        {
+          "id": "more-than-cards",
+          "title": "ウォレットで保管できるのは、もうカードだけではありません",
+          "body": "カプセルが加わりました。今はまだ渡したくないけれど、あなたに連絡がつかなくなっても失われてほしくないものを保管する場所です。",
+          "fields": {
+            "kicker": "ウォレットの新機能",
+            "kicker-audience": "upgraded",
+            "scene": "more-than-cards"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "only-you-know",
+          "title": "あなたしか知らないことがある",
+          "body": "パスワード、2要素認証コード、口座へのアクセス、暗号資産ウォレットのシードフレーズなど、あなた以外には復元できないものがたくさんあります。あなたがそばにいるうちは、問題には思えません。",
+          "fields": {
+            "scene": "only-you-know"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#3B4FA8"
+            },
+            {
+              "key": "background-from",
+              "value": "#C8D0F4"
+            },
+            {
+              "key": "background-to",
+              "value": "#DEE3F9"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "unexpected",
+          "title": "突然の出来事は予告なしにやってくる。だからこそ「突然」",
+          "body": "今日もすべて順調だからと、私たちはいつものようにこうしたことを後回しにします。でも、突然起こりうることに備えるには、前もって準備するしかありません。",
+          "fields": {
+            "scene": "unexpected"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#454F5E"
+            },
+            {
+              "key": "background-from",
+              "value": "#CCD3DD"
+            },
+            {
+              "key": "background-to",
+              "value": "#E0E5EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "too-soon",
+          "title": "今渡すには早すぎる。でも、渡さないままではリスクがある",
+          "body": "すべてが順調なうちは、情報を人に渡したり、保管する場所を増やしたりする必要はありません。それでも、準備は前もってしておくべきです。いざというときには、自分で渡せなくなっているかもしれません。",
+          "fields": {
+            "scene": "too-soon"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#B96D14"
+            },
+            {
+              "key": "background-from",
+              "value": "#F6E5C2"
+            },
+            {
+              "key": "background-to",
+              "value": "#FCF2DE"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "who-and-when",
+          "title": "誰に渡すかは、今あなたが決める。\nいつ渡すかは、そのときの状況が決める",
+          "body": "相手を選び、カプセルを封印します。あなたがアクセスを管理できる間は、封印されたままです。管理できなくなったら、カプセルが前もって準備したものを届けます。",
+          "fields": {
+            "scene": "who-and-when"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#0F7B9C"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4EAF8"
+            },
+            {
+              "key": "background-to",
+              "value": "#DDF3FB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "stay-sealed",
+          "title": "カプセルが、これからも長く封印されたままでありますように",
+          "body": "前もって備えるという、一番大切なことはもうできています。あとは時々見直して、変わったことを更新し、いつか大切になるかもしれないものを追加してください。",
+          "fields": {
+            "scene": "stay-sealed"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#1B8A44"
+            },
+            {
+              "key": "background-from",
+              "value": "#CBF1DA"
+            },
+            {
+              "key": "background-to",
+              "value": "#E3F8EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "prepare",
+          "title": "最初のカプセルを準備しましょう",
+          "body": "準備は5分。今日は何も開封されません。カプセルはいつでも変更・削除できます。",
+          "actions": [
+            {
+              "action": "next",
+              "label": "カプセルを準備"
+            },
+            {
+              "action": "skip",
+              "label": "スキップ"
+            }
+          ],
+          "fields": {
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "subscription",
+          "title": "カプセルはサブスクリプションで",
+          "body": "最初の1か月は無料です。その後はBasic：カプセル1つ、添付ファイル、選んだ相手への受け渡しが含まれます。",
+          "actions": [
+            {
+              "action": "paywall",
+              "label": "無料の1か月を始める"
+            },
+            {
+              "action": "skip",
+              "label": "スキップ"
+            }
+          ],
+          "fields": {
+            "kicker": "サブスクリプション",
+            "note": "2017年からのお約束どおり、カードはこれからも無料です。サブスクリプションが必要なのはカプセルだけです。",
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        }
+      ]
+    },
+    "ko": {
+      "actions": [
+        {
+          "action": "next",
+          "label": "다음"
+        },
+        {
+          "action": "skip",
+          "label": "건너뛰기"
+        }
+      ],
+      "pages": [
+        {
+          "id": "more-than-cards",
+          "title": "이제 지갑은 카드만 보관하는 곳이 아닙니다",
+          "body": "캡슐이 생겼습니다. 지금은 아직 전달할 준비가 되지 않았지만, 연락이 닿지 않게 되더라도 사라지지 않기를 바라는 것들을 보관하는 공간입니다.",
+          "fields": {
+            "kicker": "지갑의 새로운 기능",
+            "kicker-audience": "upgraded",
+            "scene": "more-than-cards"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "only-you-know",
+          "title": "혼자만 알고 있는 것들이 있습니다",
+          "body": "비밀번호, 이중 인증 코드, 계좌 접근 권한, 암호화폐 지갑의 시드 구문 등 본인 말고는 누구도 복구할 수 없는 것들이 많습니다. 곁에 있는 동안에는 문제가 없어 보입니다.",
+          "fields": {
+            "scene": "only-you-know"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#3B4FA8"
+            },
+            {
+              "key": "background-from",
+              "value": "#C8D0F4"
+            },
+            {
+              "key": "background-to",
+              "value": "#DEE3F9"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "unexpected",
+          "title": "하지만 갑작스러운 일은 예고하지 않습니다. 그래서 갑작스러운 일이죠",
+          "body": "오늘은 모든 게 괜찮다는 이유로, 우리는 늘 그렇듯 이런 일을 나중으로 미룹니다. 하지만 갑자기 닥칠 수 있는 일은 미리 준비하는 수밖에 없습니다.",
+          "fields": {
+            "scene": "unexpected"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#454F5E"
+            },
+            {
+              "key": "background-from",
+              "value": "#CCD3DD"
+            },
+            {
+              "key": "background-to",
+              "value": "#E0E5EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "too-soon",
+          "title": "지금 전달하기엔 이릅니다. 아예 전달하지 않는 것도 위험합니다",
+          "body": "모든 게 괜찮을 때는 정보를 다른 사람에게 넘기거나 보관 장소를 늘릴 필요가 없습니다. 그래도 미리 준비해 두는 것이 좋습니다. 정작 필요한 순간에는 직접 전달할 수 없을지도 모르니까요.",
+          "fields": {
+            "scene": "too-soon"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#B96D14"
+            },
+            {
+              "key": "background-from",
+              "value": "#F6E5C2"
+            },
+            {
+              "key": "background-to",
+              "value": "#FCF2DE"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "who-and-when",
+          "title": "누구에게 전달할지는 지금 정합니다.\n언제 전달할지는 상황이 결정합니다",
+          "body": "한 사람을 선택하고 캡슐을 봉인합니다. 접근을 통제할 수 있는 동안에는 봉인된 상태가 유지됩니다. 더 이상 통제할 수 없게 되면, 캡슐이 미리 준비해 둔 것을 전달합니다.",
+          "fields": {
+            "scene": "who-and-when"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#0F7B9C"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4EAF8"
+            },
+            {
+              "key": "background-to",
+              "value": "#DDF3FB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "stay-sealed",
+          "title": "그리고 캡슐이 앞으로도 오래 봉인된 채로 있기를",
+          "body": "가장 중요한 일은 이미 하셨습니다. 미리 준비해 두셨으니까요. 이제 가끔 돌아와 바뀐 내용을 업데이트하고, 언젠가 중요해질 수 있는 것을 추가해 주세요.",
+          "fields": {
+            "scene": "stay-sealed"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#1B8A44"
+            },
+            {
+              "key": "background-from",
+              "value": "#CBF1DA"
+            },
+            {
+              "key": "background-to",
+              "value": "#E3F8EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "prepare",
+          "title": "첫 번째 캡슐을 준비하세요",
+          "body": "준비에는 5분이 걸리며, 오늘은 아무것도 열리지 않습니다. 캡슐은 언제든 수정하거나 삭제할 수 있습니다.",
+          "actions": [
+            {
+              "action": "next",
+              "label": "캡슐 준비하기"
+            },
+            {
+              "action": "skip",
+              "label": "건너뛰기"
+            }
+          ],
+          "fields": {
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "subscription",
+          "title": "캡슐은 구독으로 이용합니다",
+          "body": "첫 달은 무료입니다. 이후에는 Basic: 캡슐 1개, 첨부 파일, 선택한 사람에게 전달하기가 포함됩니다.",
+          "actions": [
+            {
+              "action": "paywall",
+              "label": "무료 한 달 시작하기"
+            },
+            {
+              "action": "skip",
+              "label": "건너뛰기"
+            }
+          ],
+          "fields": {
+            "kicker": "구독",
+            "note": "2017년부터 약속해 온 대로, 카드는 계속 무료입니다. 구독은 캡슐에만 필요합니다.",
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        }
+      ]
+    },
+    "zh": {
+      "actions": [
+        {
+          "action": "next",
+          "label": "下一步"
+        },
+        {
+          "action": "skip",
+          "label": "跳过"
+        }
+      ],
+      "pages": [
+        {
+          "id": "more-than-cards",
+          "title": "钱包现在不只存放卡片",
+          "body": "密匣来了。它用来保存那些你现在还没准备好交出去，却又不希望在联系不上你时遗失的东西。",
+          "fields": {
+            "kicker": "钱包有了新功能",
+            "kicker-audience": "upgraded",
+            "scene": "more-than-cards"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "only-you-know",
+          "title": "有些事，只有你知道",
+          "body": "密码、双重身份验证代码、账户访问权限、加密货币钱包的助记词，还有许多只有你才能找回的东西。只要你还在身边，这似乎就不是问题。",
+          "fields": {
+            "scene": "only-you-know"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#3B4FA8"
+            },
+            {
+              "key": "background-from",
+              "value": "#C8D0F4"
+            },
+            {
+              "key": "background-to",
+              "value": "#DEE3F9"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "unexpected",
+          "title": "突发状况不会预告——否则就不叫突发",
+          "body": "我们总像往常一样，把这些事留到以后再说，毕竟今天一切都好。可要应对可能突然发生的事，就只能提前做好准备。",
+          "fields": {
+            "scene": "unexpected"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#454F5E"
+            },
+            {
+              "key": "background-from",
+              "value": "#CCD3DD"
+            },
+            {
+              "key": "background-to",
+              "value": "#E0E5EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "too-soon",
+          "title": "现在交出去太早，永远不交出去又有风险",
+          "body": "一切都好时，没必要把信息交给别人，也没必要把它存到更多地方。但还是值得提前准备：真到需要时，你可能已经无法亲自交付。",
+          "fields": {
+            "scene": "too-soon"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#B96D14"
+            },
+            {
+              "key": "background-from",
+              "value": "#F6E5C2"
+            },
+            {
+              "key": "background-to",
+              "value": "#FCF2DE"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "who-and-when",
+          "title": "交给谁，你现在决定。\n何时交付，由情况决定",
+          "body": "你选择一个人，再将密匣封存。只要你还能控制访问权限，它就会保持封存。如果你无法再控制，密匣就会把你提前准备好的东西交出去。",
+          "fields": {
+            "scene": "who-and-when"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#0F7B9C"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4EAF8"
+            },
+            {
+              "key": "background-to",
+              "value": "#DDF3FB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "stay-sealed",
+          "title": "也愿密匣还能这样封存很久",
+          "body": "你已经做了最重要的事：提前做好准备。现在，只需时不时回来看看，更新有变化的内容，再添加那些有朝一日可能很重要的东西。",
+          "fields": {
+            "scene": "stay-sealed"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#1B8A44"
+            },
+            {
+              "key": "background-from",
+              "value": "#CBF1DA"
+            },
+            {
+              "key": "background-to",
+              "value": "#E3F8EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "prepare",
+          "title": "准备你的第一个密匣",
+          "body": "准备只需五分钟，今天不会开启任何内容。你随时可以修改或删除密匣。",
+          "actions": [
+            {
+              "action": "next",
+              "label": "准备密匣"
+            },
+            {
+              "action": "skip",
+              "label": "跳过"
+            }
+          ],
+          "fields": {
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "subscription",
+          "title": "密匣需要订阅",
+          "body": "首月免费。之后为 Basic：一个密匣、附件，以及交付给你选定的人。",
+          "actions": [
+            {
+              "action": "paywall",
+              "label": "免费试用一个月"
+            },
+            {
+              "action": "skip",
+              "label": "跳过"
+            }
+          ],
+          "fields": {
+            "kicker": "订阅",
+            "note": "卡片功能依然免费，这是我们自2017年起一直坚守的承诺。只有密匣需要订阅。",
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        }
+      ]
+    },
+    "zh-Hant": {
+      "actions": [
+        {
+          "action": "next",
+          "label": "下一步"
+        },
+        {
+          "action": "skip",
+          "label": "略過"
+        }
+      ],
+      "pages": [
+        {
+          "id": "more-than-cards",
+          "title": "錢包現在不只保管卡片",
+          "body": "密匣登場了。這裡可以保管你現在還沒準備好交出去，卻不希望在無法聯絡上你時遺失的東西。",
+          "fields": {
+            "kicker": "錢包的新功能",
+            "kicker-audience": "upgraded",
+            "scene": "more-than-cards"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "only-you-know",
+          "title": "有些事，只有你知道",
+          "body": "密碼、雙重認證碼、帳戶存取權限、加密貨幣錢包的助記詞，還有許多除了你以外，沒有人能找回的東西。只要你還在身邊，這似乎就不是問題。",
+          "fields": {
+            "scene": "only-you-know"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#3B4FA8"
+            },
+            {
+              "key": "background-from",
+              "value": "#C8D0F4"
+            },
+            {
+              "key": "background-to",
+              "value": "#DEE3F9"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "unexpected",
+          "title": "突發狀況不會先打招呼——否則就不叫突發",
+          "body": "我們總是照往常一樣，把這些事留到以後再說，畢竟今天一切都好。但要面對可能突然發生的事，就只能事先做好準備。",
+          "fields": {
+            "scene": "unexpected"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#454F5E"
+            },
+            {
+              "key": "background-from",
+              "value": "#CCD3DD"
+            },
+            {
+              "key": "background-to",
+              "value": "#E0E5EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "too-soon",
+          "title": "現在交出去太早，永遠不交出去又有風險",
+          "body": "一切都好時，沒有必要把資訊交給別人，也不必把它存放到更多地方。但仍值得事先準備：真正需要的時候，你可能已經無法親自交付。",
+          "fields": {
+            "scene": "too-soon"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#B96D14"
+            },
+            {
+              "key": "background-from",
+              "value": "#F6E5C2"
+            },
+            {
+              "key": "background-to",
+              "value": "#FCF2DE"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "who-and-when",
+          "title": "交給誰，你現在決定。\n何時交付，由情況決定",
+          "body": "你選定一個人，然後封存密匣。只要你還能掌握存取權限，密匣就會維持封存。若你無法再掌握，密匣便會交付你事先準備好的東西。",
+          "fields": {
+            "scene": "who-and-when"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#0F7B9C"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4EAF8"
+            },
+            {
+              "key": "background-to",
+              "value": "#DDF3FB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "stay-sealed",
+          "title": "也願密匣能繼續封存很長一段時間",
+          "body": "你已經做了最重要的事：事先做好準備。接下來，只要偶爾回來看看，更新有變動的內容，再加入那些有一天可能會很重要的東西。",
+          "fields": {
+            "scene": "stay-sealed"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#1B8A44"
+            },
+            {
+              "key": "background-from",
+              "value": "#CBF1DA"
+            },
+            {
+              "key": "background-to",
+              "value": "#E3F8EB"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "prepare",
+          "title": "準備你的第一個密匣",
+          "body": "準備只要五分鐘，今天不會開啟任何內容。你隨時可以修改或刪除密匣。",
+          "actions": [
+            {
+              "action": "next",
+              "label": "準備密匣"
+            },
+            {
+              "action": "skip",
+              "label": "略過"
+            }
+          ],
+          "fields": {
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        },
+        {
+          "id": "subscription",
+          "title": "密匣需要訂閱",
+          "body": "首月免費。之後為 Basic：一個密匣、附件，以及交付給你選定的人。",
+          "actions": [
+            {
+              "action": "paywall",
+              "label": "免費試用一個月"
+            },
+            {
+              "action": "skip",
+              "label": "略過"
+            }
+          ],
+          "fields": {
+            "kicker": "訂閱",
+            "note": "卡片功能依然免費，這是我們自2017年起一直信守的承諾。只有密匣需要訂閱。",
+            "scene": "prepare"
+          },
+          "colors": [
+            {
+              "key": "accent",
+              "value": "#2B93F0"
+            },
+            {
+              "key": "background-from",
+              "value": "#C4DEFC"
+            },
+            {
+              "key": "background-to",
+              "value": "#D8E9FD"
+            },
+            {
+              "key": "ink",
+              "value": "#121625"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

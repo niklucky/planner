@@ -63,3 +63,27 @@
   min-width: 0;
   max-width: 640px;
 }
+
+.columnsMain[data-wide] {
+  max-width: none;
+}
+
+.split {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-6);
+}
+
+.splitMain {
+  flex: 1 1 320px;
+  min-width: 0;
+  max-width: 560px;
+}
+
+.splitSide {
+  flex: none;
+  max-width: 280px;
+  position: sticky;
+  top: var(--space-4);
+}

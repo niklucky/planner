@@ -4,7 +4,7 @@ import type { TranslateInput, TranslateResult } from '@planner/shared'
 import { z } from 'zod'
 import type { Translator } from './index'
 import { TranslationError } from './index'
-import { SYSTEM_PROMPT, userPrompt } from './prompt'
+import { systemPrompt, userPrompt } from './prompt'
 
 const outputSchema = z.object({
   translations: z.array(z.object({ locale: z.string(), text: z.string() })),
@@ -35,7 +35,7 @@ export function createAnthropicTranslator(apiKey: string, model: string): Transl
         client.messages.parse({
           model,
           max_tokens: 16000,
-          system: SYSTEM_PROMPT,
+          system: systemPrompt(input.purpose),
           messages: [{ role: 'user', content: userPrompt(input) }],
           output_config: { format: zodOutputFormat(outputSchema) },
         }),

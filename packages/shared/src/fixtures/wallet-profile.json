@@ -1,0 +1,57 @@
+{
+  "app": "wallet",
+  "actions": ["next", "skip", "close", "paywall", "create-capsule"],
+  "platforms": ["ios", "android"],
+  "fields": [
+    {
+      "key": "kicker",
+      "type": "text",
+      "localized": true,
+      "description": "Small uppercase line above the title."
+    },
+    {
+      "key": "kicker-audience",
+      "type": "enum",
+      "options": ["upgraded"],
+      "description": "Shows the kicker only to this audience. upgraded = cards were imported from the previous app."
+    },
+    {
+      "key": "note",
+      "type": "text",
+      "localized": true,
+      "description": "Boxed aside above the buttons."
+    },
+    {
+      "key": "scene",
+      "type": "enum",
+      "options": [
+        "more-than-cards",
+        "only-you-know",
+        "unexpected",
+        "too-soon",
+        "who-and-when",
+        "stay-sealed",
+        "prepare"
+      ],
+      "description": "A motion scene built into the app, drawn above the title in the accent colour. An illustration file wins over it."
+    }
+  ],
+  "colors": [
+    { "key": "accent", "description": "Kicker, main button, scene." },
+    { "key": "background-from", "description": "Top of the page wash." },
+    { "key": "background-to", "description": "Bottom of the page wash." },
+    { "key": "ink", "description": "All text on the wash." }
+  ],
+  "media": [
+    {
+      "key": "illustration",
+      "accept": ["image/png", "image/jpeg", "image/webp", "video/mp4"],
+      "description": "Drawn above the title. A video shows its poster until the app has a player."
+    },
+    {
+      "key": "illustration-poster",
+      "accept": ["image/png", "image/jpeg", "image/webp"],
+      "description": "Still for a video illustration."
+    }
+  ]
+}

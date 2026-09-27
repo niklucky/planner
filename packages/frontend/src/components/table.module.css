@@ -1,0 +1,82 @@
+.scroll {
+  overflow: auto;
+  max-width: 100%;
+  max-height: calc(100vh - 220px);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+.table {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--text-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--space-1);
+  vertical-align: top;
+  text-align: left;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-hover);
+}
+
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: var(--space-2) var(--space-1);
+  color: var(--color-fg-muted);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.table th:first-child,
+.table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 180px;
+  max-width: 220px;
+  padding-right: var(--space-3);
+}
+
+.table thead th:first-child {
+  z-index: 2;
+}
+
+.table tr[data-group] th {
+  padding-top: var(--space-4);
+  color: var(--color-fg);
+  font-weight: 600;
+}
+
+.table textarea {
+  display: block;
+  width: 240px;
+  min-height: 34px;
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--color-hover);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  resize: vertical;
+  field-sizing: content;
+}
+
+.table textarea:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 0;
+}
+
+.table td[data-state="machine"] textarea {
+  outline: 1px dashed var(--color-warning);
+  outline-offset: -1px;
+}
+
+.table td[data-state="missing"] textarea {
+  outline: 1px solid var(--color-danger);
+  outline-offset: -1px;
+}

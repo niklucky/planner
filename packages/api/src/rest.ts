@@ -1,4 +1,4 @@
-import type { Services, UploadedFile } from '@planner/server'
+import { OnboardingError, type Services, type UploadedFile } from '@planner/server'
 import { screenshotSlotInput } from '@planner/shared'
 import { Hono, type Context as HonoContext } from 'hono'
 import { getCookie } from 'hono/cookie'
@@ -50,6 +50,22 @@ export function rest(services: Services) {
       return c.json(await services.screenshots.add(projectId, releaseId, slot.data, uploads))
     } catch (e) {
       return c.json({ error: (e as Error).message }, 400)
+    }
+  })
+
+  r.post('/projects/:projectId/onboardings/:onboardingId/media', async (c) => {
+    const { projectId, onboardingId } = c.req.param()
+    if (!(await member(c, projectId))) return c.json({ error: 'Unauthorized' }, 401)
+    const form = await c.req.formData()
+    const file = form.get('file')
+    if (!(file instanceof File)) return c.json({ error: 'No file' }, 400)
+    try {
+      return c.json(
+        await services.onboardings.uploadMedia(projectId, onboardingId, new Uint8Array(await file.arrayBuffer())),
+      )
+    } catch (e) {
+      if (e instanceof OnboardingError) return c.json({ error: e.message }, e.code === 'NOT_FOUND' ? 404 : 400)
+      throw e
     }
   })
 
