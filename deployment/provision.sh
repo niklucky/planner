@@ -66,18 +66,20 @@ install -d -o "$DEPLOY_USER" -g "$DEPLOY_USER" "$APP_HOME"
 install -d -o "$DEPLOY_USER" -g "$DEPLOY_USER" "$MEDIA_DIR"
 # postgres in the official image runs as uid/gid 999
 install -d -o 999 -g 999 -m 700 "$DB_DIR"
-# nginx must be able to traverse into media (it runs as www-data)
+# nginx (www-data) must be able to traverse down to media. /data itself may be 700;
+# o+x only allows passing through it, other projects' directories keep their own modes.
+chmod o+x "$(dirname "$APP_HOME")"
 chmod 755 "$APP_HOME" "$MEDIA_DIR"
 
 log "nginx site for $DOMAIN"
-SITE="/etc/nginx/sites-available/$DOMAIN"
+SITE="/etc/nginx/sites-available/$DOMAIN.conf"
 if [ -f "$SITE" ] && grep -q "managed by Certbot" "$SITE"; then
   echo "site config already has TLS from certbot; leaving it untouched"
 else
   sed -e "s#__DOMAIN__#$DOMAIN#g" -e "s#__PORT__#$PORT#g" -e "s#__MEDIA_DIR__#$MEDIA_DIR#g" \
     "$HERE/nginx/site.conf.template" > "$SITE"
 fi
-ln -sf "$SITE" "/etc/nginx/sites-enabled/$DOMAIN"
+ln -sf "$SITE" "/etc/nginx/sites-enabled/$DOMAIN.conf"
 nginx -t
 systemctl reload nginx
 
