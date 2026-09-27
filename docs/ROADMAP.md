@@ -18,9 +18,10 @@ Working notes on what to do next. Kept short on purpose; update as items land.
 - Exercise the three write paths that have never run against real stores:
   push screenshots to App Store Connect, push notes to Google Play, a real translation.
   Do it on a safe release; fix whatever surfaces.
-- Make the Docker path real: build the image, run it with `docker-compose.yml` on the VPS,
-  migrate, sign in. The production Dockerfile has not been exercised yet, and the API still
-  runs from TypeScript source via tsx.
+- Docker image: builds and runs locally with `docker-compose.yml` (migrate, static app,
+  sign in verified 2026-09-27). Still to do on the VPS: set `APP_URL` to the public https
+  address, put TLS in front, run `docker compose up -d`. The API runs from TypeScript source
+  via tsx inside the image (627 MB); slimming it is optional.
 - CI job for typecheck and tests.
 
 ### 2. Store listing metadata

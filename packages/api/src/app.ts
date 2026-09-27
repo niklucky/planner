@@ -31,6 +31,10 @@ export function createApp(services: Services, opts: AppOptions = {}) {
     }),
   )
 
+  // Unknown API paths must not fall through to the SPA's index.html.
+  app.all('/api/*', (c) => c.json({ error: 'Not found' }, 404))
+  app.all('/trpc/*', (c) => c.json({ error: 'Not found' }, 404))
+
   if (opts.staticDir) {
     app.use('*', serveStatic({ root: opts.staticDir }))
     app.get('*', serveStatic({ path: `${opts.staticDir}/index.html` }))
