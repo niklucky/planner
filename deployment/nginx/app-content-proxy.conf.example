@@ -1,0 +1,43 @@
+# Serves an app's published Planner content through the app's own domain.
+# Example for the Wallet backend (capsule.highglossy.com): the app sets
+#   ONBOARDING_URL = ${BASE_URL}/content
+# and requests /content/onboardings/capsule-intro?locale=pt-BR; nginx forwards that to
+# Planner's /public/v1/, adds the read-only key, and keeps a copy for outages.
+#
+# 1. In the http {} block (e.g. /etc/nginx/conf.d/planner-content-cache.conf):
+
+proxy_cache_path /var/cache/nginx/planner-content levels=1:2 keys_zone=planner_content:10m
+                 max_size=1g inactive=7d use_temp_path=off;
+
+# 2. In the app's server {} block:
+
+location /content/ {
+    proxy_pass https://planner.spectron.dev/public/v1/;
+    proxy_ssl_server_name on;
+    proxy_http_version 1.1;
+    proxy_set_header Host planner.spectron.dev;
+
+    # A project API key from Planner → Integrations → API keys. It lives here, never in the app.
+    proxy_set_header Authorization "Bearer plk_REPLACE_ME";
+    # Planner makes media URLs absolute against these, so files load through this domain too.
+    proxy_set_header X-Forwarded-Host $host;
+    proxy_set_header X-Forwarded-Prefix /content;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    # Nothing of the user's reaches Planner beyond the path and locale.
+    proxy_set_header Cookie "";
+    proxy_set_header X-Forwarded-For "";
+    proxy_set_header X-Real-IP "";
+
+    proxy_cache planner_content;
+    proxy_cache_key $uri$is_args$args;
+    # Planner sends Cache-Control: documents 5 minutes, files a year (immutable). These are fallbacks.
+    proxy_cache_valid 200 5m;
+    proxy_cache_valid 404 1m;
+    # A Planner outage still serves the last copy (entries live 7 days after their last use).
+    proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
+    proxy_cache_background_update on;
+    proxy_cache_lock on;
+    proxy_connect_timeout 5s;
+    proxy_read_timeout 10s;
+    add_header X-Cache-Status $upstream_cache_status always;
+}

@@ -57,11 +57,26 @@ export function appsService(db: Db) {
       })
       await linkVersionsToReleases(db, projectId, app.id)
 
-      // Drop groups that no longer contain any app.
+      // Drop groups that no longer contain any app, unless they hold onboardings or an app profile.
       const used = db.select({ id: schema.apps.groupId }).from(schema.apps).where(eq(schema.apps.projectId, projectId))
+      const withOnboardings = db
+        .select({ id: schema.onboardings.appGroupId })
+        .from(schema.onboardings)
+        .where(eq(schema.onboardings.projectId, projectId))
+      const withProfile = db
+        .select({ id: schema.appProfiles.appGroupId })
+        .from(schema.appProfiles)
+        .where(eq(schema.appProfiles.projectId, projectId))
       await db
         .delete(schema.appGroups)
-        .where(and(eq(schema.appGroups.projectId, projectId), notInArray(schema.appGroups.id, used)))
+        .where(
+          and(
+            eq(schema.appGroups.projectId, projectId),
+            notInArray(schema.appGroups.id, used),
+            notInArray(schema.appGroups.id, withOnboardings),
+            notInArray(schema.appGroups.id, withProfile),
+          ),
+        )
 
       return (await db.query.apps.findFirst({ where: eq(schema.apps.id, app.id) }))!
     },

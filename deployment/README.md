@@ -45,6 +45,21 @@ App listens on 127.0.0.1:3000 (dev: 3001); nginx terminates TLS.
 - `dev`: no-op for now.
 - `main`: the checks, then build and push the image, then deploy.
 
+## Serving onboardings to an app
+
+Apps read published onboardings from Planner's read-only public API
+(`GET /public/v1/onboardings/{key}?locale=…` with `Authorization: Bearer <project API key>`,
+and `GET /public/v1/files/{sha256}` for media). The key must not ship inside an app, so each
+app reaches Planner through a proxy on its own domain that adds the key and caches:
+
+1. Planner → Integrations → API keys → create a key (owner only; shown once).
+2. Add the block from `nginx/app-content-proxy.conf.example` to the app's nginx, with the key.
+3. Check: `curl -i https://<app domain>/content/onboardings/<key>?locale=en` → 200, an `ETag`,
+   `Cache-Control: public, max-age=300`; a second request shows `X-Cache-Status: HIT`.
+
+Publishing in Planner reaches devices within the 5-minute cache. Revoking the key answers 401
+at once, which the app treats as "could not say" and keeps its cached copy.
+
 ## Manual operations on the box
 
     sudo -iu github

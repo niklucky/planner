@@ -1,7 +1,7 @@
 import type { TranslateInput, TranslateResult } from '@planner/shared'
 import type { Translator } from './index'
 import { TranslationError } from './index'
-import { SYSTEM_PROMPT, userPrompt } from './prompt'
+import { systemPrompt, userPrompt } from './prompt'
 
 const BASE_URL = 'https://api.deepseek.com'
 
@@ -41,7 +41,7 @@ export function createDeepSeekTranslator(apiKey: string, model: string): Transla
           messages: [
             {
               role: 'system',
-              content: `${SYSTEM_PROMPT}\n\nRespond with JSON only: {"translations":[{"locale":"<target locale>","text":"<translation>"}]}`,
+              content: `${systemPrompt(input.purpose)}\n\nRespond with JSON only: {"translations":[{"locale":"<target locale>","text":"<translation>"}]}`,
             },
             { role: 'user', content: userPrompt(input) },
           ],

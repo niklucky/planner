@@ -10,6 +10,7 @@ export function translationsService(deps: { integrations: ReturnType<typeof inte
       try {
         return await translator.translate({
           text: input.text,
+          purpose: input.purpose,
           sourceLocale: input.sourceLocale,
           targetLocales: input.targetLocales.filter((l) => l !== input.sourceLocale),
         })

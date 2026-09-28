@@ -3,7 +3,7 @@
  * "ru-RU", Apple "zh-Hans" vs Google "zh-CN"). These helpers find the best
  * counterpart for a locale among another store's locales.
  */
-const ALIASES: Record<string, string[]> = {
+export const LOCALE_ALIASES: Record<string, string[]> = {
   'zh-hans': ['zh-cn', 'zh-sg', 'zh'],
   'zh-hant': ['zh-tw', 'zh-hk', 'zh-mo'],
   'zh-cn': ['zh-hans', 'zh'],
@@ -23,7 +23,7 @@ export function matchLocale(target: string, candidates: readonly string[]): stri
   const lower = target.toLowerCase()
   const byLower = new Map(candidates.map((c) => [c.toLowerCase(), c]))
   if (byLower.has(lower)) return byLower.get(lower)
-  for (const alias of ALIASES[lower] ?? []) {
+  for (const alias of LOCALE_ALIASES[lower] ?? []) {
     if (byLower.has(alias)) return byLower.get(alias)
   }
   const language = languageOf(target)

@@ -71,6 +71,13 @@
       "when": 1788738202902,
       "tag": "0009_silent_lizard",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790520443440,
+      "tag": "0010_onboardings",
+      "breakpoints": true
     }
   ]
 }

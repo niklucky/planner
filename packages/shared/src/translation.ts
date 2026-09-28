@@ -27,8 +27,13 @@ export function translationLabel(settings: { kind: string; model?: string; plan?
   return TRANSLATION_MODELS.find((m) => m.id === settings.model)?.label ?? settings.model ?? 'LLM'
 }
 
+/** What the text is, so the model keeps the right register and length. */
+export const TRANSLATION_PURPOSES = ['release-notes', 'onboarding'] as const
+export type TranslationPurpose = (typeof TRANSLATION_PURPOSES)[number]
+
 export const translateInput = z.object({
   text: z.string().min(1).max(4000),
+  purpose: z.enum(TRANSLATION_PURPOSES).default('release-notes'),
   sourceLocale: z.string().min(2).max(20),
   targetLocales: z.array(z.string().min(2).max(20)).min(1).max(50),
 })

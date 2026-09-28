@@ -1,6 +1,7 @@
 import { Page } from '@planner/frontend'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, getRouteApi } from '@tanstack/react-router'
+import { ApiKeys } from '../../../../components/api-keys'
 import { AppStoreIntegration } from '../../../../components/app-store-integration'
 import { GooglePlayIntegration } from '../../../../components/google-play-integration'
 import { TranslationIntegration } from '../../../../components/translation-integration'
@@ -27,6 +28,7 @@ function IntegrationsPage() {
       <AppStoreIntegration projectId={project.id} integration={appStore} />
       <GooglePlayIntegration projectId={project.id} integration={googlePlay} />
       <TranslationIntegration projectId={project.id} integration={translation} />
+      <ApiKeys projectId={project.id} isOwner={project.role === 'owner'} />
     </Page>
   )
 }
