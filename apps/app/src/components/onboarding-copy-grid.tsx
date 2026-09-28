@@ -146,8 +146,11 @@ export function OnboardingCopyGrid({ projectId, detail }: { projectId: string; d
         return { locale, ...(state.labels[locale] ?? { labels: [], machine: [] }) }
       })
     await save.mutateAsync({ projectId, onboardingId: draft.id, pages, defaultLabels })
-    // Keep edits made while saving; only what was sent is clean now.
-    setGrid((g) => ({ ...g, dirty: new Set([...g.dirty].filter((k) => !state.dirty.has(k))) }))
+    // Records are replaced on every edit, so one that is still the object we sent is clean;
+    // anything edited while the save was in flight stays dirty.
+    const sent = (g: Grid, k: string) =>
+      k.startsWith('labels|') ? g.labels[k.slice(7)] === state.labels[k.slice(7)] : g.copies[k] === state.copies[k]
+    setGrid((g) => ({ ...g, dirty: new Set([...g.dirty].filter((k) => !(state.dirty.has(k) && sent(g, k)))) }))
     await queryClient.invalidateQueries(trpc.onboardings.pathFilter())
   }
 

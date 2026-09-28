@@ -18,6 +18,12 @@ export function publicBase(c: HonoContext, fallback: string) {
   return `${proto}://${host}${prefix}`
 }
 
+/**
+ * A document depends on the key (which project answers) and on where the proxy mounts
+ * us (media URLs), so shared caches must keep one copy per combination.
+ */
+const DOCUMENT_VARY = 'Authorization, X-Forwarded-Host, X-Forwarded-Prefix, X-Forwarded-Proto'
+
 function bearer(c: HonoContext) {
   return c.req
     .header('authorization')
@@ -52,8 +58,9 @@ export function publicApi(services: Services, publicUrl: string) {
       publicBase(c, publicUrl),
     )
     if (result.status === 401) return c.json({ error: 'Unauthorized' }, 401, { 'cache-control': 'no-store' })
-    if (result.status === 404) return c.json({ error: 'Not found' }, 404, { 'cache-control': 'public, max-age=60' })
-    const headers = { etag: result.etag, 'cache-control': 'public, max-age=300' }
+    if (result.status === 404)
+      return c.json({ error: 'Not found' }, 404, { 'cache-control': 'public, max-age=60', vary: DOCUMENT_VARY })
+    const headers = { etag: result.etag, 'cache-control': 'public, max-age=300', vary: DOCUMENT_VARY }
     if (notModified(c, result.etag)) return c.body(null, 304, headers)
     return c.json(result.document, 200, headers)
   })

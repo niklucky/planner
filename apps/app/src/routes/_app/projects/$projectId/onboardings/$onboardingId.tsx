@@ -140,7 +140,14 @@ function OnboardingEditor() {
           onSelect={(page) => navigate({ search: (s) => ({ ...s, page }) })}
         />
       )}
-      {tab === 'copy' && <OnboardingCopyGrid key={draft.id} projectId={project.id} detail={detail} />}
+      {tab === 'copy' && (
+        // Replacing the draft (Import JSON) recreates its pages with new ids: start the grid afresh then.
+        <OnboardingCopyGrid
+          key={`${draft.id}:${draft.pages.map((p) => p.id).join(',')}`}
+          projectId={project.id}
+          detail={detail}
+        />
+      )}
       {tab === 'settings' && (
         <OnboardingSettings
           projectId={project.id}

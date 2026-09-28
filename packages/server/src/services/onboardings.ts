@@ -685,7 +685,9 @@ export function onboardingsService(db: Db, deps: OnboardingDeps) {
           page.media ? { ...page, media: page.media.map((m) => ({ ...m, url: `${publicBase}/${m.url}` })) } : page,
         ),
       })
-      return { status: 200, document, etag: `"${release.id.slice(0, 8)}.${release.revision}.${served}"` }
+      // The media base changes the body, so it is part of the representation's tag.
+      const base = createHash('sha256').update(publicBase).digest('hex').slice(0, 8)
+      return { status: 200, document, etag: `"${release.id.slice(0, 8)}.${release.revision}.${served}.${base}"` }
     },
 
     /** A file some release refers to, by hash. Nothing else is served publicly. */
