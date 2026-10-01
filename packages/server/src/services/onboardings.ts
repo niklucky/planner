@@ -6,12 +6,15 @@ import {
   appProfileSchema,
   buildRelease,
   type CreateOnboardingInput,
+  type DeployPreview,
   diffReleases,
   draftLocales,
   exportDraft,
   importStored,
   type MediaFile,
   missingWords,
+  nextReleaseVersion,
+  type OnboardingDeployment,
   type OnboardingDetail,
   type OnboardingDocument,
   type OnboardingDraft,
@@ -24,6 +27,7 @@ import {
   resolveOnboardingLocale,
   type SaveCopyInput,
   type SavePageInput,
+  sortEnvironments,
   storedOnboardingSchema,
   type UpdateOnboardingInput,
 } from '@planner/shared'
@@ -95,6 +99,17 @@ const toRelease = (r: typeof schema.onboardingReleases.$inferSelect): Onboarding
 })
 
 const unique = <T>(items: T[]) => [...new Set(items)]
+
+type ReleaseRow = typeof schema.onboardingReleases.$inferSelect
+type EnvironmentRow = typeof schema.projectEnvironments.$inferSelect
+
+/** Compare two releases as if they carried the same version, so the diff shows content only. */
+function diffContent(from: ReleaseRow | null, to: Record<string, OnboardingDocument>, defaultLocale: string) {
+  const version = Object.values(to)[0]?.version ?? 1
+  const withVersion = (docs: Record<string, OnboardingDocument>) =>
+    Object.fromEntries(Object.entries(docs).map(([l, d]) => [l, { ...d, version }]))
+  return diffReleases(from ? withVersion(from.document) : null, to, defaultLocale)
+}
 
 export function onboardingsService(db: Db, deps: OnboardingDeps) {
   async function requireGroup(projectId: string, groupId: string) {
@@ -200,6 +215,14 @@ export function onboardingsService(db: Db, deps: OnboardingDeps) {
     return new Map(rows.map((f) => [f.id, toMediaFile(f)]))
   }
 
+  async function requireRelease(onboardingId: string, releaseId: string) {
+    const row = await db.query.onboardingReleases.findFirst({
+      where: and(eq(schema.onboardingReleases.id, releaseId), eq(schema.onboardingReleases.onboardingId, onboardingId)),
+    })
+    if (!row) throw new OnboardingError('NOT_FOUND', 'Release not found')
+    return row
+  }
+
   async function latestRelease(onboardingId: string) {
     const [row] = await db
       .select()
@@ -210,22 +233,111 @@ export function onboardingsService(db: Db, deps: OnboardingDeps) {
     return row ?? null
   }
 
-  /** The documents a publish would freeze now, with the version it would carry. */
-  async function prepare(projectId: string, onboardingId: string, offerAgain: boolean) {
+  async function requireEnvironment(projectId: string, environmentId: string) {
+    const row = await db.query.projectEnvironments.findFirst({
+      where: and(eq(schema.projectEnvironments.id, environmentId), eq(schema.projectEnvironments.projectId, projectId)),
+    })
+    if (!row) throw new OnboardingError('NOT_FOUND', 'Environment not found')
+    return row
+  }
+
+  async function environmentsOf(projectId: string) {
+    const rows = await db
+      .select()
+      .from(schema.projectEnvironments)
+      .where(eq(schema.projectEnvironments.projectId, projectId))
+    return sortEnvironments(rows)
+  }
+
+  /** What `env` serves of an onboarding: its own release, else production's. */
+  async function servedRelease(onboardingId: string, env: EnvironmentRow): Promise<ReleaseRow | null> {
+    const rows = await db
+      .select({ release: schema.onboardingReleases, environmentId: schema.onboardingDeployments.environmentId })
+      .from(schema.onboardingDeployments)
+      .innerJoin(schema.onboardingReleases, eq(schema.onboardingDeployments.releaseId, schema.onboardingReleases.id))
+      .innerJoin(
+        schema.projectEnvironments,
+        eq(schema.onboardingDeployments.environmentId, schema.projectEnvironments.id),
+      )
+      .where(
+        and(
+          eq(schema.onboardingDeployments.onboardingId, onboardingId),
+          or(eq(schema.onboardingDeployments.environmentId, env.id), eq(schema.projectEnvironments.isProduction, true)),
+        ),
+      )
+    return (rows.find((r) => r.environmentId === env.id) ?? rows[0])?.release ?? null
+  }
+
+  /** What every environment of the project serves of an onboarding, production first. */
+  async function deploymentsOf(onboardingId: string, envs: EnvironmentRow[]): Promise<OnboardingDeployment[]> {
+    const rows = await db
+      .select({ deployment: schema.onboardingDeployments, release: schema.onboardingReleases })
+      .from(schema.onboardingDeployments)
+      .innerJoin(schema.onboardingReleases, eq(schema.onboardingDeployments.releaseId, schema.onboardingReleases.id))
+      .where(eq(schema.onboardingDeployments.onboardingId, onboardingId))
+    const own = new Map(rows.map((r) => [r.deployment.environmentId, r]))
+    const production = envs.find((e) => e.isProduction)
+    const productionRelease = production ? own.get(production.id)?.release : undefined
+    return envs.map((env) => {
+      const mine = own.get(env.id)
+      const release = mine?.release ?? (env.isProduction ? undefined : productionRelease)
+      return {
+        environmentId: env.id,
+        release: release ? toRelease(release) : null,
+        followsProduction: !mine && !env.isProduction,
+        deployedAt: mine?.deployment.deployedAt ?? null,
+      }
+    })
+  }
+
+  async function deploy(
+    onboardingId: string,
+    environmentId: string,
+    releaseId: string,
+    userId: string,
+    tx: Pick<Db, 'insert'> = db,
+  ) {
+    const values = { releaseId, deployedAt: new Date(), deployedBy: userId }
+    await tx
+      .insert(schema.onboardingDeployments)
+      .values({ onboardingId, environmentId, ...values })
+      .onConflictDoUpdate({
+        target: [schema.onboardingDeployments.onboardingId, schema.onboardingDeployments.environmentId],
+        set: values,
+      })
+  }
+
+  /** The highest version any release of the onboarding carried (versions go down after a rollback's silent fix). */
+  async function highestVersion(onboardingId: string) {
+    const [row] = await db
+      .select({ version: max(schema.onboardingReleases.version) })
+      .from(schema.onboardingReleases)
+      .where(eq(schema.onboardingReleases.onboardingId, onboardingId))
+    return row?.version ?? null
+  }
+
+  /**
+   * The documents a publish to `environmentId` would freeze now. The version follows
+   * production's (see nextReleaseVersion), so offering it again on Development means
+   * production users see it again once it's promoted, and a plain publish there never does.
+   */
+  async function prepare(projectId: string, onboardingId: string, offerAgain: boolean, environmentId: string) {
     const o = await requireOnboarding(projectId, onboardingId)
+    const env = await requireEnvironment(projectId, environmentId)
+    const production = env.isProduction ? env : (await environmentsOf(projectId)).find((e) => e.isProduction)
     const draft = await loadDraft(o)
-    const [profile, files, latest] = await Promise.all([
+    const [profile, files, latest, highest, current, live] = await Promise.all([
       profileFor(o.appGroupId),
       filesFor(projectId, draft),
       latestRelease(o.id),
+      highestVersion(o.id),
+      servedRelease(o.id, env),
+      production ? servedRelease(o.id, production) : null,
     ])
-    const version = latest ? latest.version + (offerAgain ? 1 : 0) : 1
+    const version = nextReleaseVersion(live?.version ?? null, highest, offerAgain)
     const build = buildRelease(draft, profile, files, version)
-    // Compare against the last release as if it carried the same version, so the diff shows content only.
-    const withVersion = (docs: Record<string, OnboardingDocument>) =>
-      Object.fromEntries(Object.entries(docs).map(([l, d]) => [l, { ...d, version }]))
-    const diff = diffReleases(latest ? withVersion(latest.document) : null, build.documents, draft.defaultLocale)
-    return { o, draft, build, latest, version, diff }
+    const diff = diffContent(current, build.documents, draft.defaultLocale)
+    return { o, env, draft, build, latest, current, live, version, diff }
   }
 
   async function replaceDraft(
@@ -263,13 +375,16 @@ export function onboardingsService(db: Db, deps: OnboardingDeps) {
     })
   }
 
-  /** The project a key belongs to, or null. Records use at most every few minutes. */
+  /** The environment a key belongs to, or null. Records use at most every few minutes. */
   async function verifyApiKey(token: string) {
     if (!token.startsWith(API_KEY_PREFIX)) return null
-    const row = await db.query.projectApiKeys.findFirst({
-      where: eq(schema.projectApiKeys.tokenHash, hashToken(token)),
-    })
-    if (!row) return null
+    const [found] = await db
+      .select({ key: schema.projectApiKeys, environment: schema.projectEnvironments })
+      .from(schema.projectApiKeys)
+      .innerJoin(schema.projectEnvironments, eq(schema.projectApiKeys.environmentId, schema.projectEnvironments.id))
+      .where(eq(schema.projectApiKeys.tokenHash, hashToken(token)))
+    if (!found) return null
+    const row = found.key
     const stale = new Date(Date.now() - 5 * 60 * 1000)
     await db
       .update(schema.projectApiKeys)
@@ -280,12 +395,10 @@ export function onboardingsService(db: Db, deps: OnboardingDeps) {
           or(isNull(schema.projectApiKeys.lastUsedAt), lt(schema.projectApiKeys.lastUsedAt, stale)),
         ),
       )
-    return row.projectId
+    return found.environment
   }
 
   return {
-    verifyApiKey,
-
     async list(projectId: string): Promise<OnboardingSummary[]> {
       const rows = await db
         .select({ o: schema.onboardings, groupName: schema.appGroups.name })
@@ -294,13 +407,13 @@ export function onboardingsService(db: Db, deps: OnboardingDeps) {
         .where(eq(schema.onboardings.projectId, projectId))
         .orderBy(asc(schema.onboardings.createdAt))
       const profiles = new Map<string, AppProfile | null>()
+      const envs = await environmentsOf(projectId)
       const out: OnboardingSummary[] = []
       for (const { o, groupName } of rows) {
         if (!profiles.has(o.appGroupId)) profiles.set(o.appGroupId, await profileFor(o.appGroupId))
         const draft = await loadDraft(o)
         const profile = profiles.get(o.appGroupId) ?? null
         const locales = draftLocales(draft)
-        const latest = await latestRelease(o.id)
         out.push({
           id: o.id,
           groupId: o.appGroupId,
@@ -310,8 +423,7 @@ export function onboardingsService(db: Db, deps: OnboardingDeps) {
           defaultLocale: o.defaultLocale,
           localeCount: locales.length,
           completeCount: locales.filter((l) => missingWords(draft, profile, l).length === 0).length,
-          liveVersion: latest?.version ?? null,
-          lastPublishedAt: latest?.publishedAt ?? null,
+          deployments: await deploymentsOf(o.id, envs),
         })
       }
       return out
@@ -340,16 +452,18 @@ export function onboardingsService(db: Db, deps: OnboardingDeps) {
     async get(projectId: string, onboardingId: string): Promise<OnboardingDetail> {
       const o = await requireOnboarding(projectId, onboardingId)
       const draft = await loadDraft(o)
-      const [profile, files, latest] = await Promise.all([
+      const [profile, files, latest, deployments] = await Promise.all([
         profileFor(o.appGroupId),
         filesFor(projectId, draft),
         latestRelease(o.id),
+        environmentsOf(projectId).then((envs) => deploymentsOf(o.id, envs)),
       ])
       return {
         draft,
         profile,
         files: Object.fromEntries(files),
         latestRelease: latest ? toRelease(latest) : null,
+        deployments,
       }
     },
 
@@ -550,20 +664,28 @@ export function onboardingsService(db: Db, deps: OnboardingDeps) {
       return exportDraft(draft, files, (f) => `${publicBase}/files/${f.sha256}`, latest?.version ?? 1)
     },
 
-    async previewPublish(projectId: string, onboardingId: string, offerAgain: boolean): Promise<PublishPreview> {
-      const { build, latest, diff } = await prepare(projectId, onboardingId, offerAgain)
+    async previewPublish(
+      projectId: string,
+      onboardingId: string,
+      offerAgain: boolean,
+      environmentId: string,
+    ): Promise<PublishPreview> {
+      const { build, current, live, version, diff } = await prepare(projectId, onboardingId, offerAgain, environmentId)
       return {
         errors: build.errors,
         warnings: build.warnings,
         locales: Object.keys(build.documents),
         skipped: build.skipped,
         diff,
-        current: latest ? { version: latest.version, revision: latest.revision } : null,
+        current: current ? { version: current.version, revision: current.revision } : null,
+        productionVersion: live?.version ?? null,
+        version,
       }
     },
 
-    async publish(projectId: string, onboardingId: string, offerAgain: boolean, userId: string) {
-      const { o, build, latest, version } = await prepare(projectId, onboardingId, offerAgain)
+    /** Freezes the draft into a release and serves it in one environment. */
+    async publish(projectId: string, onboardingId: string, offerAgain: boolean, environmentId: string, userId: string) {
+      const { o, env, build, latest, version } = await prepare(projectId, onboardingId, offerAgain, environmentId)
       if (build.errors.length > 0) throw new OnboardingError('INVALID', build.errors.join('\n'))
       const release = await db.transaction(async (tx) => {
         const [row] = await tx
@@ -582,9 +704,52 @@ export function onboardingsService(db: Db, deps: OnboardingDeps) {
             .insert(schema.onboardingReleaseFiles)
             .values(build.fileIds.map((fileId) => ({ releaseId: row!.id, fileId })))
         }
+        await deploy(o.id, env.id, row!.id, userId, tx)
         return row!
       })
       return toRelease(release)
+    },
+
+    /** What serving `releaseId` in an environment would change there. */
+    async previewDeploy(
+      projectId: string,
+      onboardingId: string,
+      environmentId: string,
+      releaseId: string,
+    ): Promise<DeployPreview> {
+      const o = await requireOnboarding(projectId, onboardingId)
+      const env = await requireEnvironment(projectId, environmentId)
+      const release = await requireRelease(o.id, releaseId)
+      const current = await servedRelease(o.id, env)
+      return {
+        diff: diffContent(current, release.document, release.defaultLocale),
+        current: current ? { version: current.version, revision: current.revision } : null,
+        release: { version: release.version, revision: release.revision },
+      }
+    },
+
+    /** Serves an existing release in an environment: promotes what was tested, or rolls back. */
+    async deploy(projectId: string, onboardingId: string, environmentId: string, releaseId: string, userId: string) {
+      const o = await requireOnboarding(projectId, onboardingId)
+      const env = await requireEnvironment(projectId, environmentId)
+      const release = await requireRelease(o.id, releaseId)
+      await deploy(o.id, env.id, release.id, userId)
+      return toRelease(release)
+    },
+
+    /** Drops an environment's own release, so it serves production's again. */
+    async followProduction(projectId: string, onboardingId: string, environmentId: string) {
+      const o = await requireOnboarding(projectId, onboardingId)
+      const env = await requireEnvironment(projectId, environmentId)
+      if (env.isProduction) throw new OnboardingError('INVALID', 'Production can’t follow itself')
+      await db
+        .delete(schema.onboardingDeployments)
+        .where(
+          and(
+            eq(schema.onboardingDeployments.onboardingId, o.id),
+            eq(schema.onboardingDeployments.environmentId, env.id),
+          ),
+        )
     },
 
     async releases(projectId: string, onboardingId: string) {
@@ -652,33 +817,35 @@ export function onboardingsService(db: Db, deps: OnboardingDeps) {
     // ── Public, read-only ────────────────────────────────────────────────────
 
     /**
-     * The latest release of `key` in the language closest to `locale`, for the holder
-     * of a project API key. Media URLs are made absolute against `publicBase`.
+     * What the key's environment serves of `key`, in the language closest to `locale`.
+     * Media URLs are made absolute against `publicBase`. `production` tells the caller
+     * how long the answer may be cached.
      */
     async publicDocument(
       token: string,
       key: string,
       locale: string | undefined,
       publicBase: string,
-    ): Promise<{ status: 401 } | { status: 404 } | { status: 200; document: OnboardingDocument; etag: string }> {
-      const projectId = await verifyApiKey(token)
-      if (!projectId) return { status: 401 }
-      const [row] = await db
-        .select({ release: schema.onboardingReleases })
-        .from(schema.onboardingReleases)
-        .innerJoin(schema.onboardings, eq(schema.onboardingReleases.onboardingId, schema.onboardings.id))
-        .where(and(eq(schema.onboardings.projectId, projectId), eq(schema.onboardings.key, key)))
-        .orderBy(desc(schema.onboardingReleases.revision))
-        .limit(1)
-      if (!row) return { status: 404 }
-      const { release } = row
+    ): Promise<
+      | { status: 401 }
+      | { status: 404; production: boolean }
+      | { status: 200; production: boolean; document: OnboardingDocument; etag: string }
+    > {
+      const env = await verifyApiKey(token)
+      if (!env) return { status: 401 }
+      const production = env.isProduction
+      const o = await db.query.onboardings.findFirst({
+        where: and(eq(schema.onboardings.projectId, env.projectId), eq(schema.onboardings.key, key)),
+      })
+      const release = o ? await servedRelease(o.id, env) : null
+      if (!release) return { status: 404, production }
       const served = resolveOnboardingLocale(
         locale ?? release.defaultLocale,
         Object.keys(release.document),
         release.defaultLocale,
       )
       const stored = release.document[served]
-      if (!stored) return { status: 404 }
+      if (!stored) return { status: 404, production }
       const document = onboardingDocumentSchema.parse({
         ...stored,
         pages: stored.pages.map((page) =>
@@ -687,7 +854,12 @@ export function onboardingsService(db: Db, deps: OnboardingDeps) {
       })
       // The media base changes the body, so it is part of the representation's tag.
       const base = createHash('sha256').update(publicBase).digest('hex').slice(0, 8)
-      return { status: 200, document, etag: `"${release.id.slice(0, 8)}.${release.revision}.${served}.${base}"` }
+      return {
+        status: 200,
+        production,
+        document,
+        etag: `"${release.id.slice(0, 8)}.${release.revision}.${served}.${base}"`,
+      }
     },
 
     /** A file some release refers to, by hash. Nothing else is served publicly. */
@@ -716,26 +888,36 @@ export function onboardingsService(db: Db, deps: OnboardingDeps) {
         id: r.id,
         name: r.name,
         prefix: r.prefix,
+        environmentId: r.environmentId,
         createdAt: r.createdAt,
         lastUsedAt: r.lastUsedAt,
       }))
     },
 
     /** Returns the key once; only its hash is stored. */
-    async createApiKey(projectId: string, userId: string, name: string) {
+    async createApiKey(projectId: string, userId: string, name: string, environmentId: string) {
+      const env = await requireEnvironment(projectId, environmentId)
       const { token } = generateToken(24)
       const key = `${API_KEY_PREFIX}${token}`
       const [row] = await db
         .insert(schema.projectApiKeys)
         .values({
           projectId,
+          environmentId: env.id,
           name,
           tokenHash: hashToken(key),
           prefix: key.slice(0, API_KEY_PREFIX.length + 6),
           createdBy: userId,
         })
         .returning()
-      return { id: row!.id, name: row!.name, prefix: row!.prefix, createdAt: row!.createdAt, token: key }
+      return {
+        id: row!.id,
+        name: row!.name,
+        prefix: row!.prefix,
+        environmentId: row!.environmentId,
+        createdAt: row!.createdAt,
+        token: key,
+      }
     },
 
     async revokeApiKey(projectId: string, apiKeyId: string) {

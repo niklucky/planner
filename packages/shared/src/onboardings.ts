@@ -624,6 +624,22 @@ export function contrastRatio(a: string, b: string): number | null {
   return (hi + 0.05) / (lo + 0.05)
 }
 
+/**
+ * The version a new release carries; apps show an onboarding again to people who skipped
+ * or dismissed it when the version goes up. A silent fix keeps Production's version.
+ * Offering it again goes above every version ever released, not just Production's:
+ * Production may have been rolled back below a version people already turned down.
+ */
+export function nextReleaseVersion(
+  productionVersion: number | null,
+  highestVersion: number | null,
+  offerAgain: boolean,
+): number {
+  if (productionVersion === null) return 1
+  if (!offerAgain) return productionVersion
+  return Math.max(productionVersion, highestVersion ?? 0) + 1
+}
+
 // ── API inputs and outputs ──────────────────────────────────────────────────
 
 export const onboardingKeySchema = z
@@ -718,9 +734,17 @@ export const importOnboardingInput = z.object({
 
 export const publishOnboardingInput = z.object({
   onboardingId: z.uuid(),
-  /** Bumps `version`, so people who skipped or dismissed it see it again. */
+  /** Bumps `version` past production's, so people who skipped or dismissed it see it again. */
   offerAgain: z.boolean(),
+  /** Where the new release goes live. */
+  environmentId: z.uuid(),
 })
+
+/** Serve an existing release in an environment: promote what was tested, or roll back. */
+export const deployReleaseInput = z.object({ onboardingId: z.uuid(), environmentId: z.uuid(), releaseId: z.uuid() })
+
+/** An onboarding in one environment, e.g. to make Development follow production again. */
+export const onboardingEnvironmentInput = z.object({ onboardingId: z.uuid(), environmentId: z.uuid() })
 
 export const saveAppProfileInput = z.object({ groupId: z.uuid(), json: z.string().min(2).max(200_000) })
 
@@ -735,8 +759,8 @@ export interface OnboardingSummary {
   localeCount: number
   /** Languages with every word filled in. */
   completeCount: number
-  liveVersion: number | null
-  lastPublishedAt: Date | null
+  /** One per environment of the project, production first. */
+  deployments: OnboardingDeployment[]
 }
 
 export interface OnboardingRelease {
@@ -748,12 +772,25 @@ export interface OnboardingRelease {
   publishedBy: string | null
 }
 
+/** What one environment serves of an onboarding. */
+export interface OnboardingDeployment {
+  environmentId: string
+  /** Its own release, or production's while it follows production. Null: apps there get 404. */
+  release: OnboardingRelease | null
+  /** No release of its own, so it serves production's. Never true for production. */
+  followsProduction: boolean
+  /** When its own release was put there. */
+  deployedAt: Date | null
+}
+
 export interface OnboardingDetail {
   draft: OnboardingDraft
   profile: AppProfile | null
   /** Files the draft's pages use, by id. */
   files: Record<string, MediaFile>
   latestRelease: OnboardingRelease | null
+  /** One per environment of the project, production first. */
+  deployments: OnboardingDeployment[]
 }
 
 export interface PublishPreview {
@@ -761,14 +798,29 @@ export interface PublishPreview {
   warnings: string[]
   locales: string[]
   skipped: Array<{ locale: string; missing: string[] }>
+  /** Against what the chosen environment serves now. */
   diff: ReleaseDiff
-  /** Version and revision of the latest release, when there is one. */
+  /** What the chosen environment serves now. */
   current: { version: number; revision: number } | null
+  /** Production's version: offering it again is measured from it. Null before anything is in production. */
+  productionVersion: number | null
+  /** The version the new release will carry. */
+  version: number
+}
+
+export interface DeployPreview {
+  /** Against what the environment serves now. */
+  diff: ReleaseDiff
+  current: { version: number; revision: number } | null
+  release: { version: number; revision: number }
 }
 
 // ── Project API keys (read-only access to published content) ────────────────
 
-export const createApiKeyInput = z.object({ name: z.string().trim().min(1, 'Enter a name').max(120) })
+export const createApiKeyInput = z.object({
+  name: z.string().trim().min(1, 'Enter a name').max(120),
+  environmentId: z.uuid('Choose an environment'),
+})
 export const apiKeyIdInput = z.object({ apiKeyId: z.uuid() })
 
 export interface ApiKey {
@@ -776,6 +828,7 @@ export interface ApiKey {
   name: string
   /** First characters of the key, to tell keys apart. */
   prefix: string
+  environmentId: string
   createdAt: Date
   lastUsedAt: Date | null
 }

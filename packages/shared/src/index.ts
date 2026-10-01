@@ -1,5 +1,6 @@
 export * from './apps'
 export * from './auth'
+export * from './environments'
 export * from './integrations'
 export * from './locales'
 export * from './onboarding-json'

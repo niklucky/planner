@@ -1,9 +1,23 @@
-import { Button, Callout, Field, Form, Inline, Input, Row, Section, Stack, Text } from '@planner/frontend'
+import {
+  Badge,
+  Button,
+  Callout,
+  Field,
+  Form,
+  Inline,
+  Input,
+  Row,
+  Section,
+  Select,
+  Stack,
+  Text,
+} from '@planner/frontend'
 import { createApiKeyInput } from '@planner/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { type FormEvent, useState } from 'react'
 import { type FieldErrors, parseForm } from '../lib/form'
 import { useTRPC } from '../lib/trpc'
+import { useEnvironments } from './environments'
 
 /** Read-only keys for published content, sent by an app's proxy (never shipped inside an app). */
 export function ApiKeys({ projectId, isOwner }: { projectId: string; isOwner: boolean }) {
@@ -11,6 +25,8 @@ export function ApiKeys({ projectId, isOwner }: { projectId: string; isOwner: bo
   const queryClient = useQueryClient()
   const { data: keys = [] } = useQuery(trpc.onboardings.apiKeys.queryOptions({ projectId }))
   const { data: publicUrl } = useQuery(trpc.onboardings.publicUrl.queryOptions({ projectId }))
+  const environments = useEnvironments(projectId)
+  const envName = (id: string) => environments.find((e) => e.id === id)?.name ?? '…'
   const [errors, setErrors] = useState<FieldErrors>({})
   const invalidate = () => queryClient.invalidateQueries(trpc.onboardings.apiKeys.queryFilter({ projectId }))
   const create = useMutation(trpc.onboardings.createApiKey.mutationOptions({ onSuccess: invalidate }))
@@ -21,7 +37,7 @@ export function ApiKeys({ projectId, isOwner }: { projectId: string; isOwner: bo
     const { data, errors } = parseForm(e, createApiKeyInput)
     setErrors(errors)
     if (data) {
-      create.mutate({ projectId, name: data.name })
+      create.mutate({ projectId, name: data.name, environmentId: data.environmentId })
       e.currentTarget.reset()
     }
   }
@@ -30,7 +46,8 @@ export function ApiKeys({ projectId, isOwner }: { projectId: string; isOwner: bo
     <Section title="API keys">
       <Text>
         Read-only access to published onboardings at {publicUrl ?? '…/public/v1'}. Put a key in the app's proxy (as
-        Authorization: Bearer …), not in the app: anything in an app binary can be read out of it.
+        Authorization: Bearer …), not in the app: anything in an app binary can be read out of it. A key reads one
+        environment, so a dev build's proxy gets a Development key and the store build's proxy a Production key.
       </Text>
       <Stack>
         {keys.map((k) => (
@@ -53,13 +70,16 @@ export function ApiKeys({ projectId, isOwner }: { projectId: string; isOwner: bo
               </Inline>
             }
           >
-            {k.name} · {k.prefix}…
+            {k.name} · {k.prefix}… <Badge>{envName(k.environmentId)}</Badge>
           </Row>
         ))}
         {keys.length === 0 && <Text>No keys yet.</Text>}
       </Stack>
       {create.data && (
-        <Callout tone="warning" title={`New key for ${create.data.name}: copy it now, it is shown once`}>
+        <Callout
+          tone="warning"
+          title={`New ${envName(create.data.environmentId)} key for ${create.data.name}: copy it now, it is shown once`}
+        >
           <code>{create.data.token}</code>
         </Callout>
       )}
@@ -67,6 +87,15 @@ export function ApiKeys({ projectId, isOwner }: { projectId: string; isOwner: bo
         <Form onSubmit={onSubmit} error={create.error?.message ?? revoke.error?.message} noValidate>
           <Field label="New key name" error={errors.name}>
             <Input name="name" placeholder="capsule nginx" />
+          </Field>
+          <Field label="Environment" error={errors.environmentId}>
+            <Select name="environmentId" key={environments.map((e) => e.id).join()}>
+              {environments.map((e) => (
+                <option key={e.id} value={e.id}>
+                  {e.name}
+                </option>
+              ))}
+            </Select>
           </Field>
           <Inline>
             <Button type="submit" variant="primary" disabled={create.isPending}>

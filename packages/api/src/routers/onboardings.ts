@@ -4,7 +4,9 @@ import {
   appGroupIdInput,
   createApiKeyInput,
   createOnboardingInput,
+  deployReleaseInput,
   importOnboardingInput,
+  onboardingEnvironmentInput,
   onboardingIdInput,
   pageIdInput,
   publishOnboardingInput,
@@ -118,15 +120,39 @@ export const onboardingsRouter = router({
   previewPublish: projectProcedure
     .input(publishOnboardingInput)
     .query(({ ctx, input }) =>
-      ctx.services.onboardings.previewPublish(ctx.project.id, input.onboardingId, input.offerAgain).catch(rethrow),
+      ctx.services.onboardings
+        .previewPublish(ctx.project.id, input.onboardingId, input.offerAgain, input.environmentId)
+        .catch(rethrow),
     ),
 
   publish: projectProcedure
     .input(publishOnboardingInput)
     .mutation(({ ctx, input }) =>
       ctx.services.onboardings
-        .publish(ctx.project.id, input.onboardingId, input.offerAgain, ctx.user.id)
+        .publish(ctx.project.id, input.onboardingId, input.offerAgain, input.environmentId, ctx.user.id)
         .catch(rethrow),
+    ),
+
+  previewDeploy: projectProcedure
+    .input(deployReleaseInput)
+    .query(({ ctx, input }) =>
+      ctx.services.onboardings
+        .previewDeploy(ctx.project.id, input.onboardingId, input.environmentId, input.releaseId)
+        .catch(rethrow),
+    ),
+
+  deploy: projectProcedure
+    .input(deployReleaseInput)
+    .mutation(({ ctx, input }) =>
+      ctx.services.onboardings
+        .deploy(ctx.project.id, input.onboardingId, input.environmentId, input.releaseId, ctx.user.id)
+        .catch(rethrow),
+    ),
+
+  followProduction: projectProcedure
+    .input(onboardingEnvironmentInput)
+    .mutation(({ ctx, input }) =>
+      ctx.services.onboardings.followProduction(ctx.project.id, input.onboardingId, input.environmentId).catch(rethrow),
     ),
 
   releases: projectProcedure
@@ -150,7 +176,9 @@ export const onboardingsRouter = router({
 
   createApiKey: projectProcedure.input(createApiKeyInput).mutation(({ ctx, input }) => {
     requireOwner(ctx)
-    return ctx.services.onboardings.createApiKey(ctx.project.id, ctx.user.id, input.name)
+    return ctx.services.onboardings
+      .createApiKey(ctx.project.id, ctx.user.id, input.name, input.environmentId)
+      .catch(rethrow)
   }),
 
   revokeApiKey: projectProcedure.input(apiKeyIdInput).mutation(({ ctx, input }) => {

@@ -10,6 +10,7 @@ import type {
 import { and, eq, gt, isNull } from 'drizzle-orm'
 import { generateToken, hashToken } from '../auth/tokens'
 import type { Mailer } from '../mail'
+import { DEFAULT_ENVIRONMENTS } from './environments'
 
 export type ProjectErrorCode =
   | 'NOT_FOUND'
@@ -77,6 +78,9 @@ export function projectsService(db: Db, deps: ProjectDeps) {
       return db.transaction(async (tx) => {
         const [project] = await tx.insert(schema.projects).values({ name: input.name, ownerId: userId }).returning()
         await tx.insert(schema.projectMembers).values({ projectId: project!.id, userId, role: 'owner' })
+        await tx
+          .insert(schema.projectEnvironments)
+          .values(DEFAULT_ENVIRONMENTS.map((e) => ({ projectId: project!.id, ...e })))
         return { id: project!.id, name: project!.name, ownerId: project!.ownerId, role: 'owner' }
       })
     },

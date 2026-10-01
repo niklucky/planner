@@ -14,6 +14,9 @@ Working notes on what to do next. Kept short on purpose; update as items land.
   copy grid per language, machine translation with review), publish with validation and
   "offer it again", JSON import/export, project API keys, and the public read API
   (`/public/v1/onboardings/{key}`, `/public/v1/files/{sha256}`) for apps behind their own proxy
+- Environments per project (Production + Development by default, user-defined): API keys
+  belong to one; publish to an environment, promote the same release to Production, roll back
+  from Releases; environments without their own release serve Production's
 
 ## Next, in order
 
@@ -48,6 +51,8 @@ Releases tab. Later: submit for review and watch the state change.
 
 ### 5. Onboardings, later
 
+- Deployment history (who promoted or rolled back what, when); only the current pointer per
+  environment is kept now. Restricting promotion to Production to owners.
 - Draft preview for testers (a preview token that reads the draft), `min_app_version` per
   release, A/B variants and targeting, per-page analytics (needs an events endpoint),
   scheduled publishing

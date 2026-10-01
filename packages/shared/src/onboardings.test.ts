@@ -10,6 +10,7 @@ import {
   diffReleases,
   type MediaFile,
   missingWords,
+  nextReleaseVersion,
   type OnboardingDraft,
   onboardingDocumentSchema,
   resolveOnboardingLocale,
@@ -201,5 +202,31 @@ describe('contrastRatio', () => {
     expect(contrastRatio('#000', '#fff')).toBeCloseTo(21)
     expect(contrastRatio('#121625', '#C4DEFC')!).toBeGreaterThan(4.5)
     expect(contrastRatio('red', '#fff')).toBeNull()
+  })
+})
+
+describe('nextReleaseVersion', () => {
+  it('starts at 1 and keeps Production’s version for a silent fix', () => {
+    expect(nextReleaseVersion(null, null, false)).toBe(1)
+    expect(nextReleaseVersion(null, 3, true)).toBe(1)
+    expect(nextReleaseVersion(2, 2, false)).toBe(2)
+    expect(nextReleaseVersion(2, 2, true)).toBe(3)
+  })
+
+  it('offers it again above any version Production served before a rollback', () => {
+    // Releases made, and what Production serves, as the editor goes along.
+    const released: number[] = []
+    const publish = (production: number | null, offerAgain: boolean) => {
+      const version = nextReleaseVersion(production, released.length ? Math.max(...released) : null, offerAgain)
+      released.push(version)
+      return version
+    }
+    let production = publish(null, false) // v1 straight to Production
+    const tested = publish(production, true) // offered again on Development
+    expect(tested).toBe(2)
+    production = tested // promoted: people skip or dismiss v2
+    production = 1 // rolled back
+    expect(publish(production, true)).toBe(3) // must not reuse 2
+    expect(publish(production, false)).toBe(1) // a silent fix stays on what Production serves
   })
 })

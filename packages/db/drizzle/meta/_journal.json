@@ -78,6 +78,13 @@
       "when": 1790520443440,
       "tag": "0010_onboardings",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1790863464232,
+      "tag": "0011_environments",
+      "breakpoints": true
     }
   ]
 }

@@ -4,9 +4,12 @@ import { createFileRoute, getRouteApi, notFound, useNavigate } from '@tanstack/r
 import { TRPCClientError } from '@trpc/client'
 import { useState } from 'react'
 import { z } from 'zod'
+import { DeployReleaseDialog } from '../../../../../components/deploy-release-dialog'
 import { AppLink } from '../../../../../components/nav-link'
 import { OnboardingCopyGrid } from '../../../../../components/onboarding-copy-grid'
+import { type DeployTarget, OnboardingEnvironments } from '../../../../../components/onboarding-environments'
 import { OnboardingPages } from '../../../../../components/onboarding-pages'
+import { OnboardingReleases } from '../../../../../components/onboarding-releases'
 import { OnboardingSettings } from '../../../../../components/onboarding-settings'
 import { PublishOnboardingDialog } from '../../../../../components/publish-onboarding-dialog'
 import { downloadJson, pickTextFile } from '../../../../../lib/files'
@@ -17,18 +20,20 @@ const projectRoute = getRouteApi('/_app/projects/$projectId')
 const TABS = [
   { id: 'pages', label: 'Pages' },
   { id: 'copy', label: 'Copy' },
+  { id: 'releases', label: 'Releases' },
   { id: 'settings', label: 'Settings' },
 ] as const
 type TabId = (typeof TABS)[number]['id']
 
 const searchSchema = z.object({
-  tab: z.enum(['pages', 'copy', 'settings']).optional(),
+  tab: z.enum(['pages', 'copy', 'releases', 'settings']).optional(),
   page: z.string().optional(),
 })
 
 export const Route = createFileRoute('/_app/projects/$projectId/onboardings/$onboardingId')({
   validateSearch: (search) => searchSchema.parse(search),
   loader: async ({ context, params }) => {
+    void context.queryClient.prefetchQuery(context.trpc.environments.list.queryOptions({ projectId: params.projectId }))
     try {
       return await context.queryClient.ensureQueryData(
         context.trpc.onboardings.get.queryOptions({ projectId: params.projectId, onboardingId: params.onboardingId }),
@@ -53,6 +58,7 @@ function OnboardingEditor() {
   const input = { projectId: project.id, onboardingId }
   const { data: detail } = useQuery(trpc.onboardings.get.queryOptions(input))
   const [publishing, setPublishing] = useState(false)
+  const [deploying, setDeploying] = useState<DeployTarget | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
 
   const replace = useMutation(
@@ -69,7 +75,7 @@ function OnboardingEditor() {
   )
 
   if (!detail) return null
-  const { draft, latestRelease } = detail
+  const { draft } = detail
 
   const exportJson = async () => {
     const data = await queryClient.fetchQuery(trpc.onboardings.exportJson.queryOptions(input, { staleTime: 0 }))
@@ -90,12 +96,10 @@ function OnboardingEditor() {
           <AppLink to="/projects/$projectId/onboardings" params={{ projectId: project.id }}>
             Onboardings
           </AppLink>{' '}
-          · {draft.key} ·{' '}
-          {latestRelease
-            ? `Live: version ${latestRelease.version} (revision ${latestRelease.revision}), published ${latestRelease.publishedAt.toLocaleString()}, ${latestRelease.locales.length} languages`
-            : 'Not published yet'}
+          · {draft.key}
         </Text>
       </Inline>
+      <OnboardingEnvironments projectId={project.id} detail={detail} onDeploy={setDeploying} />
       <Inline>
         <Button variant="primary" onClick={() => setPublishing(true)}>
           Publish…
@@ -148,6 +152,7 @@ function OnboardingEditor() {
           detail={detail}
         />
       )}
+      {tab === 'releases' && <OnboardingReleases projectId={project.id} detail={detail} onDeploy={setDeploying} />}
       {tab === 'settings' && (
         <OnboardingSettings
           projectId={project.id}
@@ -161,6 +166,15 @@ function OnboardingEditor() {
           projectId={project.id}
           onboardingId={onboardingId}
           onClose={() => setPublishing(false)}
+        />
+      )}
+      {deploying && (
+        <DeployReleaseDialog
+          projectId={project.id}
+          onboardingId={onboardingId}
+          releaseId={deploying.releaseId}
+          environmentId={deploying.environmentId}
+          onClose={() => setDeploying(null)}
         />
       )}
     </Page>
