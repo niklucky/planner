@@ -58,7 +58,7 @@ function OnboardingsPage() {
         <Text>
           Apps ask for the latest published version of an onboarding, in one language, at{' '}
           <code>{publicUrl ?? '…/public/v1'}/onboardings/&lt;key&gt;?locale=&lt;locale&gt;</code> with a read-only{' '}
-          <AppLink to="/projects/$projectId/integrations" params={input}>
+          <AppLink to="/projects/$projectId/settings" params={input}>
             API key
           </AppLink>{' '}
           in the Authorization header. Put the key in the app's proxy, never in the app.

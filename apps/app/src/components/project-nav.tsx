@@ -1,6 +1,6 @@
 import { SubNav } from '@planner/frontend'
 import type { Project } from '@planner/shared'
-import { ChartColumn, Home, Plug, Presentation, Store, Users } from 'lucide-react'
+import { ChartColumn, Home, Plug, Presentation, Settings, Store, Users } from 'lucide-react'
 import { NavLink } from './nav-link'
 
 export function ProjectNav({ project }: { project: Project }) {
@@ -24,6 +24,9 @@ export function ProjectNav({ project }: { project: Project }) {
       </NavLink>
       <NavLink to="/projects/$projectId/members" params={params} icon={<Users />}>
         Members
+      </NavLink>
+      <NavLink to="/projects/$projectId/settings" params={params} icon={<Settings />}>
+        Settings
       </NavLink>
     </SubNav>
   )

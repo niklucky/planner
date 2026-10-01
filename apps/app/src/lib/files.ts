@@ -9,17 +9,20 @@ export function downloadJson(filename: string, data: unknown) {
   URL.revokeObjectURL(url)
 }
 
-/** Opens the file picker for one file and resolves with its text, or null when cancelled. */
-export function pickTextFile(accept = '.json,application/json'): Promise<string | null> {
+/** Opens the file picker for one file and resolves with it, or null when cancelled. */
+export function pickFile(accept: string): Promise<File | null> {
   return new Promise((resolve) => {
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = accept
-    input.onchange = () => {
-      const file = input.files?.[0]
-      resolve(file ? file.text() : null)
-    }
+    input.onchange = () => resolve(input.files?.[0] ?? null)
     input.oncancel = () => resolve(null)
     input.click()
   })
+}
+
+/** Opens the file picker for one file and resolves with its text, or null when cancelled. */
+export async function pickTextFile(accept = '.json,application/json'): Promise<string | null> {
+  const file = await pickFile(accept)
+  return file ? file.text() : null
 }
