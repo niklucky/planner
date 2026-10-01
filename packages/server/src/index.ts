@@ -1,6 +1,7 @@
 import type { Db } from '@planner/db'
 import { appsService } from './services/apps'
 import { type AuthDeps, authService } from './services/auth'
+import { environmentsService } from './services/environments'
 import { type IntegrationDeps, integrationsService } from './services/integrations'
 import { onboardingsService } from './services/onboardings'
 import { type ProjectDeps, projectsService } from './services/projects'
@@ -18,6 +19,7 @@ export function createServices(db: Db, deps: ServiceDeps) {
   return {
     apps: appsService(db),
     auth: authService(db, deps),
+    environments: environmentsService(db),
     integrations,
     onboardings: onboardingsService(db, { storage: deps.storage }),
     projects: projectsService(db, deps),
@@ -32,6 +34,7 @@ export type Services = ReturnType<typeof createServices>
 export { createSecretBox, type SecretBox } from './crypto/secret-box'
 export { createConsoleMailer, createResendMailer, type Mail, type Mailer } from './mail'
 export { AuthError, type AuthErrorCode } from './services/auth'
+export { EnvironmentError, type EnvironmentErrorCode } from './services/environments'
 export { IntegrationError, type IntegrationErrorCode } from './services/integrations'
 export { OnboardingError, type OnboardingErrorCode } from './services/onboardings'
 export { ProjectError, type ProjectErrorCode } from './services/projects'

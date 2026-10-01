@@ -2,14 +2,19 @@ import type { Services } from '@planner/server'
 import { describe, expect, it } from 'vitest'
 import { publicApi } from './public'
 
-/** Two projects publish the same key with different content; the key picks the project. */
+/**
+ * Two projects publish the same key with different content; the key picks the project.
+ * plk_dev reads a project's Development environment.
+ */
 function fakeServices() {
   const onboardings = {
     async publicDocument(token: string, key: string, _locale: string | undefined, base: string) {
-      if (token !== 'plk_a' && token !== 'plk_b') return { status: 401 as const }
-      if (key !== 'intro') return { status: 404 as const }
+      if (token !== 'plk_a' && token !== 'plk_b' && token !== 'plk_dev') return { status: 401 as const }
+      const production = token !== 'plk_dev'
+      if (key !== 'intro') return { status: 404 as const, production }
       return {
         status: 200 as const,
+        production,
         document: { id: key, version: 1, locale: 'en', pages: [], project: token, base },
         etag: `"${token}.${base}"`,
       }
@@ -55,6 +60,17 @@ describe('public onboarding documents', () => {
     })
     expect(again.status).toBe(304)
     expect(again.headers.get('vary')).toMatch(/Authorization/)
+  })
+
+  it('lets nothing outside production be cached without revalidating, so a publish shows at once', async () => {
+    const auth = { authorization: 'Bearer plk_dev' }
+    const found = await get('/onboardings/intro', auth)
+    expect(found.status).toBe(200)
+    expect(found.headers.get('cache-control')).toBe('no-cache')
+    expect(found.headers.get('etag')).toBeTruthy()
+    const missing = await get('/onboardings/other', auth)
+    expect(missing.status).toBe(404)
+    expect(missing.headers.get('cache-control')).toBe('no-cache')
   })
 
   it('builds media URLs from the proxy mount only when both host and prefix are given', async () => {

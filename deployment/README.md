@@ -52,13 +52,19 @@ Apps read published onboardings from Planner's read-only public API
 and `GET /public/v1/files/{sha256}` for media). The key must not ship inside an app, so each
 app reaches Planner through a proxy on its own domain that adds the key and caches:
 
-1. Planner → Integrations → API keys → create a key (owner only; shown once).
+1. Planner → Settings → API keys → create a key for the Production environment (owner only;
+   shown once).
 2. Add the block from `nginx/app-content-proxy.conf.example` to the app's nginx, with the key.
 3. Check: `curl -i https://<app domain>/content/onboardings/<key>?locale=en` → 200, an `ETag`,
    `Cache-Control: public, max-age=300`; a second request shows `X-Cache-Status: HIT`.
 
-Publishing in Planner reaches devices within the 5-minute cache. Revoking the key answers 401
-at once, which the app treats as "could not say" and keeps its cached copy.
+Publishing to Production reaches devices within the 5-minute cache. Revoking the key answers
+401 at once, which the app treats as "could not say" and keeps its cached copy.
+
+Each key reads one environment (Settings → Environments). For dev builds, create a Development
+key and give it its own location (e.g. `/content-dev/`, second block in the example) that dev
+builds point at. Development answers `Cache-Control: no-cache`, so a publish there shows on the
+next request; where Development has nothing of its own published, it serves Production's.
 
 ## Manual operations on the box
 

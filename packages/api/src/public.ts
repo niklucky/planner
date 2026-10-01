@@ -24,6 +24,14 @@ export function publicBase(c: HonoContext, fallback: string) {
  */
 const DOCUMENT_VARY = 'Authorization, X-Forwarded-Host, X-Forwarded-Prefix, X-Forwarded-Proto'
 
+/**
+ * Production answers may be kept for a while (and are what a proxy serves through an
+ * outage). Any other environment is for testing a publish right away, so it revalidates
+ * every time; the ETag keeps that cheap.
+ */
+const documentCaching = (production: boolean) => (production ? 'public, max-age=300' : 'no-cache')
+const missingCaching = (production: boolean) => (production ? 'public, max-age=60' : 'no-cache')
+
 function bearer(c: HonoContext) {
   return c.req
     .header('authorization')
@@ -59,8 +67,11 @@ export function publicApi(services: Services, publicUrl: string) {
     )
     if (result.status === 401) return c.json({ error: 'Unauthorized' }, 401, { 'cache-control': 'no-store' })
     if (result.status === 404)
-      return c.json({ error: 'Not found' }, 404, { 'cache-control': 'public, max-age=60', vary: DOCUMENT_VARY })
-    const headers = { etag: result.etag, 'cache-control': 'public, max-age=300', vary: DOCUMENT_VARY }
+      return c.json({ error: 'Not found' }, 404, {
+        'cache-control': missingCaching(result.production),
+        vary: DOCUMENT_VARY,
+      })
+    const headers = { etag: result.etag, 'cache-control': documentCaching(result.production), vary: DOCUMENT_VARY }
     if (notModified(c, result.etag)) return c.body(null, 304, headers)
     return c.json(result.document, 200, headers)
   })

@@ -17,7 +17,7 @@ location /content/ {
     proxy_http_version 1.1;
     proxy_set_header Host planner.spectron.dev;
 
-    # A project API key from Planner → Integrations → API keys. It lives here, never in the app.
+    # A Production API key from Planner → Settings → API keys. It lives here, never in the app.
     proxy_set_header Authorization "Bearer plk_REPLACE_ME";
     # Planner makes media URLs absolute against these, so files load through this domain too.
     proxy_set_header X-Forwarded-Host $host;
@@ -41,3 +41,8 @@ location /content/ {
     proxy_read_timeout 10s;
     add_header X-Cache-Status $upstream_cache_status always;
 }
+
+# 3. Optional, for dev builds: the same block at /content-dev/ with a Development key and
+#    X-Forwarded-Prefix /content-dev. Dev builds set ONBOARDING_URL = ${BASE_URL}/content-dev.
+#    Planner answers Development with Cache-Control: no-cache, so nginx doesn't keep it and a
+#    publish to Development shows on the next request. Keep it out of the store build's config.

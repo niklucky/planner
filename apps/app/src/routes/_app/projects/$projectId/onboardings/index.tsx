@@ -1,8 +1,9 @@
 import { Badge, Button, Callout, Inline, List, Page, Section, Stack, Text } from '@planner/frontend'
-import type { AppProfile } from '@planner/shared'
+import type { AppProfile, OnboardingSummary } from '@planner/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, getRouteApi, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useEnvironments } from '../../../../../components/environments'
 import { AppLink, NavLink } from '../../../../../components/nav-link'
 import { NewOnboardingDialog } from '../../../../../components/new-onboarding-dialog'
 import { pickTextFile } from '../../../../../lib/files'
@@ -16,6 +17,7 @@ export const Route = createFileRoute('/_app/projects/$projectId/onboardings/')({
     return Promise.all([
       context.queryClient.ensureQueryData(context.trpc.onboardings.list.queryOptions(input)),
       context.queryClient.ensureQueryData(context.trpc.apps.groups.queryOptions(input)),
+      context.queryClient.ensureQueryData(context.trpc.environments.list.queryOptions(input)),
     ])
   },
   component: OnboardingsPage,
@@ -56,12 +58,14 @@ function OnboardingsPage() {
       ))}
       <Section title="How apps read them">
         <Text>
-          Apps ask for the latest published version of an onboarding, in one language, at{' '}
+          Apps ask for an onboarding, in one language, at{' '}
           <code>{publicUrl ?? '…/public/v1'}/onboardings/&lt;key&gt;?locale=&lt;locale&gt;</code> with a read-only{' '}
           <AppLink to="/projects/$projectId/settings" params={input}>
             API key
           </AppLink>{' '}
-          in the Authorization header. Put the key in the app's proxy, never in the app.
+          in the Authorization header. The key decides the environment: a Production key gets what is in Production, a
+          Development key what is in Development (or Production's, when nothing of its own is there). Put the key in the
+          app's proxy, never in the app.
         </Text>
       </Section>
     </Page>
@@ -72,15 +76,7 @@ interface GroupSectionProps {
   projectId: string
   groupId: string
   groupName: string
-  onboardings: Array<{
-    id: string
-    key: string
-    name: string
-    localeCount: number
-    completeCount: number
-    liveVersion: number | null
-    lastPublishedAt: Date | null
-  }>
+  onboardings: OnboardingSummary[]
 }
 
 function GroupSection({ projectId, groupId, groupName, onboardings }: GroupSectionProps) {
@@ -137,13 +133,7 @@ function GroupSection({ projectId, groupId, groupName, onboardings }: GroupSecti
                 <Badge tone={o.completeCount < o.localeCount ? 'warning' : 'neutral'}>
                   {o.completeCount} of {o.localeCount} languages
                 </Badge>
-                {o.liveVersion ? (
-                  <Badge tone="success">
-                    Live v{o.liveVersion} · {o.lastPublishedAt?.toLocaleDateString()}
-                  </Badge>
-                ) : (
-                  <Badge>Not published</Badge>
-                )}
+                <DeploymentBadges projectId={projectId} deployments={o.deployments} />
               </Inline>
             }
           >
@@ -187,6 +177,39 @@ function GroupSection({ projectId, groupId, groupName, onboardings }: GroupSecti
         />
       )}
     </Section>
+  )
+}
+
+/** Production's version, then any environment serving something else of its own (e.g. a build under test). */
+function DeploymentBadges({
+  projectId,
+  deployments,
+}: {
+  projectId: string
+  deployments: OnboardingSummary['deployments']
+}) {
+  const environments = useEnvironments(projectId)
+  const production = environments.find((e) => e.isProduction)
+  const live = deployments.find((d) => d.environmentId === production?.id)?.release
+  return (
+    <>
+      {live ? (
+        <Badge tone="success">
+          {production?.name} v{live.version}
+        </Badge>
+      ) : (
+        <Badge>Not in {production?.name}</Badge>
+      )}
+      {deployments.map((d) => {
+        const env = environments.find((e) => e.id === d.environmentId)
+        if (!env || env.isProduction || d.followsProduction || !d.release || d.release.id === live?.id) return null
+        return (
+          <Badge key={d.environmentId} tone="warning">
+            {env.name} v{d.release.version} · rev {d.release.revision}
+          </Badge>
+        )
+      })}
+    </>
   )
 }
 

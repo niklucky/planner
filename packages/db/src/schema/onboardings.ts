@@ -1,6 +1,7 @@
 import type { AppProfile, FieldValue, OnboardingDocument } from '@planner/shared'
-import { integer, jsonb, pgTable, primaryKey, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core'
+import { foreignKey, integer, jsonb, pgTable, primaryKey, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core'
 import { users } from './auth'
+import { projectEnvironments } from './environments'
 import { files } from './files'
 import { appGroups } from './groups'
 import { projects } from './projects'
@@ -129,6 +130,34 @@ export const onboardingReleases = pgTable(
   (t) => [unique().on(t.onboardingId, t.revision)],
 )
 
+/**
+ * Which release an environment serves. Production without a row serves nothing; any
+ * other environment without a row serves what production serves.
+ */
+export const onboardingDeployments = pgTable(
+  'onboarding_deployments',
+  {
+    onboardingId: uuid('onboarding_id')
+      .notNull()
+      .references(() => onboardings.id, { onDelete: 'cascade' }),
+    environmentId: uuid('environment_id').notNull(),
+    releaseId: uuid('release_id')
+      .notNull()
+      .references(() => onboardingReleases.id, { onDelete: 'cascade' }),
+    deployedAt: timestamp('deployed_at', { withTimezone: true }).notNull().defaultNow(),
+    deployedBy: uuid('deployed_by').references(() => users.id, { onDelete: 'set null' }),
+  },
+  (t) => [
+    primaryKey({ columns: [t.onboardingId, t.environmentId] }),
+    // Named by hand: the generated name is longer than Postgres keeps.
+    foreignKey({
+      name: 'onboarding_deployments_environment_id_fk',
+      columns: [t.environmentId],
+      foreignColumns: [projectEnvironments.id],
+    }).onDelete('cascade'),
+  ],
+)
+
 /** Files a release refers to: the only project files the public files route serves. */
 export const onboardingReleaseFiles = pgTable(
   'onboarding_release_files',
@@ -143,12 +172,20 @@ export const onboardingReleaseFiles = pgTable(
   (t) => [primaryKey({ columns: [t.releaseId, t.fileId] })],
 )
 
-/** Read-only keys for a project's published content (the app's proxy sends one). Only the hash is kept. */
+/**
+ * Read-only keys for a project's published content (the app's proxy sends one). The key
+ * decides the environment, so a store build can't read what is only on Development.
+ * Only the hash is kept.
+ */
 export const projectApiKeys = pgTable('project_api_keys', {
   id: uuid('id').primaryKey().defaultRandom(),
   projectId: uuid('project_id')
     .notNull()
     .references(() => projects.id, { onDelete: 'cascade' }),
+  // Restrict: an environment is deleted only once its keys are revoked.
+  environmentId: uuid('environment_id')
+    .notNull()
+    .references(() => projectEnvironments.id, { onDelete: 'restrict' }),
   name: text('name').notNull(),
   tokenHash: text('token_hash').notNull().unique(),
   /** First characters of the key, to tell keys apart in the UI. */
@@ -163,4 +200,5 @@ export type OnboardingRow = typeof onboardings.$inferSelect
 export type OnboardingPageRow = typeof onboardingPages.$inferSelect
 export type OnboardingPageCopyRow = typeof onboardingPageCopy.$inferSelect
 export type OnboardingReleaseRow = typeof onboardingReleases.$inferSelect
+export type OnboardingDeploymentRow = typeof onboardingDeployments.$inferSelect
 export type ProjectApiKeyRow = typeof projectApiKeys.$inferSelect

@@ -1,8 +1,21 @@
-import { Button, Callout, Checkbox, Dialog, Inline, List, Stack, Text } from '@planner/frontend'
-import type { ReleaseDiff } from '@planner/shared'
+import {
+  Button,
+  Callout,
+  Checkbox,
+  Dialog,
+  Field,
+  Inline,
+  List,
+  Select,
+  Stack,
+  Text,
+  useStoredState,
+} from '@planner/frontend'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTRPC } from '../lib/trpc'
+import { useEnvironments } from './environments'
+import { ReleaseChanges } from './release-changes'
 
 interface Props {
   projectId: string
@@ -10,13 +23,24 @@ interface Props {
   onClose: () => void
 }
 
-/** Shows what changed and what blocks, then freezes the draft into a release. */
+/**
+ * Shows what changed and what blocks, then freezes the draft into a release served in
+ * the chosen environment. Defaults to the last one chosen, else the first besides Production.
+ */
 export function PublishOnboardingDialog({ projectId, onboardingId, onClose }: Props) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
+  const environments = useEnvironments(projectId)
+  const [stored, setStored] = useStoredState<string | null>(`publish-environment:${projectId}`, null)
+  const environment =
+    environments.find((e) => e.id === stored) ?? environments.find((e) => !e.isProduction) ?? environments[0]
+  const environmentId = environment?.id ?? ''
   const [offerAgain, setOfferAgain] = useState(false)
   const preview = useQuery(
-    trpc.onboardings.previewPublish.queryOptions({ projectId, onboardingId, offerAgain }, { staleTime: 0 }),
+    trpc.onboardings.previewPublish.queryOptions(
+      { projectId, onboardingId, offerAgain, environmentId },
+      { staleTime: 0, enabled: !!environment },
+    ),
   )
   const publish = useMutation(
     trpc.onboardings.publish.mutationOptions({
@@ -25,12 +49,22 @@ export function PublishOnboardingDialog({ projectId, onboardingId, onClose }: Pr
   )
   const p = preview.data
   const done = publish.data
-
-  const nextVersion = p?.current ? p.current.version + (offerAgain ? 1 : 0) : 1
+  const envName = environment?.name ?? '…'
 
   return (
     <Dialog open title="Publish onboarding" onClose={onClose}>
       <Stack>
+        {!done && (
+          <Field label="Publish to">
+            <Select value={environmentId} onChange={(e) => setStored(e.target.value)} disabled={publish.isPending}>
+              {environments.map((e) => (
+                <option key={e.id} value={e.id}>
+                  {e.name}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        )}
         {!p && <Text>{preview.error?.message ?? 'Checking…'}</Text>}
         {p && !done && (
           <>
@@ -69,21 +103,21 @@ export function PublishOnboardingDialog({ projectId, onboardingId, onClose }: Pr
                     </List>
                   </Callout>
                 )}
-                <Changes diff={p.diff} />
+                <ReleaseChanges diff={p.diff} environment={envName} />
               </>
             )}
             <Checkbox
               label="Offer it again to people who haven't finished it"
               checked={offerAgain}
               onChange={(e) => setOfferAgain(e.target.checked)}
-              disabled={!p.current}
+              disabled={p.productionVersion === null}
             />
             <Text>
-              {!p.current
-                ? 'First release: version 1.'
+              {p.productionVersion === null
+                ? 'Nothing is in Production yet: version 1.'
                 : offerAgain
-                  ? `Version goes to ${nextVersion}: people who skipped or dismissed it see it again. People who finished it never do.`
-                  : `A silent fix: version stays ${nextVersion}, nobody sees it again because of this.`}
+                  ? `Version ${p.version}: once it is in Production, people who skipped or dismissed version ${p.productionVersion} see it again. People who finished it never do.`
+                  : `A silent fix: version stays ${p.version}, as in Production, so nobody sees it again because of this.`}
             </Text>
             {publish.error && <Callout tone="danger">{publish.error.message}</Callout>}
             <Inline>
@@ -91,9 +125,9 @@ export function PublishOnboardingDialog({ projectId, onboardingId, onClose }: Pr
                 variant="primary"
                 size="lg"
                 disabled={p.errors.length > 0 || publish.isPending || preview.isFetching}
-                onClick={() => publish.mutate({ projectId, onboardingId, offerAgain })}
+                onClick={() => publish.mutate({ projectId, onboardingId, offerAgain, environmentId })}
               >
-                {publish.isPending ? 'Publishing…' : `Publish version ${nextVersion}`}
+                {publish.isPending ? 'Publishing…' : `Publish version ${p.version} to ${envName}`}
               </Button>
               <Button size="lg" onClick={onClose}>
                 Cancel
@@ -104,8 +138,11 @@ export function PublishOnboardingDialog({ projectId, onboardingId, onClose }: Pr
         {done && (
           <>
             <Text>
-              Published version {done.version} (revision {done.revision}) in {done.locales.length} languages. Apps pick
-              it up within about 5 minutes (the proxy's cache).
+              Published version {done.version} (revision {done.revision}) to {envName} in {done.locales.length}{' '}
+              {done.locales.length === 1 ? 'language' : 'languages'}.{' '}
+              {environment?.isProduction
+                ? "Apps pick it up within about 5 minutes (the proxy's cache)."
+                : `Builds reading ${envName} get it on their next request. When it looks right, promote it to Production from the onboarding's page.`}
             </Text>
             <Inline>
               <Button variant="primary" size="lg" onClick={onClose}>
@@ -116,32 +153,5 @@ export function PublishOnboardingDialog({ projectId, onboardingId, onClose }: Pr
         )}
       </Stack>
     </Dialog>
-  )
-}
-
-function Changes({ diff }: { diff: ReleaseDiff }) {
-  if (diff.first) return <Text>Nothing is live yet: this is the first release.</Text>
-  const lines: string[] = []
-  if (diff.addedPages.length) lines.push(`New pages: ${diff.addedPages.join(', ')}`)
-  if (diff.removedPages.length) lines.push(`Removed pages: ${diff.removedPages.join(', ')}`)
-  if (diff.reordered) lines.push('Pages are in a new order')
-  for (const c of diff.changedPages) {
-    lines.push(`${c.id} changed in ${c.locales.length > 5 ? `${c.locales.length} languages` : c.locales.join(', ')}`)
-  }
-  if (diff.defaultButtons.length)
-    lines.push(
-      `Default buttons changed in ${diff.defaultButtons.length > 5 ? `${diff.defaultButtons.length} languages` : diff.defaultButtons.join(', ')}`,
-    )
-  if (diff.addedLocales.length) lines.push(`New languages: ${diff.addedLocales.join(', ')}`)
-  if (diff.removedLocales.length) lines.push(`Languages no longer live: ${diff.removedLocales.join(', ')}`)
-  if (lines.length === 0) return <Text>No changes since the last release.</Text>
-  return (
-    <Callout title="Changes since the last release">
-      <List>
-        {lines.map((l) => (
-          <li key={l}>{l}</li>
-        ))}
-      </List>
-    </Callout>
   )
 }

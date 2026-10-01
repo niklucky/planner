@@ -1,6 +1,7 @@
 import { publicProcedure, router } from '../trpc'
 import { appsRouter } from './apps'
 import { authRouter } from './auth'
+import { environmentsRouter } from './environments'
 import { integrationsRouter } from './integrations'
 import { onboardingsRouter } from './onboardings'
 import { projectsRouter } from './projects'
@@ -13,6 +14,7 @@ export const appRouter = router({
   auth: authRouter,
   apps: appsRouter,
   projects: projectsRouter,
+  environments: environmentsRouter,
   integrations: integrationsRouter,
   onboardings: onboardingsRouter,
   releases: releasesRouter,
