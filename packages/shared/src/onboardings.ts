@@ -624,6 +624,22 @@ export function contrastRatio(a: string, b: string): number | null {
   return (hi + 0.05) / (lo + 0.05)
 }
 
+/**
+ * The version a new release carries; apps show an onboarding again to people who skipped
+ * or dismissed it when the version goes up. A silent fix keeps Production's version.
+ * Offering it again goes above every version ever released, not just Production's:
+ * Production may have been rolled back below a version people already turned down.
+ */
+export function nextReleaseVersion(
+  productionVersion: number | null,
+  highestVersion: number | null,
+  offerAgain: boolean,
+): number {
+  if (productionVersion === null) return 1
+  if (!offerAgain) return productionVersion
+  return Math.max(productionVersion, highestVersion ?? 0) + 1
+}
+
 // ── API inputs and outputs ──────────────────────────────────────────────────
 
 export const onboardingKeySchema = z

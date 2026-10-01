@@ -13,6 +13,7 @@ import {
   importStored,
   type MediaFile,
   missingWords,
+  nextReleaseVersion,
   type OnboardingDeployment,
   type OnboardingDetail,
   type OnboardingDocument,
@@ -306,24 +307,34 @@ export function onboardingsService(db: Db, deps: OnboardingDeps) {
       })
   }
 
+  /** The highest version any release of the onboarding carried (versions go down after a rollback's silent fix). */
+  async function highestVersion(onboardingId: string) {
+    const [row] = await db
+      .select({ version: max(schema.onboardingReleases.version) })
+      .from(schema.onboardingReleases)
+      .where(eq(schema.onboardingReleases.onboardingId, onboardingId))
+    return row?.version ?? null
+  }
+
   /**
-   * The documents a publish to `environmentId` would freeze now. The version is measured
-   * from production's, so offering it again on Development means production users see it
-   * again once it's promoted, and a plain publish there never does.
+   * The documents a publish to `environmentId` would freeze now. The version follows
+   * production's (see nextReleaseVersion), so offering it again on Development means
+   * production users see it again once it's promoted, and a plain publish there never does.
    */
   async function prepare(projectId: string, onboardingId: string, offerAgain: boolean, environmentId: string) {
     const o = await requireOnboarding(projectId, onboardingId)
     const env = await requireEnvironment(projectId, environmentId)
     const production = env.isProduction ? env : (await environmentsOf(projectId)).find((e) => e.isProduction)
     const draft = await loadDraft(o)
-    const [profile, files, latest, current, live] = await Promise.all([
+    const [profile, files, latest, highest, current, live] = await Promise.all([
       profileFor(o.appGroupId),
       filesFor(projectId, draft),
       latestRelease(o.id),
+      highestVersion(o.id),
       servedRelease(o.id, env),
       production ? servedRelease(o.id, production) : null,
     ])
-    const version = live ? live.version + (offerAgain ? 1 : 0) : 1
+    const version = nextReleaseVersion(live?.version ?? null, highest, offerAgain)
     const build = buildRelease(draft, profile, files, version)
     const diff = diffContent(current, build.documents, draft.defaultLocale)
     return { o, env, draft, build, latest, current, live, version, diff }
