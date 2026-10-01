@@ -1,7 +1,22 @@
-import { Button, Field, Form, Inline, Input, Row, Section, Stack, Text, Textarea } from '@planner/frontend'
+import {
+  Button,
+  Callout,
+  Field,
+  Form,
+  Inline,
+  Input,
+  List,
+  Row,
+  Section,
+  Stack,
+  Text,
+  Textarea,
+  TextLink,
+} from '@planner/frontend'
 import { appStoreCredentialsInput, type Integration } from '@planner/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { type FormEvent, useState } from 'react'
+import { pickFile } from '../lib/files'
 import { type FieldErrors, parseForm } from '../lib/form'
 import { useTRPC } from '../lib/trpc'
 
@@ -37,6 +52,8 @@ function CredentialsForm({
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const [errors, setErrors] = useState<FieldErrors>({})
+  const [keyId, setKeyId] = useState('')
+  const [privateKey, setPrivateKey] = useState('')
 
   const connect = useMutation(
     trpc.integrations.connectAppStore.mutationOptions({
@@ -54,28 +71,74 @@ function CredentialsForm({
     if (data) connect.mutate({ projectId, ...data })
   }
 
+  const onChooseFile = async () => {
+    const file = await pickFile('.p8')
+    if (!file) return
+    setPrivateKey(await file.text())
+    setErrors((prev) => ({ ...prev, privateKey: undefined }))
+    // Apple names the download AuthKey_<Key ID>.p8.
+    const fromName = /^AuthKey_([A-Z0-9]+)/i.exec(file.name)?.[1]
+    if (fromName && !keyId) setKeyId(fromName)
+  }
+
   return (
-    <Form onSubmit={onSubmit} error={connect.error?.message} noValidate>
-      <Field label="Issuer ID" error={errors.issuerId}>
-        <Input name="issuerId" autoComplete="off" spellCheck={false} />
-      </Field>
-      <Field label="Key ID" error={errors.keyId}>
-        <Input name="keyId" autoComplete="off" spellCheck={false} />
-      </Field>
-      <Field label="Private key (.p8)" error={errors.privateKey}>
-        <Textarea name="privateKey" placeholder="-----BEGIN PRIVATE KEY-----" spellCheck={false} />
-      </Field>
-      <Inline>
-        <Button type="submit" variant="primary" size="lg" disabled={connect.isPending}>
-          {connect.isPending ? 'Checking with Apple…' : 'Connect'}
-        </Button>
-        {onCancel && (
-          <Button type="button" size="lg" onClick={onCancel}>
-            Cancel
+    <>
+      <Callout title="Where to get the key">
+        <List ordered>
+          <li>
+            In App Store Connect, open{' '}
+            <TextLink href="https://appstoreconnect.apple.com/access/integrations/api" target="_blank" rel="noreferrer">
+              Users and Access → Integrations → App Store Connect API
+            </TextLink>
+            , Team Keys tab. Only the Account Holder or an Admin can create keys.
+          </li>
+          <li>Click Generate API Key (or +), name it, and give it the App Manager role.</li>
+          <li>Download the key. It is an AuthKey_&lt;Key ID&gt;.p8 file, and Apple lets you download it only once.</li>
+          <li>Copy the Issuer ID shown above the keys table. The Key ID is in the key's row.</li>
+        </List>
+      </Callout>
+      <Form onSubmit={onSubmit} error={connect.error?.message} noValidate>
+        <Field label="Issuer ID" error={errors.issuerId}>
+          <Input name="issuerId" autoComplete="off" spellCheck={false} />
+        </Field>
+        <Field label="Key ID" error={errors.keyId}>
+          <Input
+            name="keyId"
+            value={keyId}
+            onChange={(e) => setKeyId(e.target.value)}
+            autoComplete="off"
+            spellCheck={false}
+          />
+        </Field>
+        <Field
+          label="Private key (.p8)"
+          error={errors.privateKey}
+          action={
+            <Button size="sm" onClick={onChooseFile}>
+              Choose file…
+            </Button>
+          }
+        >
+          <Textarea
+            name="privateKey"
+            value={privateKey}
+            onChange={(e) => setPrivateKey(e.target.value)}
+            placeholder="Choose the .p8 file, or paste its contents: -----BEGIN PRIVATE KEY-----…"
+            spellCheck={false}
+          />
+        </Field>
+        <Inline>
+          <Button type="submit" variant="primary" size="lg" disabled={connect.isPending}>
+            {connect.isPending ? 'Checking with Apple…' : 'Connect'}
           </Button>
-        )}
-      </Inline>
-    </Form>
+          {onCancel && (
+            <Button type="button" size="lg" onClick={onCancel}>
+              Cancel
+            </Button>
+          )}
+        </Inline>
+      </Form>
+    </>
   )
 }
 

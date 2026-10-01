@@ -23,7 +23,12 @@ import { Route as AppProjectsProjectIdIndexRouteImport } from './routes/_app/pro
 import { Route as AppProjectsProjectIdAnalyticsRouteImport } from './routes/_app/projects/$projectId/analytics'
 import { Route as AppProjectsProjectIdIntegrationsRouteImport } from './routes/_app/projects/$projectId/integrations'
 import { Route as AppProjectsProjectIdMembersRouteImport } from './routes/_app/projects/$projectId/members'
+import { Route as AppProjectsProjectIdSettingsRouteImport } from './routes/_app/projects/$projectId/settings'
 import { Route as AppProjectsProjectIdStoresRouteImport } from './routes/_app/projects/$projectId/stores'
+import { Route as AppProjectsProjectIdIntegrationsIndexRouteImport } from './routes/_app/projects/$projectId/integrations/index'
+import { Route as AppProjectsProjectIdIntegrationsAppStoreRouteImport } from './routes/_app/projects/$projectId/integrations/app-store'
+import { Route as AppProjectsProjectIdIntegrationsGooglePlayRouteImport } from './routes/_app/projects/$projectId/integrations/google-play'
+import { Route as AppProjectsProjectIdIntegrationsTranslationRouteImport } from './routes/_app/projects/$projectId/integrations/translation'
 import { Route as AppProjectsProjectIdOnboardingsIndexRouteImport } from './routes/_app/projects/$projectId/onboardings/index'
 import { Route as AppProjectsProjectIdOnboardingsOnboardingIdRouteImport } from './routes/_app/projects/$projectId/onboardings/$onboardingId'
 import { Route as AppProjectsProjectIdStoresIndexRouteImport } from './routes/_app/projects/$projectId/stores/index'
@@ -101,11 +106,41 @@ const AppProjectsProjectIdMembersRoute =
     path: '/members',
     getParentRoute: () => AppProjectsProjectIdRoute,
   } as any)
+const AppProjectsProjectIdSettingsRoute =
+  AppProjectsProjectIdSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AppProjectsProjectIdRoute,
+  } as any)
 const AppProjectsProjectIdStoresRoute =
   AppProjectsProjectIdStoresRouteImport.update({
     id: '/stores',
     path: '/stores',
     getParentRoute: () => AppProjectsProjectIdRoute,
+  } as any)
+const AppProjectsProjectIdIntegrationsIndexRoute =
+  AppProjectsProjectIdIntegrationsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AppProjectsProjectIdIntegrationsRoute,
+  } as any)
+const AppProjectsProjectIdIntegrationsAppStoreRoute =
+  AppProjectsProjectIdIntegrationsAppStoreRouteImport.update({
+    id: '/app-store',
+    path: '/app-store',
+    getParentRoute: () => AppProjectsProjectIdIntegrationsRoute,
+  } as any)
+const AppProjectsProjectIdIntegrationsGooglePlayRoute =
+  AppProjectsProjectIdIntegrationsGooglePlayRouteImport.update({
+    id: '/google-play',
+    path: '/google-play',
+    getParentRoute: () => AppProjectsProjectIdIntegrationsRoute,
+  } as any)
+const AppProjectsProjectIdIntegrationsTranslationRoute =
+  AppProjectsProjectIdIntegrationsTranslationRouteImport.update({
+    id: '/translation',
+    path: '/translation',
+    getParentRoute: () => AppProjectsProjectIdIntegrationsRoute,
   } as any)
 const AppProjectsProjectIdOnboardingsIndexRoute =
   AppProjectsProjectIdOnboardingsIndexRouteImport.update({
@@ -142,12 +177,17 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof AuthResetPasswordRoute
   '/projects/$projectId': typeof AppProjectsProjectIdRouteWithChildren
   '/projects/$projectId/analytics': typeof AppProjectsProjectIdAnalyticsRoute
-  '/projects/$projectId/integrations': typeof AppProjectsProjectIdIntegrationsRoute
+  '/projects/$projectId/integrations': typeof AppProjectsProjectIdIntegrationsRouteWithChildren
   '/projects/$projectId/members': typeof AppProjectsProjectIdMembersRoute
+  '/projects/$projectId/settings': typeof AppProjectsProjectIdSettingsRoute
   '/projects/$projectId/stores': typeof AppProjectsProjectIdStoresRouteWithChildren
   '/projects/$projectId/': typeof AppProjectsProjectIdIndexRoute
+  '/projects/$projectId/integrations/app-store': typeof AppProjectsProjectIdIntegrationsAppStoreRoute
+  '/projects/$projectId/integrations/google-play': typeof AppProjectsProjectIdIntegrationsGooglePlayRoute
+  '/projects/$projectId/integrations/translation': typeof AppProjectsProjectIdIntegrationsTranslationRoute
   '/projects/$projectId/onboardings/$onboardingId': typeof AppProjectsProjectIdOnboardingsOnboardingIdRoute
   '/projects/$projectId/stores/releases': typeof AppProjectsProjectIdStoresReleasesRoute
+  '/projects/$projectId/integrations/': typeof AppProjectsProjectIdIntegrationsIndexRoute
   '/projects/$projectId/onboardings/': typeof AppProjectsProjectIdOnboardingsIndexRoute
   '/projects/$projectId/stores/': typeof AppProjectsProjectIdStoresIndexRoute
 }
@@ -160,11 +200,15 @@ export interface FileRoutesByTo {
   '/register': typeof AuthRegisterRoute
   '/reset-password': typeof AuthResetPasswordRoute
   '/projects/$projectId/analytics': typeof AppProjectsProjectIdAnalyticsRoute
-  '/projects/$projectId/integrations': typeof AppProjectsProjectIdIntegrationsRoute
   '/projects/$projectId/members': typeof AppProjectsProjectIdMembersRoute
+  '/projects/$projectId/settings': typeof AppProjectsProjectIdSettingsRoute
   '/projects/$projectId': typeof AppProjectsProjectIdIndexRoute
+  '/projects/$projectId/integrations/app-store': typeof AppProjectsProjectIdIntegrationsAppStoreRoute
+  '/projects/$projectId/integrations/google-play': typeof AppProjectsProjectIdIntegrationsGooglePlayRoute
+  '/projects/$projectId/integrations/translation': typeof AppProjectsProjectIdIntegrationsTranslationRoute
   '/projects/$projectId/onboardings/$onboardingId': typeof AppProjectsProjectIdOnboardingsOnboardingIdRoute
   '/projects/$projectId/stores/releases': typeof AppProjectsProjectIdStoresReleasesRoute
+  '/projects/$projectId/integrations': typeof AppProjectsProjectIdIntegrationsIndexRoute
   '/projects/$projectId/onboardings': typeof AppProjectsProjectIdOnboardingsIndexRoute
   '/projects/$projectId/stores': typeof AppProjectsProjectIdStoresIndexRoute
 }
@@ -181,12 +225,17 @@ export interface FileRoutesById {
   '/_app/': typeof AppIndexRoute
   '/_app/projects/$projectId': typeof AppProjectsProjectIdRouteWithChildren
   '/_app/projects/$projectId/analytics': typeof AppProjectsProjectIdAnalyticsRoute
-  '/_app/projects/$projectId/integrations': typeof AppProjectsProjectIdIntegrationsRoute
+  '/_app/projects/$projectId/integrations': typeof AppProjectsProjectIdIntegrationsRouteWithChildren
   '/_app/projects/$projectId/members': typeof AppProjectsProjectIdMembersRoute
+  '/_app/projects/$projectId/settings': typeof AppProjectsProjectIdSettingsRoute
   '/_app/projects/$projectId/stores': typeof AppProjectsProjectIdStoresRouteWithChildren
   '/_app/projects/$projectId/': typeof AppProjectsProjectIdIndexRoute
+  '/_app/projects/$projectId/integrations/app-store': typeof AppProjectsProjectIdIntegrationsAppStoreRoute
+  '/_app/projects/$projectId/integrations/google-play': typeof AppProjectsProjectIdIntegrationsGooglePlayRoute
+  '/_app/projects/$projectId/integrations/translation': typeof AppProjectsProjectIdIntegrationsTranslationRoute
   '/_app/projects/$projectId/onboardings/$onboardingId': typeof AppProjectsProjectIdOnboardingsOnboardingIdRoute
   '/_app/projects/$projectId/stores/releases': typeof AppProjectsProjectIdStoresReleasesRoute
+  '/_app/projects/$projectId/integrations/': typeof AppProjectsProjectIdIntegrationsIndexRoute
   '/_app/projects/$projectId/onboardings/': typeof AppProjectsProjectIdOnboardingsIndexRoute
   '/_app/projects/$projectId/stores/': typeof AppProjectsProjectIdStoresIndexRoute
 }
@@ -204,10 +253,15 @@ export interface FileRouteTypes {
     | '/projects/$projectId/analytics'
     | '/projects/$projectId/integrations'
     | '/projects/$projectId/members'
+    | '/projects/$projectId/settings'
     | '/projects/$projectId/stores'
     | '/projects/$projectId/'
+    | '/projects/$projectId/integrations/app-store'
+    | '/projects/$projectId/integrations/google-play'
+    | '/projects/$projectId/integrations/translation'
     | '/projects/$projectId/onboardings/$onboardingId'
     | '/projects/$projectId/stores/releases'
+    | '/projects/$projectId/integrations/'
     | '/projects/$projectId/onboardings/'
     | '/projects/$projectId/stores/'
   fileRoutesByTo: FileRoutesByTo
@@ -220,11 +274,15 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/projects/$projectId/analytics'
-    | '/projects/$projectId/integrations'
     | '/projects/$projectId/members'
+    | '/projects/$projectId/settings'
     | '/projects/$projectId'
+    | '/projects/$projectId/integrations/app-store'
+    | '/projects/$projectId/integrations/google-play'
+    | '/projects/$projectId/integrations/translation'
     | '/projects/$projectId/onboardings/$onboardingId'
     | '/projects/$projectId/stores/releases'
+    | '/projects/$projectId/integrations'
     | '/projects/$projectId/onboardings'
     | '/projects/$projectId/stores'
   id:
@@ -242,10 +300,15 @@ export interface FileRouteTypes {
     | '/_app/projects/$projectId/analytics'
     | '/_app/projects/$projectId/integrations'
     | '/_app/projects/$projectId/members'
+    | '/_app/projects/$projectId/settings'
     | '/_app/projects/$projectId/stores'
     | '/_app/projects/$projectId/'
+    | '/_app/projects/$projectId/integrations/app-store'
+    | '/_app/projects/$projectId/integrations/google-play'
+    | '/_app/projects/$projectId/integrations/translation'
     | '/_app/projects/$projectId/onboardings/$onboardingId'
     | '/_app/projects/$projectId/stores/releases'
+    | '/_app/projects/$projectId/integrations/'
     | '/_app/projects/$projectId/onboardings/'
     | '/_app/projects/$projectId/stores/'
   fileRoutesById: FileRoutesById
@@ -355,12 +418,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProjectsProjectIdMembersRouteImport
       parentRoute: typeof AppProjectsProjectIdRoute
     }
+    '/_app/projects/$projectId/settings': {
+      id: '/_app/projects/$projectId/settings'
+      path: '/settings'
+      fullPath: '/projects/$projectId/settings'
+      preLoaderRoute: typeof AppProjectsProjectIdSettingsRouteImport
+      parentRoute: typeof AppProjectsProjectIdRoute
+    }
     '/_app/projects/$projectId/stores': {
       id: '/_app/projects/$projectId/stores'
       path: '/stores'
       fullPath: '/projects/$projectId/stores'
       preLoaderRoute: typeof AppProjectsProjectIdStoresRouteImport
       parentRoute: typeof AppProjectsProjectIdRoute
+    }
+    '/_app/projects/$projectId/integrations/': {
+      id: '/_app/projects/$projectId/integrations/'
+      path: '/'
+      fullPath: '/projects/$projectId/integrations/'
+      preLoaderRoute: typeof AppProjectsProjectIdIntegrationsIndexRouteImport
+      parentRoute: typeof AppProjectsProjectIdIntegrationsRoute
+    }
+    '/_app/projects/$projectId/integrations/app-store': {
+      id: '/_app/projects/$projectId/integrations/app-store'
+      path: '/app-store'
+      fullPath: '/projects/$projectId/integrations/app-store'
+      preLoaderRoute: typeof AppProjectsProjectIdIntegrationsAppStoreRouteImport
+      parentRoute: typeof AppProjectsProjectIdIntegrationsRoute
+    }
+    '/_app/projects/$projectId/integrations/google-play': {
+      id: '/_app/projects/$projectId/integrations/google-play'
+      path: '/google-play'
+      fullPath: '/projects/$projectId/integrations/google-play'
+      preLoaderRoute: typeof AppProjectsProjectIdIntegrationsGooglePlayRouteImport
+      parentRoute: typeof AppProjectsProjectIdIntegrationsRoute
+    }
+    '/_app/projects/$projectId/integrations/translation': {
+      id: '/_app/projects/$projectId/integrations/translation'
+      path: '/translation'
+      fullPath: '/projects/$projectId/integrations/translation'
+      preLoaderRoute: typeof AppProjectsProjectIdIntegrationsTranslationRouteImport
+      parentRoute: typeof AppProjectsProjectIdIntegrationsRoute
     }
     '/_app/projects/$projectId/onboardings/': {
       id: '/_app/projects/$projectId/onboardings/'
@@ -393,6 +491,30 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AppProjectsProjectIdIntegrationsRouteChildren {
+  AppProjectsProjectIdIntegrationsAppStoreRoute: typeof AppProjectsProjectIdIntegrationsAppStoreRoute
+  AppProjectsProjectIdIntegrationsGooglePlayRoute: typeof AppProjectsProjectIdIntegrationsGooglePlayRoute
+  AppProjectsProjectIdIntegrationsTranslationRoute: typeof AppProjectsProjectIdIntegrationsTranslationRoute
+  AppProjectsProjectIdIntegrationsIndexRoute: typeof AppProjectsProjectIdIntegrationsIndexRoute
+}
+
+const AppProjectsProjectIdIntegrationsRouteChildren: AppProjectsProjectIdIntegrationsRouteChildren =
+  {
+    AppProjectsProjectIdIntegrationsAppStoreRoute:
+      AppProjectsProjectIdIntegrationsAppStoreRoute,
+    AppProjectsProjectIdIntegrationsGooglePlayRoute:
+      AppProjectsProjectIdIntegrationsGooglePlayRoute,
+    AppProjectsProjectIdIntegrationsTranslationRoute:
+      AppProjectsProjectIdIntegrationsTranslationRoute,
+    AppProjectsProjectIdIntegrationsIndexRoute:
+      AppProjectsProjectIdIntegrationsIndexRoute,
+  }
+
+const AppProjectsProjectIdIntegrationsRouteWithChildren =
+  AppProjectsProjectIdIntegrationsRoute._addFileChildren(
+    AppProjectsProjectIdIntegrationsRouteChildren,
+  )
+
 interface AppProjectsProjectIdStoresRouteChildren {
   AppProjectsProjectIdStoresReleasesRoute: typeof AppProjectsProjectIdStoresReleasesRoute
   AppProjectsProjectIdStoresIndexRoute: typeof AppProjectsProjectIdStoresIndexRoute
@@ -412,8 +534,9 @@ const AppProjectsProjectIdStoresRouteWithChildren =
 
 interface AppProjectsProjectIdRouteChildren {
   AppProjectsProjectIdAnalyticsRoute: typeof AppProjectsProjectIdAnalyticsRoute
-  AppProjectsProjectIdIntegrationsRoute: typeof AppProjectsProjectIdIntegrationsRoute
+  AppProjectsProjectIdIntegrationsRoute: typeof AppProjectsProjectIdIntegrationsRouteWithChildren
   AppProjectsProjectIdMembersRoute: typeof AppProjectsProjectIdMembersRoute
+  AppProjectsProjectIdSettingsRoute: typeof AppProjectsProjectIdSettingsRoute
   AppProjectsProjectIdStoresRoute: typeof AppProjectsProjectIdStoresRouteWithChildren
   AppProjectsProjectIdIndexRoute: typeof AppProjectsProjectIdIndexRoute
   AppProjectsProjectIdOnboardingsOnboardingIdRoute: typeof AppProjectsProjectIdOnboardingsOnboardingIdRoute
@@ -422,8 +545,10 @@ interface AppProjectsProjectIdRouteChildren {
 
 const AppProjectsProjectIdRouteChildren: AppProjectsProjectIdRouteChildren = {
   AppProjectsProjectIdAnalyticsRoute: AppProjectsProjectIdAnalyticsRoute,
-  AppProjectsProjectIdIntegrationsRoute: AppProjectsProjectIdIntegrationsRoute,
+  AppProjectsProjectIdIntegrationsRoute:
+    AppProjectsProjectIdIntegrationsRouteWithChildren,
   AppProjectsProjectIdMembersRoute: AppProjectsProjectIdMembersRoute,
+  AppProjectsProjectIdSettingsRoute: AppProjectsProjectIdSettingsRoute,
   AppProjectsProjectIdStoresRoute: AppProjectsProjectIdStoresRouteWithChildren,
   AppProjectsProjectIdIndexRoute: AppProjectsProjectIdIndexRoute,
   AppProjectsProjectIdOnboardingsOnboardingIdRoute:

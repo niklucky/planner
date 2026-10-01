@@ -1,7 +1,22 @@
-import { Button, Field, Form, Inline, Input, Row, Section, Stack, Text, Textarea } from '@planner/frontend'
+import {
+  Button,
+  Callout,
+  Field,
+  Form,
+  Inline,
+  Input,
+  List,
+  Row,
+  Section,
+  Stack,
+  Text,
+  Textarea,
+  TextLink,
+} from '@planner/frontend'
 import { googlePlayCredentialsInput, type Integration, importGooglePlayAppInput } from '@planner/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { type FormEvent, useState } from 'react'
+import { pickTextFile } from '../lib/files'
 import { type FieldErrors, parseForm } from '../lib/form'
 import { useTRPC } from '../lib/trpc'
 
@@ -37,6 +52,7 @@ function CredentialsForm({
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const [errors, setErrors] = useState<FieldErrors>({})
+  const [json, setJson] = useState('')
 
   const connect = useMutation(
     trpc.integrations.connectGooglePlay.mutationOptions({
@@ -54,23 +70,95 @@ function CredentialsForm({
     if (data) connect.mutate({ projectId, ...data })
   }
 
+  const onChooseFile = async () => {
+    const text = await pickTextFile()
+    if (text === null) return
+    setJson(text)
+    setErrors((prev) => ({ ...prev, serviceAccountJson: undefined }))
+  }
+
+  const clientEmail = serviceAccountEmail(json)
+
   return (
-    <Form onSubmit={onSubmit} error={connect.error?.message} noValidate>
-      <Field label="Service account key (JSON)" error={errors.serviceAccountJson}>
-        <Textarea name="serviceAccountJson" placeholder='{ "type": "service_account", … }' spellCheck={false} />
-      </Field>
-      <Inline>
-        <Button type="submit" variant="primary" size="lg" disabled={connect.isPending}>
-          {connect.isPending ? 'Checking with Google…' : 'Connect'}
-        </Button>
-        {onCancel && (
-          <Button type="button" size="lg" onClick={onCancel}>
-            Cancel
+    <>
+      <Callout title="Where to get the key">
+        <List ordered>
+          <li>
+            In Google Cloud, pick or create a project and enable the{' '}
+            <TextLink
+              href="https://console.cloud.google.com/apis/library/androidpublisher.googleapis.com"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Google Play Android Developer API
+            </TextLink>
+            .
+          </li>
+          <li>
+            In{' '}
+            <TextLink
+              href="https://console.cloud.google.com/iam-admin/serviceaccounts"
+              target="_blank"
+              rel="noreferrer"
+            >
+              IAM &amp; Admin → Service accounts
+            </TextLink>
+            , create a service account. It needs no Google Cloud roles.
+          </li>
+          <li>Open the service account, go to Keys → Add key → Create new key → JSON. The file downloads.</li>
+          <li>
+            In Play Console,{' '}
+            <TextLink href="https://play.google.com/console/users-and-permissions" target="_blank" rel="noreferrer">
+              Users and permissions
+            </TextLink>{' '}
+            → Invite new users, enter the service account's email (client_email in the file), and give it View app
+            information, Manage store presence, and the release permissions for the tracks you edit notes on.
+            Permissions can take a while to apply; if Connect fails at first, try again later.
+          </li>
+        </List>
+      </Callout>
+      <Form onSubmit={onSubmit} error={connect.error?.message} noValidate>
+        <Field
+          label="Service account key (JSON)"
+          error={errors.serviceAccountJson}
+          action={
+            <Button size="sm" onClick={onChooseFile}>
+              Choose file…
+            </Button>
+          }
+        >
+          <Textarea
+            name="serviceAccountJson"
+            value={json}
+            onChange={(e) => setJson(e.target.value)}
+            placeholder='Choose the .json file, or paste its contents: { "type": "service_account", … }'
+            spellCheck={false}
+          />
+        </Field>
+        {clientEmail && <Text>Service account: {clientEmail}. Invite this email in Play Console.</Text>}
+        <Inline>
+          <Button type="submit" variant="primary" size="lg" disabled={connect.isPending}>
+            {connect.isPending ? 'Checking with Google…' : 'Connect'}
           </Button>
-        )}
-      </Inline>
-    </Form>
+          {onCancel && (
+            <Button type="button" size="lg" onClick={onCancel}>
+              Cancel
+            </Button>
+          )}
+        </Inline>
+      </Form>
+    </>
   )
+}
+
+/** client_email from a service account key, or null while the text is not (yet) one. */
+function serviceAccountEmail(json: string): string | null {
+  try {
+    const email = (JSON.parse(json) as { client_email?: unknown }).client_email
+    return typeof email === 'string' ? email : null
+  } catch {
+    return null
+  }
 }
 
 function ConnectedView({

@@ -19,7 +19,8 @@ export function Callout({
   )
 }
 
-/** Bulleted list for inside a Callout (or anywhere a few parallel items need listing). */
-export function List({ children }: { children: ReactNode }) {
-  return <ul className={styles.list}>{children}</ul>
+/** Bulleted list for inside a Callout (or anywhere a few parallel items need listing); `ordered` numbers steps. */
+export function List({ ordered, children }: { ordered?: boolean; children: ReactNode }) {
+  const Tag = ordered ? 'ol' : 'ul'
+  return <Tag className={styles.list}>{children}</Tag>
 }
